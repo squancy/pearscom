@@ -1,0 +1,1 @@
+function _(e){return document.getElementById(e)}function toggleElement(e){"block"==(e=_(e)).style.display?e.style.display="none":e.style.display="block"}

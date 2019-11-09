@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Graph</title>
+	<link rel="icon" href="images/math.png" type="image/png" sizes="16x16">
+	<style type="text/css">
+		body{
+			box-sizing: border-box;
+			padding: 0;
+			margin: 0;
+			font-family: 'Arial', sans-serif;
+		}
+
+		button{
+			padding: 5px;
+			font-size: 16px;
+			border-radius: 20px;
+			background-color: #fff;
+		}
+
+		button:hover{
+			cursor: pointer;
+			-webkit-box-shadow: 1px 1px 5px -1px rgba(135, 135, 135, 1);
+			-moz-box-shadow: 1px 1px 5px -1px rgba(135, 135 ,135, 1);
+			box-shadow: 1px 1px 5px -1px rgba(135, 135, 135, 1);
+			outline: none;
+		}
+
+		input{
+			width: 40%;
+			height: 10px;
+			border-radius: 20px;
+			outline: none;
+			font-size: 15px;
+			border: 1px solid #F1F3F4;
+			background-color: #F1F3F4;
+			padding: 10px;
+		}
+
+		#container{
+			width: 80%;
+			margin: 0 auto;
+			margin-top: 10px;
+		}
+
+		.holders{
+			box-sizing: border-box;
+			width: 50%;
+			float: left;
+		}
+
+		#info{
+			width: 80%;
+			padding: 5px;
+		}
+
+		@media only screen and (max-width: 1100px){
+			.holders{
+				width: auto;
+				float: none;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div class="holders">
+			<div id="inputCont">
+				<input type="text" name="func" id="func" placeholder="function definition">
+				<button id="submit">Submit</button>
+				<div id="info"></div>
+				<div id="result"></div>
+			</div>
+		</div>
+		<div class="holders">
+			<canvas id="graph" style="float: right;"></canvas>
+		</div>
+	</div>
+	<script type="text/javascript">
+		// Set up global references to elements and function counter
+		let gr = document.getElementById("graph");
+		let btn = document.getElementById("submit");
+		let txt = document.getElementById("func");
+		let info = document.getElementById("info");
+		let res = document.getElementById("result");
+		let fCount = 0;
+
+		// Set up canvas environment and draw the graph
+		let ctx = gr.getContext("2d");
+		drawGraph(ctx);
+		addDash();
+
+		// Listen for button click after input
+		btn.addEventListener("click", () => {
+			// Gather input value and set up object and array that will hold the coordinates
+			let val = txt.value;
+			let funcObj = {}, coords = [], zeroSite = [];
+
+			if(val.length < 1) return 0;
+
+			// Loop from -14 to 14 by 0.025 in order to get a precise graph (1160 it.)
+			for(let i = -14; i <= 14; i += 0.025){
+				// Set up RegExp for authorizing input - traslate absolute value and letters
+				let newVal = authFunc(i, val);
+
+				// !!! Caution !!! - use of the depricated and "evil" eval()
+				/* 
+					It will evaluate the JavaScript code returned back with previous RegExp
+					Due to Math.abs() - and some other JS functions that will be added later to code - the usage of eval() shortens code and make it clearer 
+				 */
+				try{
+					newVal = eval(newVal);
+				}catch(e){
+					info.innerHTML = "Oops... an error occurred during the function parsing!";
+				}
+
+                if(newVal.toFixed(10) == 0) zeroSite.push(i.toFixed(3), newVal.toFixed(3));
+
+				// Check to make sure newVal is in the proper range
+				if(newVal <= 14 && newVal >= -14){
+					funcObj[i] = newVal.toFixed(17);
+
+					/* 
+						Calcuate the top-left pixles for canvas for every coordinate
+					 	There are 15 assignments on each half of the x;y axes with a
+					 	20 px distance
+					 	So the distance from top is (15 - coord) * 20
+					 	And the distance from left is (15 - |coord|) * 20 or (15 + coord) * 20
+					*/
+					let top = (15 - funcObj[i]) * 20;
+					let left;
+					if(Math.abs(getKeyByValue(funcObj, funcObj[i])) == getKeyByValue(funcObj, funcObj[i])){
+						left = (15 + Number(getKeyByValue(funcObj, funcObj[i]))) * 20;
+					}else{
+						left = (15 - Math.abs(getKeyByValue(funcObj, funcObj[i]))) * 20;
+					}
+					// console.log(getKeyByValue(funcObj, funcObj[i]), funcObj[i], top, left);
+					// console.log(i);
+					coords.push(left, top);
+				}
+			}
+			// console.log(coords);
+
+			// Check to make sure that coords is not empty
+			if(coords.length == 0){
+				info.innerHTML = "The function definition given cannot be illustrated on this graph. Please reduce the function in proportion!";
+				return 0;
+			}
+
+			// Generate new color and name for function
+			let newColor = randColor();
+			let fName = funcName(fCount) + "(x)";
+
+			// Loop through array of coords by 2 and connect two adjacent coords
+			// Note: coords array follows this scheme: [left1, top1, left2, top2 ...]
+			for(let i = 0; i < coords.length; i += 2){
+				if(coords[i + 3] === undefined) continue;
+				console.log(coords[i]);
+				ctx.beginPath();
+				ctx.strokeStyle = newColor;
+				ctx.moveTo(coords[i], coords[i + 1]);
+				ctx.lineTo(coords[i + 2], coords[i + 3]);
+				if(i == 20){
+					ctx.font = "16px Arial";
+					ctx.fillText(fName, coords[i + 2] + 10, coords[i + 3] + 10);
+				}
+				ctx.stroke();
+				ctx.closePath();
+				//console.log(coords[i]);
+			}
+			console.log(funcObj);
+			
+			// Calculate important properties about the functions
+			let minVal = Math.min.apply(Math, (convertNum(Object.values(funcObj)))).toFixed(17), maxVal = Math.max.apply(Math, (convertNum(Object.values(funcObj)))).toFixed(17), isMinVal = "", isMaxVal = "", isLower = "", isUpper = "";
+
+			let mn = getKeyByValue(funcObj, minVal), mx = getKeyByValue(funcObj, maxVal);
+
+			if((minVal > eval(authFunc(-15000, val))) || (minVal > eval(authFunc(Number(mn) + 0.025, val)))){
+			    isMinVal = "-";
+			    isLower = "]-&#8734;";
+			}else{
+			    isMinVal = Number(minVal).toFixed(3);
+			    isLower = "[" + Number(minVal).toFixed(3);
+			}
+			
+			if((maxVal < eval(authFunc(15000, val))) || (maxVal < eval(authFunc(mx - 0.025, val)))){
+			    isMaxVal = "-";
+			    isUpper = "&#8734;[";
+			}else{
+			    isMaxVal = Number(maxVal).toFixed(3);
+			    isUpper = "[" + Number(maxVal).toFixed(3);
+			}
+
+            let zh = zSites(zeroSite);
+            
+			// Display information about the function(s)
+			res.innerHTML += "<p style='color: " + newColor + "'>" + fName + ": " + val + "</p><p>Range of interpretation: R<br>Set of values:  " + isLower + "; " + isUpper + "<br>Minimum value: " + isMinVal + "<br>Maximum value: " + isMaxVal + "<br>Zero site: " + zh + "<br></p>";
+			fCount++;
+		});
+		
+		// Function for returning 1st matched key by value on objects
+		function getKeyByValue(object, value){
+			return Object.keys(object).find(key => object[key] === value);
+		}
+		
+		// Function for displaying zero sites
+		function zSites(array){
+		    let result = "";
+		    for(let i = 0; i < array.length; i += 2){
+		        if(array[i + 1] != undefined){
+    		        result += "x = " + array[i] + ", where function value is " + array[i + 1] + "\n";
+		        }
+		    }
+		    return result || "-";
+		}
+
+		// Function for drawing the graph, adding assignments and dashed helper lines
+		function drawGraph(ctx){
+			gr.width = 600;
+			gr.height = 600;
+			ctx.moveTo(300, 0);
+			ctx.lineTo(300, 600);
+			ctx.moveTo(0, 300);
+			ctx.lineTo(600, 300);
+			for(let i = 0; i < 30; i++){
+				ctx.moveTo(i * 20, 305);
+				ctx.lineTo(i * 20, 295);
+				ctx.moveTo(305, i * 20);
+				ctx.lineTo(295, i * 20);
+
+				// Only display even numbers - except 0
+				if(i % 2 == 0 && i != 0 && i <= 14){
+					ctx.fillText(-i, 295 - i * 20, 320);
+					ctx.fillText(-i, 273, i * 20 + 303);
+					ctx.fillText(i, i * 19 + 300, 320);
+					ctx.fillText(i, 276, 303 - i * 20);
+				}
+			}
+			ctx.stroke();
+		}
+		
+		// Function for authorizing function definition
+		function authFunc(realVal, val){
+		    let newVal = val
+		    	//.replace(/^\d+$/g, realVal)
+				.replace(/[a-z]/gi, realVal)
+				.replace(/--/gi, "+").replace(/(-\+|\+-)/gi, "-")
+				.replace(/(\d+)\(/g, "$1*(")
+				.replace(/\|\|(.+?)\^(\d+)\|\|/g, "Math.abs((Math.pow($1, $2)))")
+				.replace(/\|(.+?)\^(\d+)\|/g, "Math.abs((Math.pow($1, $2)))")
+				.replace(/(.+?)\^(\d+)/g, "(Math.pow($1, $2))");
+			if(newVal.search(/\|\|.*\|\|/g) != -1){
+				newVal = autoSign(/\|(.*)\|/g, newVal, "(Math.abs($1))");
+			}else{
+				newVal = autoSign(/\|(.*?)\|/g, newVal, "(Math.abs($1))");
+			}
+    		newVal = autoSign(/sin\((.*?)\)\|/g, newVal, "(Math.sin($1))");
+    		newVal = autoSign(/cos\((.*?)\)\|/g, newVal, "(Math.cos($1))");
+    		console.log(newVal);
+        	return newVal;
+		}
+		
+		// Function for converting array values from string to number
+		function convertNum(array){
+		    for(let i = 0; i < array.length; i++){
+		        array[i] = Number(array[i]);
+		    }
+		    return array;
+		}
+
+		// Function for adding helper dashed lines with a smaller opacity
+		function addDash(){
+			ctx.setLineDash([5, 3]);
+			for(let i = 1; i < 30; i++){
+				ctx.moveTo(i * 20, 0);
+				ctx.lineTo(i * 20, 600);
+				ctx.moveTo(0, i * 20);
+				ctx.lineTo(600, i * 20);
+			}
+			ctx.strokeStyle = "rgba(0,0,0,0.2)";
+			ctx.stroke();
+			ctx.setLineDash([]);
+		}
+
+		// Function for generating random colors for function graphs
+		function randColor(){
+			let randColors = ["#33cc33", "#ea3c11", "#0cfcfd", "#08849e", "#08849e", "#6af97e", "#3e71bd", "#ed619a", "#ed619a"];
+			return randColors[Math.floor(Math.random() * randColors.length)];
+		}
+
+		// Function for selecting the proper letter for function
+		function funcName(index){
+			let funcNames = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"];
+			return funcNames[index];
+		}
+		
+		// Function for constantly replacing every math sign
+		function autoSign(regexp, str, replace){
+		    while(str.search(regexp) != -1){
+    		    str = str.replace(regexp, replace);
+    		}
+    		return str;
+		}
+	</script>
+</body>
+</html>
