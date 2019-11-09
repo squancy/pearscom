@@ -1,0 +1,37 @@
+.sslider{
+        margin-top: -13px;
+        width: 53% !important;
+        position: absolute;
+    }
+    
+    .sslider_short{
+        margin-top: -13px;
+        width: 10% !important;
+        position: absolute;
+    }
+    
+    .sslider_long{
+        position: absolute;
+        width: 40% !important;
+        margin-top: -13px;
+    }
+
+    input[type="range"]::-ms-fill-upper {
+	    background-color: #763626 !important;
+	}
+
+    #ms_align_{
+    	margin-left: 58% !important;
+    }
+    
+    #ms_align_big{
+        margin-left: 43% !important;
+    }
+
+    .ms_visible{
+    	z-index: 10000 !important;
+    }
+    
+    #settings_menu{
+        margin-top: -113px !important;
+    }

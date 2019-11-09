@@ -1,0 +1,184 @@
+/* Custom font fron Google Fonts */
+@import url('https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap');
+
+html, body{
+	font-family: 'Arimo', sans-serif;
+	padding: 0;
+	margin: 0;
+	background-color: #e6ecf0;
+}
+
+header{
+	overflow: hidden;
+	background-color: #282828; /* iconic black */
+	color: red;
+	padding: 10px 10px;
+	position: fixed;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.nonStockCont{
+	min-height: calc(100% - 50px);
+}
+
+#pageBottom {
+  	background: #282828;
+  	padding: 10px;
+  	color: #c1c1c1;
+	font-size: 14px;
+  	margin-top: auto;
+	text-align: center;
+}
+
+.dimw{
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+hr{
+	opacity: .5;
+}
+
+#pageBottom > a{
+	margin-right: 5px;
+  	line-height: 25px;
+	color: #c1c1c1;
+	text-decoration: none;
+	margin-right: 20px;
+}
+
+header a{
+	float: left;
+	color: red;
+	text-align: center;
+	padding: 12px;
+	text-decoration: none;
+	font-size: 18px;
+	line-height: 25px;
+	border-radius: 4px;
+}
+
+header > a{
+	font-size: 28px;
+}
+
+.headerRight{
+	float: right;
+}
+
+.hStocks{
+	width: 50%;
+	margin: 0 auto;
+}
+
+.hStocks img{
+	display: block;
+	width: 35px;
+	height: 35px;
+	margin: 0 auto;
+	margin-top: 20px;
+}
+
+.stockCont{
+	background-color: white;
+	padding: 15px;
+	margin: 0 15px 0 15px;
+	border-bottom: 1px solid #ccc;
+}
+
+.stockCont:first-child{
+	margin-top: 15px;
+	border-radius: 5px 5px 0 0;
+}
+
+.stockCont:last-child{
+	margin-bottom: 15px;
+	border-radius: 0 0 5px 5px;
+	border: 0;
+}
+
+.title{
+	text-align: center;
+	font-size: 18px;
+}
+
+.flexCont{
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	margin-top: 15px;
+}
+
+.flexCont > div{
+	margin: 15px;
+}
+
+.summary{
+	text-align: center;
+	margin-top: 25px;
+}
+
+.neutral{
+	color: gray;
+}
+
+.checkTrades{
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
+    cursor: pointer;
+}
+
+.oversold{
+	color: red;
+}
+
+.overbought{
+	color: green;
+}
+
+.allTrades{
+    display: none;
+    flex-flow: column;
+    text-align: center;
+}
+
+.infoHolder > b{
+	display: block;
+	margin-bottom: 20px;
+}
+
+.heading{
+	font-size: 22px;
+}
+
+@media screen and (max-width: 768px) {
+  .hStocks{
+		width: 100%;
+		margin-top: 35px;
+	}
+
+	header > a{
+		display: block;
+		font-size: 22px;
+		line-height: normal;
+		float: none;
+		padding: 5px;
+	}
+
+	.headerRight{
+		display: flex;
+		justify-content: space-evenly;
+		width: 100%;
+	}
+
+	header a{
+		padding: 10px 15px 0 15px;
+		line-height: normal;
+	}
+}
