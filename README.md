@@ -35,6 +35,13 @@ In order to test Pearscom on your machine you will need a local server like XAMP
 See the live product at <a href="https://www.pearscom.com/">pearscom.com</a>.<br>
 <b>Note:</b> due to the lots of images Pearscom costs about 1.3GB.
 
+# About the live product
+You can check <a href="https://www.pearscom.com/">Pearscom</a>, play with its features and try out the site.<br>
+  - It is on a shared-host web server (I will consider moving it to a VPS because that would be fun)
+  - The server is running Linux x84_64
+  - Uses Let's Encrypt for https
+  - The server is located in Hungary
+
 # Contribute
 If you have any questions or suggestions drop me with an email at <a href="mailto:mark@pearscom.com">mark@pearscom.com</a>.
 
