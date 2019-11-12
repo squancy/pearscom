@@ -136,9 +136,9 @@
             WHERE gm.mname = ? $cond $limit";
         $stmt = $conn->prepare($sql);
         
-        if($otype == "grs_0" || $otype == "grs_1"){
+        if($otype == "grs_0" || $otype == "grs_1" || $otype == 'grs_2' || $otype == 'grs_3'){
             $stmt->bind_param("s",$u);
-        }else if($otype != "grs_0" && $otype != "grs_1" && $otype != "grs_2" && $otype != "grs_3" && $otype != "grs_12" && $otype != "grs_13"){
+        }else if($otype != "grs_0" && $otype != "grs_1" && $otype != "grs_12" && $otype != "grs_13"){
             $stmt->bind_param("ss",$u,$grCat);
         }else{
             $stmt->bind_param("ss",$u,$grType);
@@ -204,8 +204,12 @@
                     $cat = "Other";
                     break;
             }
-
-            $my_all_list .= '<a href="/group/'.$nameori.'"><div class="article_echo_2" style="width: 100%;"><div data-src=\''.$logo.'\' style="background-repeat: no-repeat; background-position: center; background-size: cover; width: 80px; height: 80px; float: right; border-radius: 50%;" class="lazy-bg"></div><div><p class="title_"><b>Name: </b>'.$name.'</p>';
+            
+            $style = 'background-repeat: no-repeat; background-position: center; background-size: cover; width: 80px; height: 80px; float: right; border-radius: 50%;';
+                
+	        $sourceURL = "style='background-image: url(\"$logo\"); ".$style."'";
+	            
+            $my_all_list .= '<a href="/group/'.$nameori.'"><div class="article_echo_2" style="width: 100%;"><div '.$sourceURL.'></div><div><p class="title_"><b>Name: </b>'.$name.'</p>';
               $my_all_list .= '<p class="title_"><b>Creator: </b>'.$creator.'</p>';
               $my_all_list .= '<p class="title_"><b>Created: </b>'.$agoform.' ago</p>';
               $my_all_list .= '<p class="title_"><b>Type: </b>'.$invrule_new.'</p>';

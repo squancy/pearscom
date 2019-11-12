@@ -322,8 +322,17 @@
                 }else{
                     $pcurl = '/user/'.$unamerq.'/'.$avatar;
                 }
+                
+                $style = 'background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'';
+                
+                $sourceURL = "";
+    	        if($otype == 'all'){
+    	            $sourceURL = "data-src=\"" . $pcurl . "\" class='lazy-bg' style='".$style."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$pcurl\"); ".$style."'";
+    	        }
     
-                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'" class="lazy-bg"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
+                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div '.$sourceURL.'></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
                 if(!isset($_GET["otype"])){ $countSugg++; }
     		}
     	}
@@ -424,8 +433,17 @@
                 }else{
                     $pcurl = '/user/'.$unamerq.'/'.$avatar;
                 }
+                
+                $style = 'background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'';
+                
+                $sourceURL = "";
+    	        if($otype == 'all'){
+    	            $sourceURL = "data-src=\"" . $pcurl . "\" class='lazy-bg' style='".$style."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$pcurl\"); ".$style."'";
+    	        }
     
-                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'" class="lazy-bg"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
+                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div '.$sourceURL.' '.$online.'"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
                 if(!isset($_GET["otype"])){ $countSugg++; }
     	    }
     	}
@@ -522,8 +540,17 @@
                 }else{
                     $pcurl = '/user/'.$unamerq.'/'.$avatar;
                 }
+                
+                $style = 'background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'';
+                
+                $sourceURL = "";
+    	        if($otype == 'all'){
+    	            $sourceURL = "data-src=\"" . $pcurl . "\" class='lazy-bg' style='".$style."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$pcurl\"); ".$style."'";
+    	        }
     
-                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'" class="lazy-bg"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
+                $moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div '.$sourceURL.' '.$online.'"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
                 if(!isset($_GET["otype"])){ $countSugg++; }
     	    }
             if(isset($_GET["otype"]) && $moMoFriends == ""){
@@ -587,8 +614,17 @@
     			}else{
     				$pcurl = '/user/'.$unamerq.'/'.$avatar;
     			}
+    			
+    			$style = 'background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'';
+                
+                $sourceURL = "";
+    	        if($otype == 'all'){
+    	            $sourceURL = "data-src=\"" . $pcurl . "\" class='lazy-bg' style='".$style."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$pcurl\"); ".$style."'";
+    	        }
     
-    			$moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 70px; height: 70px; float: right; display: inline-block; border-radius: 50%; '.$online.'" class="lazy-bg"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
+    			$moMoFriends .= '<div><a href="/user/'.$unameori.'/"><div '.$sourceURL.' '.$online.'"></div></a><p><a href="/user/'.$unameori.'/">'.$uname.'</a></p><p>'.$country.'</p>'.$friend_btn.'</div>';
                 if(!isset($_GET["otype"])){ $countSugg++; }
     	    }
     	}

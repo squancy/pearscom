@@ -212,8 +212,22 @@
                 }else{
                     $pcurlk = "/images/avdef.png";
                 }
-                $senderpic = "<a href='/user/".$sender."/'><div data-src=\"".$pcurlk."\" style='background-repeat: no-repeat; background-position: center; background-size: cover; width: 50px; height: 50px; border-radius: 50%;' class='lazy-bg'></div></a>";
-                $senderpic_from = "<a href='/user/".$sender."'><div data-src=\"".$pcurlk."\" style='background-repeat: no-repeat; background-position: center; background-size: cover; width: 50px; height: 50px; border-radius: 50%; float: left;' class='lazy-bg'></div></a>";
+                
+                $style = $stylef = 'background-repeat: no-repeat; background-position: center; background-size: cover; width: 50px; height: 50px; border-radius: 50%;';
+                $stylef .= 'float: left;';
+                
+                $sourceURL = "";
+                $sourceURLFrom = "";
+    	        if($otype == 'nto'){
+    	            $sourceURL = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$style."'";
+    	            $sourceURLFrom = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$stylef."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$pcurlk\"); ".$style."'";
+    	            $sourceURLFrom = "style='background-image: url(\"$pcurlk\"); ".$stylek."'";
+    	        }
+                
+                $senderpic = "<a href='/user/".$sender."/'><div ".$sourceURL."></div></a>";
+                $senderpic_from = "<a href='/user/".$sender."'><div ".$sourceURLFrom."></div></a>";
 
                 $pmids = strval($pmid);
                 $sql3 = "SELECT message, sender, senttime FROM pm WHERE parent = ? ORDER BY senttime DESC LIMIT 1";
@@ -285,11 +299,23 @@
                         $stmt->execute();
                         $stmt->bind_result($userpicture_reply);
                         $stmt->fetch();
-                        $pcurlkk = "/user/".$rsender."/".$userpicture_reply;
-                        $senderpic_from_reply = "<a href='/user/".$rsender."'><div data-src=\"".$pcurlkk."\" style='background-repeat: no-repeat; background-position: center; background-size: cover; width: 50px; height: 50px; float: left; border-radius: 50%;' class='lazy-bg'></div></a>";
-                        if($userpicture_reply == NULL){
-                            $senderpic_from_reply = '<a href="/user/'.$rsender.'"><img src="/images/avdef.png" alt="'.$rsender.'" width="50" height="50" style="border-radius: 50%;"></a>';
+                        $pcurlkk = "";
+                        if($userpicture_reply != NULL){
+                            $pcurlkk = "/user/".$rsender."/".$userpicture_reply;
+                        }else{
+                            $pcurlkk = "/images/avdef.png";
                         }
+                        
+                        $style_r = 'background-repeat: no-repeat; background-position: center; background-size: cover; width: 50px; height: 50px; float: left; border-radius: 50%;';
+                        
+                        $sourceURL_r = "";
+            	        if($otype == 'nto'){
+            	            $sourceURL_r = "data-src=\"" . $pcurlkk . "\" class='lazy-bg' style='".$style_r."'";
+            	        }else{
+            	            $sourceURL_r = "style='background-image: url(\"$pcurlkk\"); ".$style_r."'";
+            	        }
+                        
+                        $senderpic_from_reply = "<a href='/user/".$rsender."'><div ".$sourceURL_r."></div></a>";
 
                         $reply_old = $row2["message"];
                         $reply_old = nl2br($reply_old);
@@ -749,7 +775,7 @@ function showBtnDiv_pm(x)
         var n = _("fts").value;
         if ("" == n) return !1;
         n = encodeURIComponent(n), window.location = "/private_messages/" + uname + "&q=" + n
-    }	    
+    }
 
     $( "#sort" ).click(function() {
           $( "#sortTypes" ).slideToggle( 200, function() {

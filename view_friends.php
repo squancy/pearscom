@@ -178,21 +178,35 @@
                 $friend_online = $row["online"];
                 $friend_country = $row["country"];
                 $bday = $row["bday"];
-                $echo_online = "";
-                if($friend_online == "yes"){
-                    $echo_online = '<b style="font-weight: normal; color: green;">online <img src="/images/wgreen.png" class="notfimg" style="margin-bottom: -2px;"></b>';
-                }else{
-                    $echo_online = '<b style="font-weight: normal; color: #999;">offline <img src="/images/wgrey.png" class="notfimg" style="margin-bottom: -2px;"></b>';
-                }
+                $color = "";
+                
                 if($friend_avatar != ""){
                     $friend_pic = '/user/'.$friend_username.'/'.$friend_avatar.'';
                 } else {
                     $friend_pic = '/images/avdef.png';
                 }
+                
+                
+                if($friend_online == "yes"){
+                    $color = 'color: green;';
+                }else{
+                    $color = 'color: #999;';
+                }
+                
+                $echo_online = '<b style="font-weight: normal; '.$color.'">online <img src="/images/wgreen.png" class="notfimg" style="margin-bottom: -2px;"></b>';
+                
+                $style = 'background-repeat: no-repeat; background-size: cover; background-position: center; display: inline-block; float: left; width: 60px; height: 60px; border-radius: 50px; margin-bottom: 0;';
+                
+                $sourceURL = "";
+    	        if($otype == 'all'){
+    	            $sourceURL = "data-src=\"" . $friend_pic . "\" class='lazy-bg friendpics' style='".$style."'";
+    	        }else{
+    	            $sourceURL = "style='background-image: url(\"$friend_pic\"); ".$style."' class='friendpics'";
+    	        }
 
                 $age = floor((time() - strtotime($bday)) / 31556926);
 
-                $friendsHTML .= '<div><a href="/user/'.$friend_username.'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; display: inline-block; float: left; width: 60px; height: 60px; border-radius: 50px; margin-bottom: 0;" class="friendpics lazy-bg"></div></a><div id="contviewf" style="width: calc(100% - 80px); margin-left: 10px;"><p><span>'.$friend_username.'<br /></span><span>'.$friend_country.'<br /></span>'.$age.' years old</p></div></div>';
+                $friendsHTML .= '<div><a href="/user/'.$friend_username.'/"><div  '.$sourceURL.'></div></a><div id="contviewf" style="width: calc(100% - 80px); margin-left: 10px;"><p><span>'.$friend_username.'<br /></span><span>'.$friend_country.'<br /></span>'.$age.' years old</p></div></div>';
             }
             $stmt->close();
             if(isset($_GET["otype"])){
