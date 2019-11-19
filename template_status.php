@@ -3,7 +3,7 @@
 	require_once 'user.php';
     require_once 'headers.php';
     require_once 'elist.php';
-	require_once 'php_includes/dist.php';
+    require_once 'php_includes/dist.php';
 
 	$status_ui = "";
 	$statuslist = "";
@@ -180,10 +180,13 @@
 		    $fuco = mb_substr($fuco, 0, 16, "utf-8");
 		    $fuco .= " ...";
 		}
-		$mgin = "";
-		if(($log_username == $u || $account_name != $log_username) && isset($_SESSION["username"])){
-		    $mgin = "margin-left: -11px;";
-		}
+
+		if ($avatar == NULL) {
+            $friend_pic = '/images/avdef.png';
+        } else {
+            $friend_pic = '/user/' . $author . '/' . $avatar;
+        }
+
 		$sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
 		$stmt = $conn->prepare($sql);
 		$stmt->bind_param("sss",$author,$author,$one);
@@ -192,13 +195,7 @@
 		$stmt->fetch();
 		$stmt->close();
 
-		if ($avatar == NULL) {
-            $friend_pic = '/images/avdef.png';
-        } else {
-            $friend_pic = '/user/' . $author . '/' . $avatar;
-        }
-
-		$user_image = '<a href="/user/'.$author.'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; '.$mgin.' background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tshov bbmob lazy-bg"></div><div class="infostdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left;" class="tshov lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
+		$user_image = '<a href="/user/'.$author.'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tshov bbmob lazy-bg"></div><div class="infostdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left;" class="tshov lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
 
 		$agoform = time_elapsed_string($postdate_);
 		$data = $row["data"];
@@ -243,7 +240,7 @@
 		$data = stripslashes($data);
 		$statusDeleteButton = '';
 		if($author == $log_username || $account_name == $log_username ){
-			$statusDeleteButton = '<span id="sdb_'.$statusid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" onclick="return false;" onmousedown="deleteStatus(\''.$statusid.'\',\'status_'.$statusid.'\');" title="Delete Post And Its Replies">X</button></span> &nbsp; &nbsp;';
+			$statusDeleteButton = '<span id="sdb_'.$statusid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" onclick="return false;" onmousedown="deleteStatus(\''.$statusid.'\',\'status_'.$statusid.'\');" title="Delete Post And Its Replies">X</button></span>';
 		}
 		// Add share button
 		$shareButton = "";
