@@ -18,16 +18,17 @@ Pearscom does not require the user to give a valid real name so the user can be 
 When deleting a user profile, photo, article etc. it actually gets deleted from the database and Pearscom will not keep any redundant information about its users.<br>
 Also note that by not having lots of information about users does not necessarily mean that it will result in a bad user experience, only in a different one.<br>
 The only additional information that is used in suggestions and queries (apart from that the user gave at sign up) is geolocation.<br>
-Pearscom can also be downloaded as a PWA (Progessive Web App) for both mobile and computer.
+At sign up the user needs to give more information that is generally required for such a service like timezone and country but these are mostly needed due to the lack of configurability on the server that I hire. (shared-hosted)
+Pearscom can also be downloaded as a PWA (Progessive Web App) for both mobile and desktop.
 
 # Nice TODOs:
 The site is written is pure PHP & MySQL, HTML5, CSS3 and JS with some jQuery.
   - Integrate the service with a framework like React or Angular (may also consider using Django or Node.js on server-side)
   - Restructure code for better readibility and reusability
-  - Implement messaging, notifications etc. in real-time (perhaps with Node.js)
+  - Implement messaging, notifications etc. in real-time (perhaps with Node.js and Socket.io)
   - Better integration with MySQL, more efficient queries etc.
-  - Anything else you think would be great
   - More clever UI
+  - Anything else you think would be great
  
 # Play with the code
 `git clone https://github.com/squancy/pearscom`
