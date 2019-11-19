@@ -16,7 +16,7 @@ Pearscom mostly offers the same features and services as other social media site
 
 Pearscom does not require the user to give a valid real name so the user can be completely anonymous under a fantasy username.<br>
 When deleting a user profile, photo, article etc. it actually gets deleted from the database and Pearscom will not keep any redundant information about its users.<br>
-Also note that by not having lots of information about users does not necessarily means that it will result in a bad user experience, only in a different one.<br>
+Also note that by not having lots of information about users does not necessarily mean that it will result in a bad user experience, only in a different one.<br>
 The only additional information that is used in suggestions and queries (apart from that the user gave at sign up) is geolocation.<br>
 Pearscom can also be downloaded as a PWA (Progessive Web App) for both mobile and computer.
 
