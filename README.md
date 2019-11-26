@@ -23,7 +23,7 @@ Pearscom can also be downloaded as a PWA (Progessive Web App) for both mobile an
 
 # Nice TODOs:
 The site is written is pure PHP & MySQL, HTML5, CSS3 and JS with some jQuery.
-  - Integrate the service with a framework like React or Angular (may also consider using Django or Node.js on server-side)
+  - Integrate the service with a framework/library like React or Angular (may also consider using Django or Node.js on server-side)
   - Restructure code for better readibility and reusability
   - Implement messaging, notifications etc. in real-time (perhaps with Node.js and Socket.io)
   - Better integration with MySQL, more efficient queries etc.
