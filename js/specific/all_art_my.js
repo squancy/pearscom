@@ -1,30 +1,41 @@
-let uPHP = "<?php echo $u; ?>";
-
 $("#sort").click(function () {
   $("#sortTypes").slideToggle(200, function () {
     // Animation complete.
   });
 });
 
-
+// Search btn clicked; perform article search 
 function getLAll() {
-  var e = _("fts").value;
-  if (e == "") return _("artSearchResults").style.display = "none", !1;
-  var a = encodeURI(e);
-  window.location = "/search_articles/" + a + "&inmy=yes";
+  var searchVal = _("fts").value;
+  if (searchVal == "") {
+    return _("artSearchResults").style.display = "none";
+  }
+  var encVal = encodeURI(searchVal);
+  window.location = "/search_articles/" + encVal + "&inmy=yes";
 }
 
+// Search on keydown; fetch matching articles from server
 function getArt(e) {
-  if ("" == e) return _("artSearchResults").style.display = "none", !1;
-  _("artSearchResults").style.display = "block", "" == _("artSearchResults").innerHTML && (_("artSearchResults").innerHTML = '<img src="/images/rolling.gif" width="30" height="30">');
-  var a = encodeURI(e),
-    t = new XMLHttpRequest;
-  t.open("POST", "/art_all_exec.php", !0), t.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), t.onreadystatechange = function () {
-    if (4 == t.readyState && 200 == t.status) {
-      var e = t.responseText;
-      "" != e && (_("artSearchResults").innerHTML = e)
+  if (e == "") {
+    return _("artSearchResults").style.display = "none";
+  }
+  _("artSearchResults").style.display = "block";
+  if (_("artSearchResults").innerHTML == '') {
+    _("artSearchResults").innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
+  }
+  let encVal = encodeURI(e);
+  let request = new XMLHttpRequest;
+  request.open("POST", "/art_all_exec.php", true);
+  request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  request.onreadystatechange = function () {
+    if (request.readyState == 4 && request.status == 200) {
+      let response = request.responseText;
+      if (response != "") {
+        _("artSearchResults").innerHTML = response;
+      }
     }
-  }, t.send("a=" + a + "&phpu=" + uPHP);
+  }
+  request.send("a=" + encVal + "&phpu=" + uPHP);
 }
 
 addListener("date_0", "date_0");
@@ -44,7 +55,7 @@ function addListener(onw, w) {
 function filterArts(otype) {
   changeStyle(otype);
   let req = new XMLHttpRequest();
-  req.open("GET", "/all_art_my.php?u=<?php echo $u; ?>&otype=" + otype, false);
+  req.open("GET", "/all_art_my.php?u=" + uPHP + "&otype=" + otype, false);
   req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   req.onreadystatechange = function () {
     if (req.readyState == 4 && req.status == 200) {
