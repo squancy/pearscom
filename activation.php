@@ -8,22 +8,22 @@
 
   function escapeURLParams($id_g, $u, $e, $p) {
     $id = preg_replace('#[^0-9]#i', '', $id_g); 
-  	$uname = mysqli_real_escape_string($conn, $u);
-  	$email = mysqli_real_escape_string($conn, $e);
-  	$pwd = mysqli_real_escape_string($conn, $p);
+    $uname = mysqli_real_escape_string($conn, $u);
+    $email = mysqli_real_escape_string($conn, $e);
+    $pwd = mysqli_real_escape_string($conn, $p);
     return [$id, $uname, $email, $pwd];
   }
 
   function resetPwd(&$p) {
     if(strpos($p, '__slash__')){
       $p = str_replace('__slash__', '/', $p);
-  	}
-  	if(strpos($p, '__dollar__')){
-  	  $p = str_replace('__dollar__', '$', $p);
-  	}
-  	if(strpos($p, '__dot__')){
-  	  $p = str_replace('__dot__', '.', $p);
-  	}
+    }
+    if(strpos($p, '__dollar__')){
+      $p = str_replace('__dollar__', '$', $p);
+    }
+    if(strpos($p, '__dot__')){
+      $p = str_replace('__dot__', '.', $p);
+    }
   }
 
   function checkCredentials($id, $u, $e, $p) {
@@ -36,18 +36,18 @@
     $stmt->fetch();
     $numrows = $stmt->num_rows;
 
-  	if($numrows == 0){
-  		$error = "Your credentials are not matching anything in our system";
-  	}
-  	$stmt->close();
+    if($numrows == 0){
+      $error = "Your credentials are not matching anything in our system";
+    }
+    $stmt->close();
   }
 
   function activateUser($id) {
     global $conn, $one;
     $sql = "UPDATE users SET activated=? WHERE id=? LIMIT 1";
-  	$stmt = $conn->prepare($sql);
-  	$stmt->bind_param("si", $one, $id);
-  	$stmt->execute();
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $one, $id);
+    $stmt->execute();
     $stmt->close();
   }
   
@@ -60,22 +60,22 @@
     list($id, $u, $e, $p) = escapeURLParams($_GET['id'], $_GET['u'], $_GET['e'], $_GET['p']);
 
     // Reset password to its original state (it was URL-friendly)
-  	resetPwd($p);
+    resetPwd($p);
 
-  	if($id == "" || strlen($u) < 3 || strlen($e) < 5 || $p == ""){
-  		$error = "Activation string length issues";
-  	}
+    if($id == "" || strlen($u) < 3 || strlen($e) < 5 || $p == ""){
+      $error = "Activation string length issues";
+    }
 
-  	// Check their credentials against the database
-  	checkCredentials($id, $u, $e, $p);
+    // Check their credentials against the database
+    checkCredentials($id, $u, $e, $p);
 
     // No errors; update db
     activateUser($id);
-  	
-  	// Optional double check to see if activated in fact now = 1
-  	$sql = "SELECT * FROM users WHERE id=? AND activated=? LIMIT 1";
-  	$stmt = $conn->prepare($sql);
-  	$stmt->bind_param("is",$id,$one);
+    
+    // Optional double check to see if activated in fact now = 1
+    $sql = "SELECT * FROM users WHERE id=? AND activated=? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("is",$id,$one);
     $stmt->execute();
     $stmt->store_result();
     $stmt->fetch();
@@ -87,10 +87,10 @@
       } else if($numrows == 1) {
         $error = "Activation success";
       } else {
-      	$error = "Unknown error occurred";
+        $error = "Unknown error occurred";
       }
   } else {
-  	$error = "Missing URL parameters";
+    $error = "Missing URL parameters";
   }
 ?>
 <!DOCTYPE html>
@@ -121,26 +121,26 @@
 </head>
 <body style="background: #fafafa;">
   <div id="pageMiddle_2">
-  	<?php if($error != "Activation success") { ?>
-  		<p class='wrong'>Oops, something went wrong ...</p>
-  	<?php } else { ?>
-  		<p class='wrong'>Congratulations! You have successfully activated your account!</p>
-  	<?php } ?>
+    <?php if($error != "Activation success") { ?>
+      <p class='wrong'>Oops, something went wrong ...</p>
+    <?php } else { ?>
+      <p class='wrong'>Congratulations! You have successfully activated your account!</p>
+    <?php } ?>
 
-  	<div id="divf1">
-  	  <?php if($error == "Activation success"){ ?>
-  		  <img src="/images/checked.png">
-  		<?php }else{ ?>
-  		  <img src="/images/error.png">
-  		<?php } ?>
-  	</div>
-  	<div id="divf2">
-  		<p>
+    <div id="divf1">
+      <?php if($error == "Activation success"){ ?>
+        <img src="/images/checked.png">
+      <?php }else{ ?>
+        <img src="/images/error.png">
+      <?php } ?>
+    </div>
+    <div id="divf2">
+      <p>
         <?php echo $error; ?>
       </p>
 
-  		<?php if($error == "Activation success"){ ?>
-  			<p>
+      <?php if($error == "Activation success"){ ?>
+        <p>
           Great! You have successfully verified your email and activated your account so now
           you are ready to <a href="/login">log in</a> to your account.
           <br><br>
@@ -148,18 +148,18 @@
           <br><br>
           We hope you will enjoy being part of an amazing community!
         </p>
-  		<?php }else{ ?>
-  			<p>
+      <?php }else{ ?>
+        <p>
           Sorry.. Unfortunately an error has occured during your signing up and returned: 
           <?php echo $error; ?>
         </p>
-  			<p>
+        <p>
           Don&#39;t worry! We might help you to solve this problem if you send us a
           <a href="/help">problem report.</a>
         </p>
-  		<?php } ?>
-  	</div>
-  	<div class="clear"></div>
+      <?php } ?>
+    </div>
+    <div class="clear"></div>
   </div>
   <?php require_once 'template_pageBottom.php'; ?>
 </body>
