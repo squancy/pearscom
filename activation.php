@@ -7,6 +7,7 @@
   require_once 'headers.php';
 
   function escapeURLParams($id_g, $u, $e, $p) {
+    global $conn;
     $id = preg_replace('#[^0-9]#i', '', $id_g); 
     $uname = mysqli_real_escape_string($conn, $u);
     $email = mysqli_real_escape_string($conn, $e);
@@ -27,7 +28,7 @@
   }
 
   function checkCredentials($id, $u, $e, $p) {
-    global $conn;
+    global $conn, $error;
     $sql = "SELECT * FROM users WHERE id=? AND username=? AND email=? AND password=? LIMIT 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("isss", $id, $u, $e, $p);
@@ -51,9 +52,9 @@
     $stmt->close();
   }
   
-   $one = "1";
+  $one = "1";
   $error = "";
-  if (isset($_GET['id']) && isset($_GET['u']) && isset($_GET['e']) && isset($_GET['p'])) {
+  if(isset($_GET['id']) && isset($_GET['u']) && isset($_GET['e']) && isset($_GET['p'])) {
     include_once("php_includes/conn.php");
 
     // Escape URL parameters
@@ -90,7 +91,7 @@
         $error = "Unknown error occurred";
       }
   } else {
-    $error = "Missing URL parameters";
+    header('Location: /index');
   }
 ?>
 <!DOCTYPE html>
