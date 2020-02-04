@@ -328,6 +328,10 @@
     <div id="paginationCtrls" style="text-align: center;"><?php echo $paginationCtrls; ?></div>
   </div>
   <?php require_once 'template_pageBottom.php'; ?>
-  <script src='/js/specific/all_art_my.js' defer></script>
+  <script type='text/javascript'>
+    var uPHP = "<?php echo $u; ?>";
+  </script>
+  <script src='/js/specific/all_art_my.js'></script>
+  <script src='/js/specific/mode.js'></script>
 </body>
 </html>
