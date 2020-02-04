@@ -594,7 +594,6 @@
 <meta name="apple-mobile-web-app-title" content="Pearscom">
 <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
 <meta name="theme-color" content="#282828" />
-	<link rel="stylesheet" type="text/css" href="/js/spectrum.css">
 	<script type="text/javascript">
 		function toggleHeart(type,p,u,elem){
 			var ajax = ajaxObj("POST","/php_parsers/heart_system.php");

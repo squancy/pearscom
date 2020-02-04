@@ -26,9 +26,8 @@
   
   // Pagination; cut num of articles
   $p_sql = "SELECT COUNT(id) FROM articles WHERE written_by=?";
-  $url_prev = "/all_articles/{$u}";
   $url_n = "/all_articles/{$u}";
-  list($paginationCtrls, $limit) = pagination($conn, $p_sql, 's', $u, $url_prev, $url_n); 
+  list($paginationCtrls, $limit) = pagination($conn, $p_sql, 's', $url_n, $u); 
 
   // Get the user's all articles ordered by otype
   $catgs = "";
@@ -42,6 +41,7 @@
     }
 
     function catSort($otype) {
+      global $limit;
       if($otype == "date_0"){
         $sql = "SELECT * FROM articles WHERE written_by = ? ORDER BY post_time DESC $limit";
       }else if($otype == "date_1"){

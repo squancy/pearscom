@@ -3,15 +3,36 @@
     General function for pagination. Used on most pages.
   */
 
-  function pagination($conn, $sql, $params1, $params2, $url_prev, $url_n) {
+  // Implement custom bind_param with variable num of parameters
+  class BindParam {
+    private $values = array(), $types = '';
+
+    public function add($type, &$value) {
+      $this->values[] = $value;
+      $this->types .= $type;
+    }
+
+    public function get() {
+      return array_merge(array($this->types), $this->values);
+    }
+  }
+
+  function pagination($conn, $sql, $params1, $url_n) {
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param($params1, $params2);
+    $bindParam = new BindParam;
+
+    // Dynamic params after the 5th argument
+    $values = array_slice(func_get_args(), 4);
+    for($i = 0; $i < count($values); $i++) {
+      $bindParam->add($params1[$i], $values[$i]);
+    }
+    call_user_func_array(array($stmt, 'bind_param'), $bindParam->get());
     $stmt->execute();
     $stmt->bind_result($rows);
     $stmt->fetch();
     $stmt->close();
 
-    $page_rows = 21;
+    $page_rows = 5;
     $last = ceil($rows / $page_rows);
     if($last < 1){
       $last = 1;
@@ -35,7 +56,7 @@
     if($last != 1){
       if($pagenum > 1) {
         $previous = $pagenum - 1;
-        $paginationCtrls .= '<a href="'.$url_prev.'&pn='.$previous.'">Previous</a>
+        $paginationCtrls .= '<a href="'.$url_n.'&pn='.$previous.'">Previous</a>
             &nbsp;&nbsp;';
 
         for($i = $pagenum - 4; $i < $pagenum; $i++){
