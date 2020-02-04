@@ -16,7 +16,7 @@
 
   function resetPwd(&$p) {
     if(strpos($p, '__slash__')){
-		  $p = str_replace('__slash__', '/', $p);
+      $p = str_replace('__slash__', '/', $p);
 		}
 		if(strpos($p, '__dollar__')){
 		  $p = str_replace('__dollar__', '$', $p);
