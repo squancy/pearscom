@@ -36,4 +36,11 @@
     }
     return $isOwner;
   }
+
+  function validateUser($user_ok, $log_username) {
+    if($user_ok != true || $log_username == ""){
+      header('Location: /index');
+      exit();
+    }
+  }
 ?>
