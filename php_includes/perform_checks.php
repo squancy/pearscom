@@ -47,12 +47,12 @@
   function numOfFriends($conn, $user) {
     $one = "1";
     $sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("sss", $user, $user, $one);
-		$stmt->execute();
-		$stmt->bind_result($numoffs);
-		$stmt->fetch();
-		$stmt->close();
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $user, $user, $one);
+    $stmt->execute();
+    $stmt->bind_result($numoffs);
+    $stmt->fetch();
+    $stmt->close();
     return $numoffs;
   } 
 ?>
