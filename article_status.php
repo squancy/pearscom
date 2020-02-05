@@ -68,7 +68,8 @@
       <div id="btns_SP" class="hiddenStuff" style="width: 90%;">
       <span id="swithspan">
         <button id="statusBtn" class="btn_rply"
-          onclick="postToStatus(\'status_post\',\'a\',\''.$u.'\',\'statustext_\')">Post</button>      </span>
+          onclick="postToStatus(\'status_post\',\'a\',\''.$u.'\',\'statustext_\')">Post</button
+      </span>
       <img src="/images/camera.png" id="triggerBtn_SP_" 
         onclick="triggerUpload(event, \'fu_SP\')" width="22" height="22"
         title="Upload A Photo" class="triggerBtnreply" />
@@ -335,7 +336,7 @@
               title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
             <div class="clear"></div>
         ';
-        $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
+      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
           'replytext_'.$statusid);
       $statuslist .= '</div>';
       $statuslist .= '
