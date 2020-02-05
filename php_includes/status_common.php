@@ -61,24 +61,24 @@
 
   function isOn($ison) {
     if($ison == "yes"){
-		  return "<img src='/images/wgreen.png' width='12' height='12'>";
-		}else{
-		  return "<img src='/images/wgrey.png' width='12' height='12'>";
-		}
+      return "<img src='/images/wgreen.png' width='12' height='12'>";
+    }else{
+      return "<img src='/images/wgrey.png' width='12' height='12'>";
+    }
   }
 
   function avatarImg($author, $avatar) {
     if($avatar != ""){
-			return '/user/'.$author.'/'.$avatar;
-		} else {
-			return '/images/avdef.png';
-		}
+      return '/user/'.$author.'/'.$avatar;
+    } else {
+      return '/images/avdef.png';
+    }
   }
 
   function sanitizeData($data_old) {
     $data_old = nl2br($data_old);
-		$data_old = str_replace("&amp;", "&", $data_old);
-		$data_old = stripslashes($data_old);
+    $data_old = str_replace("&amp;", "&", $data_old);
+    $data_old = stripslashes($data_old);
     return $data_old;
   }
 
@@ -123,25 +123,25 @@
         $half = 'reply_';
       }
 
-			return '
+      return '
         <span id="'.$id.'">
           <button onclick="Confirm.render("Delete '.$what.'?","delete_post","post_1")" 
           class="delete_s" onclick="return false;"
           onmousedown="'.$fname.'(\''.$statusid.'\',\''.$half.''.$statusid.'\');">X</button>
         </span>
         &nbsp;&nbsp;';
-		}else{
-			return "&nbsp;&nbsp;&nbsp;";
-		}
+    }else{
+      return "&nbsp;&nbsp;&nbsp;";
+    }
   }
 
   function genShareBtn($log_username, $author, $statusid) {
     if($log_username != "" && $author != $log_username){
-			return '
+      return '
         <img src="/images/black_share.png" width="18" height="18" onclick="return false;"
           onmousedown="shareStatus(\'' . $statusid . '\');" id="shareBlink"
           style="vertical-align: middle;">';
-		}
+    }
     return '';
   }
 
@@ -153,29 +153,29 @@
     }
 
     $likeButton = "";
-		$likeText = "";
-		if($isLike == true){
-			$likeButton = '
+    $likeText = "";
+    if($isLike == true){
+      $likeButton = '
         <a href="#" onclick="return false;" 
           onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\')">
           <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
-			$likeText = '<span style="vertical-align: middle;">Dislike</span>';
-		}else{
-			$likeButton = '
+      $likeText = '<span style="vertical-align: middle;">Dislike</span>';
+    }else{
+      $likeButton = '
         <a href="#" onclick="return false;"
           onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\')">
           <img src="/images/nf.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
-			$likeText = '<span style="vertical-align: middle;">Like</span>';
-		}
+      $likeText = '<span style="vertical-align: middle;">Like</span>';
+    }
     return [$likeButton, $likeText];
   }
 
   function userLiked($user_ok, $conn, $statusid, $log_username, $isStatus = true) {
-		if($user_ok){
+    if($user_ok){
       if($isStatus) {
         $db = 'art_stat_likes';
         $field = 'status';
@@ -183,18 +183,18 @@
         $db = 'art_reply_likes';
         $field = 'reply'; 
       }
-			$like_check = "SELECT id FROM ".$db." WHERE username=? AND ".$field."=? LIMIT 1";
-			$stmt = $conn->prepare($like_check);
-			$stmt->bind_param("si",$log_username,$statusid);
-			$stmt->execute();
-			$stmt->store_result();
-			$stmt->fetch();
-			$numrows = $stmt->num_rows;
-			if($numrows > 0){
+      $like_check = "SELECT id FROM ".$db." WHERE username=? AND ".$field."=? LIMIT 1";
+      $stmt = $conn->prepare($like_check);
+      $stmt->bind_param("si",$log_username,$statusid);
+      $stmt->execute();
+      $stmt->store_result();
+      $stmt->fetch();
+      $numrows = $stmt->num_rows;
+      if($numrows > 0){
         return true;
-			}
-			$stmt->close();
-		}
+      }
+      $stmt->close();
+    }
     return false;
   }
 
@@ -248,12 +248,12 @@
 
   function genShowMore($crply, $statusid) {
     if($crply > 0){
-		  return '
+      return '
         <div class="showrply">
           <a id="showreply_'.$statusid.'" onclick="showReply('.$statusid.','.$crply.')">
             Show replies ('.$crply.')
           </a>
         </div>';
-	  }
+    }
   }
 ?>
