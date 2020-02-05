@@ -32,7 +32,7 @@
     $stmt->fetch();
     $stmt->close();
 
-    $page_rows = 5;
+    $page_rows = 21;
     $last = ceil($rows / $page_rows);
     if($last < 1){
       $last = 1;
