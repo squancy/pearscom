@@ -96,8 +96,8 @@
     // replace new lines with <br>
     $str = preg_replace("/\r\n/", "<br>", $str);
     $str = str_replace("\\n", '<br>', $str);
-		$str = str_replace('\\\'', '&#39;', $str);
-		$str = str_replace('\\\'', '&#34;', $str);
+    $str = str_replace('\\\'', '&#39;', $str);
+    $str = str_replace('\\\'', '&#34;', $str);
     return $str;
   }
 
