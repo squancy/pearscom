@@ -410,129 +410,166 @@
   <?php include_once("template_pageTop.php"); ?>
   <div id="overlay"></div>
   <div id="pageMiddle_2">
-      <div id="dialogbox_art"></div>
+    <div id="dialogbox_art"></div>
     <div id="dialogbox"></div>
 
     <div class="biggerHolder">
-    <div id="big_view_article" class="genWhiteHolder">
-        <?php if($_SESSION["username"] != ""){ ?>
-      <div id="heart_btn"><span id="cntHeart" style="float: left;"><?php echo $heart_count; ?></span>&nbsp;&nbsp;<span id="heartBtn"><?php echo $heartButton; ?></span></div>
-      <div id="fav_btn"><span id="favBtn" style="margin-right: 7px;"><?php echo $favButton; ?></span></div>
-      <img src="/images/black_share.png" id="art_share" style="width: 20px; height: 20px;" onclick="shareArticle('<?php echo $id; ?>')">
-      <?php } ?>
-      <div id="arti_pp" class="lazy-bg genBg" data-src="<?php echo $profile_pic; ?>" onclick="window.location = '/user/<?php echo $u; ?>/'"></div>
-      <div id="forpcontent" style="font-size: 14px;">
-          <div id="artkeppal">
-            <p style="font-size: 14px; margin: 0px;"><strong>Author: </strong><b class="art_font"><a href="/user/<?php echo $u; ?>/"><?php echo $u; ?></a></b></p>
-           <p style="font-size: 14px; margin: 0px;"><strong>Title: </strong><b class="art_font"><?php echo $tmlong; ?></b></p>
-           <p style="font-size: 14px; margin: 0px;"><strong>Category: </strong><b class="art_font"><?php echo $cat_ma; ?></b></p>
-           <p style="font-size: 14px; margin: 0px;"><strong>Posted: </strong><b class="art_font"><?php echo $post_time_am; ?></b></p>
-           <a href="#pcontent">Go to comments</a>
-       </div>
-       <br /><hr class="dim">
-       <?php echo $content_ma; ?></p>
-       <hr class="dim">
-       <div id="attached_photos" class="flexibleSol">
-        <?php
-          foreach($arr_of_imgs as $img) {
-            echo $img;
-          }
-        ?>
-       </div>
-       <div class="clear"></div>
-       <br>
-    </div>
-     <div id="pcontent">
-       <button onclick="topFunction()" id="back_top" class="main_btn_fill fixRed">Back to top</button>
-       <?php echo $deleteButton; ?>
-       <?php echo $editButton; ?>
-       <button class="main_btn_fill fixRed" onclick="printContent('forpcontent')">Print article</button>
-     </div>
-   </div>
-   <p style="color: #999;" class="txtc"><?php echo $scount; ?> comments recorded</p>
-      <hr class="dim">
-    <?php if($isBlock != true){ ?><?php require_once 'article_status.php'; ?><?php }else{ ?><p style="color: #006ad8;" class="txtc">Alert: this user blocked you, therefore you cannot post on his/her articles!</p><?php } ?>
-  </div>
-    <div id="uptoea">
-      <div id="yellow_box_art" class="genWhiteHolder">
-        <b style="font-size: 16px;">Information about the article</b><br /><br />
-        <div id="art_mob_wrap">
-          &bull; Tags(<?php echo $tags_count_ma; ?>) <?php echo $tags_ma; ?><br />
-          &bull; <?php echo $isHeartOrNot; ?><br />
-          &bull; <?php echo $isFavOrNot; ?><br />
-          &bull; This article belongs to <?php echo $u; ?><br />
-          <?php echo "&bull; This article has the &#34;".$cat_ma."&#34; category"; ?>
+      <div id="big_view_article" class="genWhiteHolder">
+      <?php if($_SESSION["username"] != ""){ ?>
+        <div id="heart_btn">
+          <span id="cntHeart" style="float: left;">
+            <?php echo $heart_count; ?>
+          </span>
+
+          &nbsp;&nbsp;
+
+          <span id="heartBtn">
+            <?php echo $heartButton; ?>
+          </span>
         </div>
-        <div style="float: right; margin-top: -85px; margin-right: 2px;"><?php echo $cover_ma; ?></div>
+
+        <div id="fav_btn">
+          <span id="favBtn" style="margin-right: 7px;">
+            <?php echo $favButton; ?>
+          </span>
+        </div>
+
+        <img src="/images/black_share.png" id="art_share" style="width: 20px; height: 20px;"
+          onclick="shareArticle('<?php echo $id; ?>')">
+      <?php } ?>
+
+      <div id="arti_pp" class="lazy-bg genBg" data-src="<?php echo $profile_pic; ?>"
+        onclick="window.location = '/user/<?php echo $u; ?>/'"></div>
+      <div id="forpcontent" style="font-size: 14px;">
+        <div id="artkeppal">
+          <p style="font-size: 14px; margin: 0px;">
+            <strong>Author: </strong>
+            <b class="art_font">
+              <a href="/user/<?php echo $u; ?>/">
+                <?php echo $u; ?>
+              </a>
+            </b>
+          </p>
+
+          <p style="font-size: 14px; margin: 0px;">
+            <strong>Title: </strong>
+            <b class="art_font">
+              <?php echo $tmlong; ?>
+            </b>
+          </p>
+
+          <p style="font-size: 14px; margin: 0px;">
+            <strong>Category: </strong>
+            <b class="art_font">
+              <?php echo $cat_ma; ?>
+            </b>
+          </p>
+
+          <p style="font-size: 14px; margin: 0px;">
+            <strong>Posted: </strong>
+            <b class="art_font">
+              <?php echo $post_time_am; ?>
+            </b>
+          </p>
+          <a href="#pcontent">Go to comments</a>
+        </div>
+
+        <br />
+        <hr class="dim">
+        <?php echo $content_ma; ?></p>
+        <hr class="dim">
+        <div id="attached_photos" class="flexibleSol">
+          <?php
+            foreach($arr_of_imgs as $img) {
+              echo $img;
+            }
+          ?>
+        </div>
+        <div class="clear"></div>
+        <br>
       </div>
 
-        <div class="compdiv genWhiteHolder">
-        <b style="font-size: 16px;">Related articles</b>
-          <div id="related_arts">
-            <?php echo $related; ?>
-          </div>
+      <div id="pcontent">
+        <button onclick="topFunction()" id="back_top" class="main_btn_fill fixRed">
+          Back to top
+        </button>
+        <?php echo $deleteButton; ?>
+        <?php echo $editButton; ?>
+        <button class="main_btn_fill fixRed" onclick="printContent('forpcontent')">
+          Print article
+        </button>
       </div>
+    </div>
 
-        <div class="compdiv genWhiteHolder">
-        <?php if($isOwner == "Yes"){echo "<b style='font-size: 16px;'>My articles</b>";}else{echo "<b style='font-size: 16px;'>".$u."&#39;s articles</b>";} ?>
-
-        <div id="artsminemy">
-          <?php echo $usersarts; ?>
+    <p style="color: #999;" class="txtc">
+      <?php echo $scount; ?> comments recorded
+    </p>
+    <hr class="dim">
+    <?php if($isBlock != true){ ?>
+      <?php require_once 'article_status.php'; ?>
+    <?php }else{ ?>
+      <p style="color: #006ad8;" class="txtc">
+        Alert: this user blocked you, therefore you cannot post on his/her articles!
+      </p>
+    <?php } ?>
+  </div>
+  <div id="uptoea">
+    <div id="yellow_box_art" class="genWhiteHolder">
+      <b style="font-size: 16px;">Information about the article</b>
+      <br /><br />
+      <div id="art_mob_wrap">
+        &bull; Tags(<?php echo $tags_count_ma; ?>) <?php echo $tags_ma; ?><br />
+        &bull; <?php echo $isHeartOrNot; ?><br />
+        &bull; <?php echo $isFavOrNot; ?><br />
+        &bull; This article belongs to <?php echo $u; ?><br />
+        <?php echo "&bull; This article has the &#34;".$cat_ma."&#34; category"; ?>
       </div>
-     </div>
+      <div style="float: right; margin-top: -85px; margin-right: 2px;">
+        <?php echo $cover_ma; ?>
+      </div>
+    </div>
+    <div class="compdiv genWhiteHolder">
+      <b style="font-size: 16px;">Related articles</b>
+        <div id="related_arts">
+          <?php echo $related; ?>
+        </div>
+    </div>
+
+    <div class="compdiv genWhiteHolder">
+      <?php if($isOwner == "Yes"){
+        echo "<b style='font-size: 16px;'>My articles</b>";
+      }else{
+        echo "<b style='font-size: 16px;'>".$u."&#39;s articles</b>";
+      } ?>
+
+      <div id="artsminemy">
+        <?php echo $usersarts; ?>
+      </div>
+    </div>
+
        <div class="compdiv genWhiteHolder">
-        <?php if($isOwner == "Yes"){echo "<b style='font-size: 16px;'>My favourite articles</b>";}else{echo "<b style='font-size: 16px;'>".$u."&#39;s favourite articles</b>";} ?>
+        <?php if($isOwner == "Yes"){
+          echo "<b style='font-size: 16px;'>My favourite articles</b>";
+        }else{
+          echo "<b style='font-size: 16px;'>".$u."&#39;s favourite articles</b>";
+        } ?>
 
         <div id="addfavarts">
           <?php echo $fav_arts; ?>
+        </div>
       </div>
     </div>
-    </div>
-    
-   </div>
-   <div class="clear"></div>
+  </div>
+  <div class="clear"></div>
   <?php require_once 'template_pageBottom.php'; ?>
   <script type="text/javascript">
-      var _0x6016=["\x73\x6C\x69\x64\x65\x32","\x6F\x6E\x6D\x6F\x75\x73\x65\x64\x6F\x77\x6E","\x61\x72\x74\x73\x6D\x69\x6E\x65\x6D\x79","\x72\x69\x67\x68\x74","\x73\x6C\x69\x64\x65\x31","\x6C\x65\x66\x74","\x73\x6C\x69\x64\x65\x6C","\x72\x65\x6C\x61\x74\x65\x64\x5F\x61\x72\x74\x73","\x73\x6C\x69\x64\x65\x72","\x73\x6C\x69\x64\x65\x6C\x6C","\x61\x64\x64\x66\x61\x76\x61\x72\x74\x73","\x73\x6C\x69\x64\x65\x72\x72","\x73\x63\x72\x6F\x6C\x6C\x4C\x65\x66\x74","\x63\x6C\x65\x61\x72\x49\x6E\x74\x65\x72\x76\x61\x6C"];if(_(_0x6016[0])!= undefined){var forward=_(_0x6016[0]);forward[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[2]);sideScroll(_0xa11ax2,_0x6016[3],15,250,20)}};if(_(_0x6016[4])!= undefined){var back=_(_0x6016[4]);back[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[2]);sideScroll(_0xa11ax2,_0x6016[5],15,250,20)}};if(_(_0x6016[6])!= undefined){var f2=_(_0x6016[6]);f2[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[7]);sideScroll(_0xa11ax2,_0x6016[3],15,250,20)}};if(_(_0x6016[8])!= undefined){var b2=_(_0x6016[8]);b2[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[7]);sideScroll(_0xa11ax2,_0x6016[5],15,250,20)}};if(_(_0x6016[9])!= undefined){var f3=_(_0x6016[9]);f3[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[10]);sideScroll(_0xa11ax2,_0x6016[3],15,250,20)}};if(_(_0x6016[11])!= undefined){var b3=_(_0x6016[11]);b3[_0x6016[1]]= function(){var _0xa11ax2=_(_0x6016[10]);sideScroll(_0xa11ax2,_0x6016[5],15,250,20)}};function sideScroll(_0xa11ax9,_0xa11axa,_0xa11axb,_0xa11axc,_0xa11axd){scrollAmount= 0;var _0xa11axe=setInterval(function(){if(_0xa11axa== _0x6016[5]){_0xa11ax9[_0x6016[12]]-= _0xa11axd}else {_0xa11ax9[_0x6016[12]]+= _0xa11axd};scrollAmount+= _0xa11axd;if(scrollAmount>= _0xa11axc){window[_0x6016[13]](_0xa11axe)}},_0xa11axb)}
-          window.onbeforeunload = function(){
-              if(_("title").innerHTML != "" || window.frames['richTextField'].document.body.innerHTML != ""){
-                  return "You have unsaved work left. Are you sure you want to leave the page?";
-              }
-          }
-          
-          function getCookie(cname) {
-            var name = cname + "=";
-            var decodedCookie = decodeURIComponent(document.cookie);
-            var ca = decodedCookie.split(';');
-            for(var i = 0; i <ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') {
-                    c = c.substring(1);
-                }
-                if (c.indexOf(name) == 0) {
-                    return c.substring(name.length, c.length);
-                }
-            }
-            return "";
-        }
-     function setDark(){
-            var cssId = 'thisClassDoesNotExist';
-            if (!document.getElementById(cssId)){
-                var head  = document.getElementsByTagName('head')[0];
-                var link  = document.createElement('link');
-                link.id   = cssId;
-                link.rel  = 'stylesheet';
-                link.type = 'text/css';
-                link.href = '/style/dark_style.css';
-                link.media = 'all';
-                head.appendChild(link);
-            }
-        }
-        var isdarkm = getCookie("isdark");
-        if(isdarkm == "yes"){
-            setDark();
-        }
-  </script>
+    window.onbeforeunload = function(){
+      if(_("title").innerHTML != "" ||
+        window.frames['richTextField'].document.body.innerHTML != ""){
+          return "You have unsaved work left. Are you sure you want to leave the page?";
+      }
+    }
+ </script>
 </body>
 </body>
 </html>

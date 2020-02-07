@@ -1,22 +1,35 @@
 // Currently not used on the page; implements dark mode
-function getCookie(e) {
-  for (var t = e + "=", s = decodeURIComponent(document.cookie).split(
-      ";"), n = 0; n < s.length; n++) {
-    for (var r = s[n];
-      " " == r.charAt(0);) r = r.substring(1);
-    if (0 == r.indexOf(t)) return r.sub string(t.length, r.length)
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
   }
-  return ""
+  return "";
 }
 
-function setDark() {
-  var e = "thisClassDoesNotExist";
-  if (!document.getElementById(e)) {
-    var t = document.getElementsByTagName("head")[0],
-      s = document.createElement("lin    k");
-    s.id = e, s.rel = "stylesheet", s.type = "text/css", s.href =
-      "/style/dark_style.css", s.media = "all", t.a ppendChild(s)
+function setDark(){
+  var cssId = 'thisClassDoesNotExist';
+  if (!document.getElementById(cssId)){
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.id   = cssId;
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = '/style/dark_style.css';
+    link.media = 'all';
+    head.appendChild(link);
   }
 }
+
 var isdarkm = getCookie("isdark");
-"yes" == isdarkm && setDark();
+if(isdarkm == "yes"){
+  setDark();
+}
