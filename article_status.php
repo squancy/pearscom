@@ -355,6 +355,7 @@
   const UNAME = '<?php echo $u; ?>';
 </script>
 <script src='/js/specific/p_dialog.js' defer></script>
+<script src='/js/specific/file_dialog.js' defer></script>
 <script src='/js/specific/see_hide.js' defer></script>
 <script src='/js/specific/open_emoji.js' defer></script>
 <script src='/js/specific/delete_post.js' defer></script>
