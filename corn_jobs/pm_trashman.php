@@ -1,9 +1,9 @@
 <?php
-	// Connect to the database
 	require_once 'php_includes/conn.php';
 	// Private Message Database Trashman Corn Job
 	// Delete when receiver has never replied and has deleted
-	$query = mysqli_query($conn, "SELECT id FROM pm WHERE parent='x' AND rdelete='1' AND hasreplies='0'");
+	$query = mysqli_query($conn, "SELECT id FROM pm WHERE parent='x' AND rdelete='1' AND
+    hasreplies='0'");
 	$numrows = mysqli_num_rows($conn, $sql);
 	if($numrows > 0){
 		while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
@@ -13,7 +13,8 @@
 	}
 
 	// Delete when both users have checked delete, also delete replies
-	$query3 = mysqli_query($conn, "SELECT id FROM pm WHERE parent='x' AND sdelete='1' AND rdelete='1'");
+	$query3 = mysqli_query($conn, "SELECT id FROM pm WHERE parent='x' AND sdelete='1' AND
+    rdelete='1'");
 	$numrows3 = mysqli_num_rows($query3);
 	if($numrows3 > 0){
 		while($row3 = mysqli_fetch_array($query3, MYSQLI_ASSOC)){
