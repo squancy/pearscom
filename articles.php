@@ -169,20 +169,7 @@
   $stmt->execute();
   $result = $stmt->get_result();
   while($row = $result->fetch_assoc()){
-    $written_bylink = $row["written_by"];
-    $wb = urlencode($written_bylink);
-    $cat = $row["category"];
-    $tags2 = $row["tags"];
-    $linkp = $row["post_time"];
-    $title = html_entity_decode($row["title"]);
-    $dop_ = $row["post_time"];
-    $dpp = base64url_encode($linkp,$hshkey);
-    $dop = strftime("%b %d, %Y", strtotime($dop_));
-    $agoform = time_elapsed_string($dop_);
-
-    $cover = chooseCover($cat);
-
-    $related .= genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat);
+    $related .= genFullBox($row);
   }
   $stmt->close();
 
@@ -195,19 +182,7 @@
     $stmt->execute();
     $result = $stmt->get_result();
     while($row = $result->fetch_assoc()){
-      $written_bylink = $row["written_by"];
-      $wb = urlencode($written_bylink);
-      $cat = $row["category"];
-      $tags2 = $row["tags"];
-      $linkp = $row["post_time"];
-      $title = html_entity_decode($row["title"]);
-      $dop_ = $row["post_time"];
-      $dpp = base64url_encode($linkp,$hshkey);
-      $dop = strftime("%b %d, %Y", strtotime($dop_));
-      $agoform = time_elapsed_string($dop_);
-
-      $cover = chooseCover($cat);
-      $related .= genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat);
+      $related .= genFullBox($row);
     }
     $stmt->close();
   }
@@ -225,19 +200,7 @@
     $stmt->execute();
     $result = $stmt->get_result();
     while($row = $result->fetch_assoc()){
-      $written_bylink = $row["written_by"];
-      $wb = urlencode($written_bylink);
-      $cat = $row["category"];
-      $tags2 = $row["tags"];
-      $linkp = $row["post_time"];
-      $title = html_entity_decode($row["title"]);
-      $dop_ = $row["post_time"];
-      $dpp = base64url_encode($linkp,$hshkey);
-      $dop = strftime("%b %d, %Y", strtotime($dop_));
-      $agoform = time_elapsed_string($dop_);
-
-      $cover = chooseCover($cat);
-      $related .= genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat);
+      $related .= genFullBox($row);
     }
     $stmt->close();
   }
@@ -285,20 +248,8 @@
   $stmt->bind_param("ss", $u, $p);
   $stmt->execute();
   $result = $stmt->get_result();
-    while($row = $result->fetch_assoc()){
-    $written_bylink = $row["written_by"];
-    $wb = urlencode($written_bylink);
-    $cat = $row["category"];
-    $tags2 = $row["tags"];
-    $linkp = $row["post_time"];
-    $title = html_entity_decode($row["title"]);
-    $dop_ = $row["post_time"];
-    $dpp = base64url_encode($linkp,$hshkey);
-    $dop = strftime("%b %d, %Y", strtotime($dop_));
-    $agoform = time_elapsed_string($dop_);
-
-    $cover = chooseCover($cat);
-    $usersarts .= genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat);
+  while($row = $result->fetch_assoc()){
+    $usersarts .= genFullBox($row);
   }
   
   $stmt->close();
@@ -321,20 +272,7 @@
   $stmt->execute();
   $result = $stmt->get_result();
   while($row = $result->fetch_assoc()){
-    $written_bylink = $row["written_by"];
-    $wb = urlencode($written_bylink);
-    $cat = $row["category"];
-    $tags2 = $row["tags"];
-    $linkp = $row["post_time"];
-    $title = html_entity_decode($row["title"]);
-    $dop_ = $row["post_time"];
-    $dpp = base64url_encode($linkp,$hshkey);
-    $dop = strftime("%b %d, %Y", strtotime($dop_));
-    $agoform = time_elapsed_string($dop_);
-
-    $cover = chooseCover($cat);
-    
-    $fav_arts .= genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat);
+    $fav_arts .= genFullBox($row);
   }
   $stmt->close();
   

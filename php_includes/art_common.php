@@ -99,30 +99,6 @@
     return ['', ''];
   }
 
-  function genRelArt($dpp, $wb, $cover, $title, $written_bylink, $agoform, $cat) {
-    return '
-      <a href="/articles/'.$dpp.'/'.$wb.'">
-        <div class="article_echo_2 artRelGen">
-          '.$cover.'
-          <div>
-            <p class="title_">
-              <b>Author: </b> '.$written_bylink.'
-            </p>
-            <p class="title_">
-              <b>Title: </b>'.$title.'
-            </p>
-            <p class="title_">
-              <b>Posted: </b>'.$agoform.' ago
-            </p>
-            <p class="title_">
-              <b>Category: </b>'.$cat.'
-            </p>
-          </div>
-        </div>
-      </a>
-    ';
-  }
-
   function getNumOfArts($conn, $u) {
     $sql = "SELECT COUNT(id) FROM articles WHERE written_by = ?";
     $stmt = $conn->prepare($sql);
@@ -132,5 +108,54 @@
     $stmt->fetch();
     $stmt->close();
     return $count_art;
+  }
+
+  function genFullBox($row) {
+    global $hshkey;
+    $wb = $row["written_by"];
+    $tit = stripslashes($row["title"]);
+    $tit = str_replace('\'', '&#39;', $tit);
+    $tit = str_replace('\'', '&#34;', $tit);
+    $tag = $row["tags"];
+    $pt_ = $row["post_time"];
+    $opt = $pt_;
+    $pt = strftime("%b %d, %Y", strtotime($pt_));
+    $pt_ = base64url_encode($pt_, $hshkey);
+    $wb_ori = urlencode($wb);
+    $cat = $row["category"];
+    $cover = chooseCover($cat);
+  
+    if(!function_exists('genArtBox')) {
+      function genArtBox($post_time_, $written_by_original, $cover, $written_by, $title,
+        $post_time, $tags, $cat) {
+        return '
+          <a href="/articles/'.$post_time_.'/'.$written_by_original.'">
+            <div class="article_echo_2" style="width: 100%;">
+              '.$cover.'
+              <div>
+                <p class="title_">
+                  <b>Author: </b>'.$written_by.'
+                </p>
+                <p class="title_">
+                  <b>Title: </b>'.$title.'
+                </p>
+                <p class="title_">
+                  <b>Posted: </b>'.$post_time.'
+                </p>
+                <div id="tag_wrap">
+                  <p class="title_">
+                    <b>Tags: </b>'.$tags.'
+                  </p>
+                </div>
+                <p class="title_">
+                  <b>Category: </b>'.$cat.'
+                </p>
+              </div>
+            </div>
+          </a>
+        '; 
+      }
+    }
+    return genArtBox($pt_, $wb_ori, $cover, $wb, $tit, $pt, $tag, $cat);
   }
 ?>
