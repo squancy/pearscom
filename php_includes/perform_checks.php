@@ -120,4 +120,15 @@
     $stmt->close();
     return $all_friends;
   }
+
+  function getLatLon($conn, $log_username) {
+    $sql = "SELECT lat, lon FROM users WHERE username = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $log_username);
+    $stmt->execute();
+    $stmt->bind_result($lat, $lon);
+    $stmt->fetch();
+    $stmt->close();
+    return [$lat, $lon];
+  }
 ?>

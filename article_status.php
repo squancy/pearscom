@@ -16,18 +16,7 @@
   require_once 'php_includes/dist.php';
 
   // Select user's lat and lon
-  function getUserLatLon($conn, $log_username) {
-    $sql = "SELECT lat, lon FROM users WHERE username = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $log_username);
-    $stmt->execute();
-    $stmt->bind_result($lat, $lon);
-    $stmt->fetch();
-    $stmt->close();
-    return [$lat, $lon];
-  }
-
-  list($lat, $lon) = getUserLatLon($conn, $log_username);
+  list($lat, $lon) = getLatLon($conn, $log_username);
 
   $status_ui = "";
   $statuslist = "";

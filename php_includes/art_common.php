@@ -53,6 +53,17 @@
     return $heart_count;
   }
 
+  function countFavs($conn, $opt, $log_username) {
+    $sql = "SELECT COUNT(id) FROM fav_art WHERE art_uname = ? AND art_time = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $log_username, $opt);
+    $stmt->execute();
+    $stmt->bind_result($cnt_fav);
+    $stmt->fetch();
+    $stmt->close();
+    return $cnt_fav;
+  }
+
   function genFavBtn($isFav, $p, $u) {
     if($isFav){
       $favButton = '
@@ -110,5 +121,16 @@
         </div>
       </a>
     ';
+  }
+
+  function getNumOfArts($conn, $u) {
+    $sql = "SELECT COUNT(id) FROM articles WHERE written_by = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $u);
+    $stmt->execute();
+    $stmt->bind_result($count_art);
+    $stmt->fetch();
+    $stmt->close();
+    return $count_art;
   }
 ?>
