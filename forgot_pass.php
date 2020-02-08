@@ -1,15 +1,15 @@
 <?php
-	include_once("php_includes/check_login_statues.php");
-	require_once 'timeelapsedstring.php';
-	require_once 'headers.php';
+  include_once("php_includes/check_login_statues.php");
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
 
-	// If user is logged in header them away 
-	if($user_ok == true){
-		header("Location: /user/".$_SESSION["username"]."/");
-	    exit();
-	}
+  // If user is logged in header them away 
+  if($user_ok == true){
+    header("Location: /user/".$_SESSION["username"]."/");
+      exit();
+  }
 
-	if(isset($_POST["e"])){
+  if(isset($_POST["e"])){
     function getUser($e, $conn, $one = '1') {
       $sql = "SELECT id, username FROM users WHERE email=? AND activated=? LIMIT 1";
       $stmt = $conn->prepare($sql);
@@ -169,15 +169,15 @@
   }
 
   // User is redirected here when clicked on link in email
-	if(isset($_GET['u']) && isset($_GET['p'])){
-		$u = mysqli_real_escape_string($conn, $_GET["u"]);
-		$temppasshash = $_GET['p'];
-		if(strlen($temppasshash) < 10){
-			exit();
-		}
+  if(isset($_GET['u']) && isset($_GET['p'])){
+    $u = mysqli_real_escape_string($conn, $_GET["u"]);
+    $temppasshash = $_GET['p'];
+    if(strlen($temppasshash) < 10){
+      exit();
+    }
 
-		$p_nohash = $temppasshash;
-		if(strpos($p_nohash, "__slash__")){
+    $p_nohash = $temppasshash;
+    if(strpos($p_nohash, "__slash__")){
       $p_nohash = str_replace("__slash__", "/", $p_nohash);
     }
 
@@ -189,18 +189,18 @@
       $stmt->store_result();
       $stmt->fetch();
       $numrows = $stmt->num_rows;
-	    $stmt->close();
+      $stmt->close();
       return $numrows;
     }
 
     function selectEmail($conn, $u) {
       $sql = "SELECT email FROM users WHERE username = ? LIMIT 1";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("s", $u);
-			$stmt->execute();
-			$stmt->bind_result($email);
-			$stmt->fetch();
-			$stmt->close();
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("s", $u);
+      $stmt->execute();
+      $stmt->bind_result($email);
+      $stmt->fetch();
+      $stmt->close();
       return $email;
     }
 
@@ -212,7 +212,7 @@
       $stmt->close();
       $n = NULL;
 
-			$sql = "UPDATE useroptions SET temp_pass=? WHERE username=? LIMIT 1";
+      $sql = "UPDATE useroptions SET temp_pass=? WHERE username=? LIMIT 1";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("ss", $n, $u);
       $stmt->execute();
@@ -222,22 +222,22 @@
     // Check if there is a user with this temp pass
     $numrows = checkUser($conn, $u, $p_nohash);
 
-		if ($numrows == 0){
-			header("location: /usernotexist");
-	    exit();
-		} else {
+    if ($numrows == 0){
+      header("location: /usernotexist");
+      exit();
+    } else {
       $email = selectEmail($conn, $u);
 
-			if($email == "" || $email == NULL){
-			    exit();
-			    header("location: /index");
-			}
+      if($email == "" || $email == NULL){
+          exit();
+          header("location: /index");
+      }
 
       resetTmp($conn, $p_nohash, $email, $u);
-		  header("location: /login");
+      header("location: /login");
       exit();
     }
-	}
+  }
 ?>
 <!DOCTYPE html>
 <html>
