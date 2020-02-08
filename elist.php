@@ -1,7 +1,7 @@
 <?php
   function generateEList($pmid, $del, $where){
-        // Predefined emojies
-	  json_decode('"\uD83D\uDE00"');
+    // Predefined emojies
+    json_decode('"\uD83D\uDE00"');
     $smilesArr = array("\u{1F601}", "\u{1F602}", "\u{1F603}", "\u{1F604}", "\u{1F605}",
       "\u{1F606}", "\u{1F609}", "\u{1F680}", "\u{1F60A}", "\u{1F60B}", "\u{1F60C}",
       "\u{1F60D}", "\u{1F60F}", "\u{1F612}", "\u{1F613}", "\u{1F614}", "\u{1F616}",
