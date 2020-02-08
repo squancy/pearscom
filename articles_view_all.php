@@ -455,17 +455,17 @@
 
         <div class="infobadiv" id="pc_'.$uniid.'">
           <span style="float: left;">
-            <b style="font-size: 12px !important;">Username: </b>'.$buname.'
+            <b style="font-size: 12px;">Username: </b>'.$buname.'
             <br>
-            <b style="font-size: 12px !important;">Articles written: </b>'.$cnt_wbs.'
+            <b style="font-size: 12px;">Articles written: </b>'.$cnt_wbs.'
             <br>
-            <b style="font-size: 12px !important;">Likes got: </b>'.$cnt_hearts.'
+            <b style="font-size: 12px;">Likes got: </b>'.$cnt_hearts.'
             <br>
-            <b style="font-size: 12px !important;">Favourites got: </b>'.$cnt_favs.'
+            <b style="font-size: 12px;">Favourites got: </b>'.$cnt_favs.'
             <br>
-            <b style="font-size: 12px !important;">Points got: </b>'.$apoints.'
+            <b style="font-size: 12px;">Points got: </b>'.$apoints.'
             <br>
-            <b style="font-size: 12px !important;">Favourite category: </b>'.$favcat.'
+            <b style="font-size: 12px;">Favourite category: </b>'.$favcat.'
           </span>
 
           <div style="background-image: url(\''.$bavatar.'\'); background-repeat: no-repeat;
