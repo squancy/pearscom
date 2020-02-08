@@ -344,38 +344,38 @@
 
   // If nothing, run query without time restriction
   if($uname_string == "" && $at_string == ""){
-      $uname_array2 = array();
-      $at_array2 = array();
-      $sql = "SELECT art_uname, art_time, COUNT(*) AS u 
-          FROM heart_likes
-          GROUP BY art_time
-          ORDER BY u DESC
-          LIMIT $max";
-      $stmt = $conn->prepare($sql);
-      $stmt->execute();
-      $res = $stmt->get_result();
-      while($row = $res->fetch_assoc()){
-        $uname = $row["art_uname"];
-        $at = $row["art_time"];
-        array_push($uname_array2, $uname);
-        array_push($at_array2, $at);
-      }
-      $stmt->close();
+    $uname_array2 = array();
+    $at_array2 = array();
+    $sql = "SELECT art_uname, art_time, COUNT(*) AS u 
+        FROM heart_likes
+        GROUP BY art_time
+        ORDER BY u DESC
+        LIMIT $max";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while($row = $res->fetch_assoc()){
+      $uname = $row["art_uname"];
+      $at = $row["art_time"];
+      array_push($uname_array2, $uname);
+      array_push($at_array2, $at);
+    }
+    $stmt->close();
 
-      $uname_string2 = join("','", $uname_array2);
-      $at_string2 = join("','", $at_array2);
+    $uname_string2 = join("','", $uname_array2);
+    $at_string2 = join("','", $at_array2);
 
-      $n = 0;
-      $sql = "
-        SELECT * FROM articles WHERE written_by IN ('$uname_string2')
-        AND post_time IN ('$at_string2')";
-      $stmt = $conn->prepare($sql);
-      $stmt->execute();
-      $res = $stmt->get_result();
-      while($row = $res->fetch_assoc()){
-        $best_arts .= genFullBox($row);
-      }
-      $stmt->close();
+    $n = 0;
+    $sql = "
+      SELECT * FROM articles WHERE written_by IN ('$uname_string2')
+      AND post_time IN ('$at_string2')";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while($row = $res->fetch_assoc()){
+      $best_arts .= genFullBox($row);
+    }
+    $stmt->close();
   }
   
   // Get the best authors
