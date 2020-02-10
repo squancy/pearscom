@@ -113,7 +113,8 @@ function postToStatus(cond, thencommands, pollProfileId, userId, isGr = false,
   xhr.send(toSend);
 }
 
-function replyToStatus(id, supr, o, dizhi) {
+function replyToStatus(id, supr, o, dizhi, isGr = false,
+  serverSide = "/php_parsers/article_status_system.php") {
   var c = _(o).value;
   if (isEmptyPost(c, hasImage)) return; 
   var line = "";
@@ -122,12 +123,22 @@ function replyToStatus(id, supr, o, dizhi) {
   [line, hasImage] = attachImage(c, hasImage);
 
   // Loading gif
-  let beforeSpan = _("swithidbr_" + id);
+  let beforeSpan = _("swithidbr_" + id).innerHTML;
   _("swithidbr_" + id).innerHTML = `<img src="/images/rolling.gif" width="30" height="30"
     style="float: left;">`;
 
+  if (!isGr) {
+    var toSend = "action=status_reply&sid=" + id + "&user=" + supr + "&data=" + c + "&image="
+      + hasImage;
+    var trigBtn = 'triggerBtn_SP_reply_';
+  } else {
+    var toSend = "action=post_reply&sid=" + id + "&data=" + c + "&g=" + isGr + "&image="
+      + hasImage;
+    var trigBtn = 'triggerBtn_SP_reply';
+  }
+
   // Send to server to process the request
-  var xhr = ajaxObj("POST", "/php_parsers/article_status_system.php");
+  var xhr = ajaxObj("POST", serverSide);
   xhr.onreadystatechange = function() {
     if (1 == ajaxReturn(xhr)) {
       var actionsLengthsArray = xhr.responseText.split("|");
@@ -141,7 +152,7 @@ function replyToStatus(id, supr, o, dizhi) {
               <b>Reply by you just now:</b>
               <span id="srdb_${l}">
                 <button onclick="return false;" class="delete_s"
-                  onmousedown="deleteReply('${l}', 'reply_${l}');"
+                  onmousedown="deleteReply('${l}', 'reply_${l}', ${serverSide});"
                   title="Delete Comment">X</button>
               </span>
               <br />
@@ -150,15 +161,9 @@ function replyToStatus(id, supr, o, dizhi) {
           </div>
         `;
 
-        _("swithidbr_" + id).innerHTML = `
-          <button id="replyBtn_${id}" class="btn_rply"
-            onclick="replyToStatus('${id}', '${UNAME}', 'replytext_${id}', this);">
-            Reply
-          </button>
-        `;
-
+        _("swithidbr_" + id).innerHTML = beforeSpan;
         _(o).value = "";
-        _("triggerBtn_SP_reply_").style.display = "block";
+        _(trigBtn).style.display = "block";
         _("btns_SP_reply_" + id).style.display = "none";
         _("uploadDisplay_SP_reply_" + id).innerHTML = "";
         _("fu_SP_reply").value = "";
@@ -169,5 +174,5 @@ function replyToStatus(id, supr, o, dizhi) {
       }
     }
   }
-  xhr.send("action=status_reply&sid=" + id + "&user=" + supr + "&data=" + c + "&image=" + hasImage);
+  xhr.send(toSend);
 }

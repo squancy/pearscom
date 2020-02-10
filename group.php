@@ -501,7 +501,7 @@
         <div id="btns_SP_reply_'.$post_id.'" class="hiddenStuff rply_joiner">
           <span id="swithidbr_'.$post_id.'">
             <button id="replyBtn_'.$post_id.'" class="btn_rply"
-              onclick="replyPost(\''.$post_id.'\',\''.$g.'\')">Reply</button>
+              onclick="replyToStatus(\''.$post_id.'\', false, \'replytext_'.$post_id.'\', false, \''.$g.'\', \'/php_parsers/group_parser2.php\')">Reply</button>
           </span>
 
           <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
@@ -767,51 +767,7 @@
   <script src='/js/specific/post_reply.js' defer></script>
   <script src='/js/specific/delete_post.js' defer></script>
     <script type="text/javascript"> 
-    function replyPost(name, options) {
-      var query_string = "replytext_" + name;
-      var c = _(query_string).value;
-      if ("" == c && "" == hasImage) {
-        return _("overlay").style.display = "block", _("overlay").style.opacity = .5, _("dialogbox").style.display = "block", _("dialogbox").innerHTML = '<p style="font-size: 18px; margin: 0px;">Blank post</p><p>To post your status you have to write or upload something firstly.</p><br /><button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" onclick="closeDialog()">Close</button>', document.body.style.overflow = "hidden", false;
-      }
-      var line = "";
-      if ("" != c) {
-        line = c.replace(/\n/g, "<br />").replace(/\r/g, "<br />");
-      }
-      if ("" == line && "" != hasImage) {
-        c = "||na||";
-        line = '<img src="/permUploads/' + hasImage + '" />';
-      } else {
-        if ("" != line && "" != hasImage) {
-          line = line + ('<br /><img src="/permUploads/' + hasImage + '" />');
-        } else {
-          hasImage = "na";
-        }
-      }
-      _("swithidbr_" + name).innerHTML = '<img src="/images/rolling.gif" width="30" height="30" style="float: left;">';
-      var xhr = ajaxObj("POST", "/php_parsers/group_parser2.php");
-      xhr.onreadystatechange = function() {
-        if (1 == ajaxReturn(xhr)) {
-          var addedItemIDs = xhr.responseText.split("|");
-          if ("reply_ok" == addedItemIDs[0]) {
-            var id = addedItemIDs[1];
-            _("status_" + id).innerHTML += '<div id="reply_' + id + '" class="reply_boxes"><div><b>Reply by you just now:</b><span id="srdb_' + id + '"><button onclick="return false;" class="delete_s" onmousedown="deleteReply(\'' + id + "','reply_" + id + '\');" title="Delete Comment">X</button></span><br />' + line + "</div></div>";
-            _(query_string).value = "";
-            _("swithidbr_" + name).innerHTML = '<button id="replyBtn_' + id + '" class="btn_rply" onclick="replyPost(\''+name+'\', \''+options+'\')">Reply</button>';
-            _("triggerBtn_SP_reply").style.display = "block";
-            _("fu_SP_reply").value = "";
-            hasImage = "";
-          } else {
-            _("overlay").style.display = "block";
-            _("overlay").style.opacity = .5;
-            _("dialogbox").style.display = "block";
-            _("dialogbox").innerHTML = '<p style="font-size: 18px; margin: 0px;">An error occured</p><p>Unfortunately an unknown error has occured with your reply. Please try again later and check everything is proper.</p><br /><button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" onclick="closeDialog()">Close</button>';
-            document.body.style.overflow = "hidden";
-          }
-        }
-      };
-      xhr.send("action=post_reply&sid=" + name + "&data=" + c + "&g=" + options + "&image=" + hasImage);
-    }
-    function deleteReply(siteId, data) {
+        function deleteReply(siteId, data) {
       if (1 != confirm("Are you sure you want to delete this reply? We will not be able to recover it!")) {
         return false;
       }

@@ -303,7 +303,7 @@
           </span>
         </div>';
 
-    if($isFriend == true || $log_username == $u){
+    if($isFriend == true || $log_username == $_SESSION['username']){
       $statuslist .= '
         <textarea id="replytext_'.$statusid.'" class="replytext"
           onfocus="showBtnDiv_reply('.$statusid.')"
