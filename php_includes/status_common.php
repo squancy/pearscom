@@ -5,24 +5,26 @@
   */
 
   function genUserImage($author, $friend_pic, $funames, $isonimg, $fuco, $dist, $numoffs,
-    $mgin = false) {
+    $mgin = false, $aClass = '') {
     if($mgin) {
       $mgin = 'margin-left: -11px;';
     } else {
       $mgin = '';
     }
+
     return '
       <a href="/user/'.$author.'/">
         <div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat;
           background-size: cover; '.$mgin.' background-position: center; width: 50px;
           margin-bottom: 5px; height: 50px; display: inline-block;"
-          class="tsrhov bbmob lazy-bg">
+          class="tsrhov bbmob lazy-bg '.$aClass.'">
         </div>
 
         <div class="infotsrdiv">
           <div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat;
             background-size: cover; background-position: center; width: 60px;
-            height: 60px; display: inline-block; float: left;" class="tsrhov lazy-bg">
+            height: 60px; display: inline-block; float: left;" class="tsrhov lazy-bg
+            '.$aClass.'">
           </div>
 
           <span style="float: left; margin-left: 2px;">
@@ -109,7 +111,8 @@
     return [$data, $data_old];
   }
 
-  function genDelBtn($author, $log_username, $account_name, $statusid, $isStatus = true) {
+  function genDelBtn($author, $log_username, $account_name, $statusid, $isStatus = true,
+    $space = true, $serverSide = "/php_parsers/article_status_system.php") {
     if($author == $log_username || $account_name == $log_username){
       if($isStatus) {
         $id = "sdb_'.$statusid.'"; 
@@ -127,12 +130,13 @@
         <span id="'.$id.'">
           <button onclick="Confirm.render("Delete '.$what.'?","delete_post","post_1")" 
           class="delete_s" onclick="return false;"
-          onmousedown="'.$fname.'(\''.$statusid.'\',\''.$half.''.$statusid.'\');">X</button>
+          onmousedown="'.$fname.'(\''.$statusid.'\',\''.$half.''.$statusid.'\', \''.$serverSide.'\');">X</button>
         </span>
         &nbsp;&nbsp;';
-    }else{
+    }else if ($space) {
       return "&nbsp;&nbsp;&nbsp;";
     }
+    return '';
   }
 
   function genShareBtn($log_username, $author, $statusid) {
@@ -145,7 +149,7 @@
     return '';
   }
 
-  function genStatLikeBtn($isLike, $statusid, $isStatus = true) {
+  function genStatLikeBtn($isLike, $statusid, $isStatus = true, $extraArg = '') {
     if($isStatus) {
       $postfix = '';
     } else {
@@ -157,7 +161,7 @@
     if($isLike == true){
       $likeButton = '
         <a href="#" onclick="return false;" 
-          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\')">
+          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\''.$extraArg.')">
           <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
@@ -165,7 +169,7 @@
     }else{
       $likeButton = '
         <a href="#" onclick="return false;"
-          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\')">
+          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\''.$extraArg.')">
           <img src="/images/nf.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
@@ -185,7 +189,7 @@
       }
       $like_check = "SELECT id FROM ".$db." WHERE username=? AND ".$field."=? LIMIT 1";
       $stmt = $conn->prepare($like_check);
-      $stmt->bind_param("si",$log_username,$statusid);
+      $stmt->bind_param("si", $log_username, $statusid);
       $stmt->execute();
       $stmt->store_result();
       $stmt->fetch();

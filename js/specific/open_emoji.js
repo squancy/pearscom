@@ -3,20 +3,20 @@
   TODO: merge the two functions and add more logic
 */
 
-function openEmojiBox() {
-  var cancel = _("emojiBox_art");
-  if ("block" == cancel.style.display) {
-    cancel.style.display = "none";
+function openEmojiBox(box = 'emojiBox_art') {
+  var box = _(box);
+  if (box.style.display == "block") {
+    box.style.display = "none";
   } else {
-    cancel.style.display = "block";
+    box.style.display = "block";
   }
 }
 
 function openEmojiBox_reply(name) {
-  var cancel = _("emojiBox_reply_" + name);
-  if ("block" == cancel.style.display) {
-    cancel.style.display = "none";
+  var box = _("emojiBox_reply_" + name);
+  if (box.style.display == "block") {
+    box.style.display = "none";
   } else {
-    cancel.style.display = "block";
+    box.style.display = "block";
   }
 }

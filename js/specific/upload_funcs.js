@@ -131,6 +131,7 @@ function abortHandler_reply(canCreateDiscussions) {
   _("triggerBtn_SP_reply").style.display = "block";
 }
 
+// jeez?
 function triggerUpload(event, file) {
   event.preventDefault();
   _(file).click();

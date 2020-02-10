@@ -21,7 +21,7 @@
     $stmt = $conn->prepare($sql);
     $bindParam = new BindParam;
 
-    // Dynamic params after the 5th argument
+    // Dynamic params after the 4th argument
     $values = array_slice(func_get_args(), 4);
     for($i = 0; $i < count($values); $i++) {
       $bindParam->add($params1[$i], $values[$i]);

@@ -3,22 +3,24 @@
   TODO: merge the functions & add more logic
 */
 
-function deleteStatus(id, status) {
+function deleteStatus(id, status, serverSide = "/php_parsers/article_status_system.php") {
   if (1 != confirm("Press OK to confirm deletion of this status and its replies")) {
     return false;
   }
-  var xhr = ajaxObj("POST", "/php_parsers/article_status_system.php");
+  var xhr = ajaxObj("POST", serverSide);
   xhr.onreadystatechange = function() {
-    if (1 == ajaxReturn(xhr)) {
-      if ("delete_ok" == xhr.responseText) {
+    if (ajaxReturn(xhr)) {
+      if (xhr.responseText == "delete_ok") {
         _(status).style.display = "none";
-        _("replytext_" + id).style.display = "none";
-        _("replyBtn_" + id).style.display = "none";
+        if (_("replytext_" + id) != null) {
+          _("replytext_" + id).style.display = "none";
+          _("replyBtn_" + id).style.display = "none";
+        }
       } else {
         alert(xhr.responseText);
       }
     }
-  };
+  }
   xhr.send("action=delete_status&statusid=" + id);
 }
 

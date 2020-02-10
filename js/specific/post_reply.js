@@ -54,31 +54,40 @@ function showError() {
   `;
 }
 
-function postToStatus(cond, thencommands, pollProfileId, userId) {
+function postToStatus(cond, thencommands, pollProfileId, userId, isGr = false,
+  serverSide = "/php_parsers/article_status_system.php", where = "statusarea") {
   var c = _(userId).value;
   if (isEmptyPost(c, hasImage)) return;
   let line = '';
   [line, hasImage] = attachImage(c, hasImage);
 
   // Loading gif
+  let beforeSpan = _("swithspan").innerHTML;
   _("swithspan").innerHTML = `<img src="/images/rolling.gif" width="30" height="30"
     style="float: left;">`;
 
+  if (!isGr) {
+    var toSend = "action=" + cond + "&type=" + thencommands + "&user=" + pollProfileId +
+      "&data=" + c + "&image=" + hasImage;
+  } else {
+    var toSend = "action=new_post&data=" + c + "&g=" + isGr + "&image=" + hasImage;
+  }
+
   // AJAX request to server side
-  var xhr = ajaxObj("POST", "/php_parsers/article_status_system.php");
+  var xhr = ajaxObj("POST", serverSide);
   xhr.onreadystatechange = function() {
-    if (1 == ajaxReturn(xhr)) {
+    if (ajaxReturn(xhr)) {
       var tilesToCheck = xhr.responseText.split("|");
       if ("post_ok" == tilesToCheck[0]) {
         var t = tilesToCheck[1];
-        var newHTML = _("statusarea").innerHTML;
-        _("statusarea").innerHTML = `
+        var newHTML = _(where).innerHTML;
+        _(where).innerHTML = `
           <div id="status_${t}" class="status_boxes">
             <div>
               <b>Posted by you just now:</b>
               <span id="sdb_${t}">
                 <button onclick="return false;" class="delete_s"
-                  onmousedown="deleteStatus('${t}', 'status_${t}');"
+                  onmousedown="deleteStatus('${t}', 'status_${t}', '${serverSide}');"
                   title="Delete Status And Its Replies">X</button>
               </span>
               <br />
@@ -89,10 +98,7 @@ function postToStatus(cond, thencommands, pollProfileId, userId) {
           ${newHTML}
         `;
 
-        _("swithspan").innerHTML = `
-          <button id='statusBtn'
-            onclick="postToStatus('status_post', 'a', '${UNAME}, 'statustext')"
-          class="btn_rply">Post</button>`;
+        _("swithspan").innerHTML = beforeSpan;
         _(userId).value = "";
         _("btns_SP").style.display = "none";
         _("uploadDisplay_SP").innerHTML = "";
@@ -104,7 +110,7 @@ function postToStatus(cond, thencommands, pollProfileId, userId) {
       }
     }
   }
-  xhr.send("action=" + cond + "&type=" + thencommands + "&user=" + pollProfileId + "&data=" + c + "&image=" + hasImage);
+  xhr.send(toSend);
 }
 
 function replyToStatus(id, supr, o, dizhi) {
@@ -116,6 +122,7 @@ function replyToStatus(id, supr, o, dizhi) {
   [line, hasImage] = attachImage(c, hasImage);
 
   // Loading gif
+  let beforeSpan = _("swithidbr_" + id);
   _("swithidbr_" + id).innerHTML = `<img src="/images/rolling.gif" width="30" height="30"
     style="float: left;">`;
 

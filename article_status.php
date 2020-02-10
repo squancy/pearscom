@@ -129,8 +129,6 @@
     $data_old = sanitizeData($data_old);
     $pos = strpos($data_old, 
       '<br /><br /><i style="font-size: 14px;">Shared via <a href="/user/');
-    $sec_data = "";
-    $first_data = "";
 
     /*
       TODO: instead of saving uploaded images in the same context as other data & text
@@ -204,8 +202,6 @@
 
         $data_old_reply = $row2["data"];
         $data_old_reply = sanitizeData($data_old_reply);
-        $sec_data = "";
-        $first_data = "";
         $isex = clearImg($data_old_img); 
         list($replydata, $data_old_reply) = seeHideWrap($replydata, $data_old_reply,
           $statusreplyid, false, false, false);
