@@ -307,7 +307,8 @@
       $isLike = isLiked($conn, $user_ok, $log_username, $post_id, $g, 'group_status_likes');
       
       // Add status like button
-      list($likeButton, $likeText) = genStatLikeBtn($isLike, $post_id, true, ',\''.$g.'\'');
+      list($likeButton, $likeText) = genStatLikeBtn($isLike, $post_id, true, $g,
+        '/php_parsers/gr_like_system.php');
 
       $post_data_old = sanitizeData($row["data"]);
       $pos = strpos($data_old,
@@ -366,7 +367,7 @@
           
           // Add delete btn
           $replyDeleteButton = genDelBtn($reply_auth, $log_username, $reply_auth,
-            $statusreplyid, false);
+            $statusreplyid, false, false, '/php_parsers/group_parser2.php');
 
           $agoformrply = time_elapsed_string($reply_date_);
           $data_old_reply = sanitizeData($row2["data"]);
@@ -383,7 +384,7 @@
               
           // Add reply like button
           list($likeButton_reply, $likeText_reply) = genStatLikeBtn($isLike_reply,
-            $statusreplyid, false, ',\''.$g.'\'');
+            $statusreplyid, false, $g, '/php_parsers/gr_like_system_reply.php');
 
           // Count reply likes
           $rpycl = cntLikes($conn, $statusreplyid, $g, 'group_reply_likes');
@@ -754,6 +755,15 @@
   <script type="text/javascript">
     const GNAME = '<?php echo $g ?>';
     const UNAME = '<?php echo $log_username; ?>';
+    let GRDES = '<?php echo $gr_des; ?>';
+    let GRDES_OLD = '<?php echo $gr_des_old; ?>';
+
+    var hasImage = "";
+    window.onbeforeunload = function() {
+      if ("" != hasImage) {
+        return "You have not posted your image";
+      }
+    }
   </script>
   <script src='/js/specific/p_dialog.js' defer></script>
   <script src='/js/specific/error_dialog.js' defer></script>
@@ -766,97 +776,7 @@
   <script src='/js/specific/btn_div.js' defer></script>
   <script src='/js/specific/post_reply.js' defer></script>
   <script src='/js/specific/delete_post.js' defer></script>
-    <script type="text/javascript"> 
-        function deleteReply(siteId, data) {
-      if (1 != confirm("Are you sure you want to delete this reply? We will not be able to recover it!")) {
-        return false;
-      }
-      var xhr = ajaxObj("POST", "/php_parsers/group_parser2.php");
-      xhr.onreadystatechange = function() {
-        if (1 == ajaxReturn(xhr)) {
-          if ("delete_ok" == xhr.responseText) {
-            _(data).style.display = "none";
-          } else {
-            alert(xhr.responseText);
-          }
-        }
-      };
-      xhr.send("action=delete_reply&replyid=" + siteId);
-    }
-    
-    var hasImage = "";
-    window.onbeforeunload = function() {
-      if ("" != hasImage) {
-        return "You have not posted your image";
-      }
-    };
-    
-    function toggleLike(payload, data, opts, result) {
-      var res = ajaxObj("POST", "/php_parsers/gr_like_system.php");
-      res.onreadystatechange = function() {
-        if (1 == ajaxReturn(res)) {
-          if ("like_success" == res.responseText) {
-            _(opts).innerHTML = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'unlike\',\'' + data + "','likeBtn_" + data + '\', \''+result+'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"></a><span style="vertical-align: middle; margin-left: 5px;">Dislike</span>';
-            var e = (e = _("ipanf_" + data).innerText.replace("(", "")).replace(")", "").replace("likes", "").replace(" ", "");
-            e = Number(e);
-            _("ipanf_" + data).innerText = ++e + " likes";
-          } else {
-            if ("unlike_success" == res.responseText) {
-              _(opts).innerHTML = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'like\',\'' + data + "','likeBtn_" + data + '\', \''+result+'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike"></a><span style="vertical-align: middle; margin-left: 5px;">Like</span>';
-              e = (e = (e = _("ipanf_" + data).innerText.replace("(", "")).replace(")", "")).replace("likes", "").replace(" ", "");
-              e = Number(e);
-              _("ipanf_" + data).innerText = --e + " likes";
-            } else {
-              _("overlay").style.display = "block";
-              _("overlay").style.opacity = .5;
-              _("dialogbox").style.display = "block";
-              _("dialogbox").innerHTML = '<p style="font-size: 18px; margin: 0px;">An error occured</p><p>Unfortunately an unknown error has occured with your status like. Please try again later and check everything is proper.</p><br /><button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" onclick="closeDialog()">Close</button>';
-              document.body.style.overflow = "hidden";
-            }
-          }
-        }
-      };
-      res.send("type=" + payload + "&id=" + data + "&group=" + result);
-    }
-    function toggleLike_reply(isSlidingUp, current_notebook, k, command) {
-      var request = ajaxObj("POST", "/php_parsers/gr_like_system_reply.php");
-      request.onreadystatechange = function() {
-        if (1 == ajaxReturn(request)) {
-          if ("like_success_reply" == request.responseText) {
-            _(k).innerHTML = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'unlike\',\'' + current_notebook + "','likeBtn_reply_" + current_notebook + '\', \''+command+'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"></a><span style="vertical-align: middle; margin-left: 5px;">Dislike</span>';
-            var e = (e = _("ipanr_" + current_notebook).innerText.replace("(", "")).replace(")", "").replace("likes", "").replace(" ", "");
-            e = Number(e);
-            _("ipanr_" + current_notebook).innerText = ++e + " likes";
-          } else {
-            if ("unlike_success_reply" == request.responseText) {
-              _(k).innerHTML = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'like\',\'' + current_notebook + "','likeBtn_reply_" + current_notebook + '\', \''+command+'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike"></a><span style="vertical-align: middle; margin-left: 5px;">Like</span>';
-              e = (e = (e = _("ipanr_" + current_notebook).innerText.replace("(", "")).replace(")", "")).replace("likes", "").replace(" ", "");
-              e = Number(e);
-              _("ipanr_" + current_notebook).innerText = --e + " likes";
-            } else {
-              _("overlay").style.display = "block";
-              _("overlay").style.opacity = .5;
-              _("dialogbox").style.display = "block";
-              _("dialogbox").innerHTML = '<p style="font-size: 18px; margin: 0px;">An error occured</p><p>Unfortunately an unknown error has occured with your reply like. Please try again later and check everything is proper.</p><br /><button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" onclick="closeDialog()">Close</button>';
-              document.body.style.overflow = "hidden";
-            }
-          }
-        }
-      };
-      request.send("type=" + isSlidingUp + "&id=" + current_notebook + "&group=" + command);
-    }
-
-    function statusMax(match, i) {
-      if (match.value.length > i) {
-        _("overlay").style.display = "block";
-        _("overlay").style.opacity = .5;
-        _("dialogbox").style.display = "block";
-        _("dialogbox").innerHTML = '<p style="font-size: 18px; margin: 0px;">Maximum character limit reached</p><p>For some reasons we limited the number of characters that you can write at the same time. Now you have reached this limit.</p><br /><button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" onclick="closeDialog()">Close</button>';
-        document.body.style.overflow = "hidden";
-        match.value = match.value.substring(0, i);
-      }
-    } 
-  </script>
+  <script src='/js/specific/status_max.js' defer></script>
 </head>
 <body>
   <?php require_once 'template_pageTop.php'; ?>
@@ -865,10 +785,15 @@
     <div id="dialogbox"></div>
     <div class="biggerHolder">
     <div id="gr_upper" class="genWhiteHolder">
-      <div id="gr_icon_box" data-src='<?php echo $profile_pic; ?>' class="genBg lazy-bg"><?php echo $profile_pic_btn; ?><?php echo $avatar_form; ?></div>
+      <div id="gr_icon_box" data-src='<?php echo $profile_pic; ?>' class="genBg lazy-bg">
+        <?php echo $profile_pic_btn; ?>
+        <?php echo $avatar_form; ?>
+      </div>
       <?php echo $joinBtn; ?>
+
       <?php if(in_array($_SESSION['username'], $approved)){ ?>
-        <button id="quitBtn" class="main_btn_fill fixRed btnUimg" onclick="quitGroup('<?php echo $g; ?>')">Quit group</button>
+        <button id="quitBtn" class="main_btn_fill fixRed btnUimg"
+          onclick="quitGroup('<?php echo $g; ?>')">Quit group</button>
       <?php } ?>
 
       <p class="grHeading"><?php echo $g_echo; ?></p>
@@ -883,6 +808,7 @@
         <?php echo $mod_count; ?>
         <br>
       </p>
+
       <?php echo $moderatorsPics; ?>
       <div class="clear"></div>
 
@@ -899,7 +825,7 @@
 
       <div id="left_side">
         <div id="pending_holder">
-        <?php echo $addMembers; ?>
+          <?php echo $addMembers; ?>
         </div>
         <hr class="dim">
       </div>
@@ -908,91 +834,76 @@
       <?php if(in_array($_SESSION["username"], $moderators) && $gr_des == NULL){ ?>
         <div id="grdes_holder">
           <p style="font-size: 16px;">New description</p>
-          <textarea id="desgivegr" style="width: 100%; margin-top: 0;" class="ssel" placeholder="Give a description about the group" onkeyup="statusMax(this, 3000)"></textarea>
-          <button id="des_save_btn" class="main_btn_fill fixRed" onclick="saveDesGr()">Save description</button>
+          <textarea id="desgivegr" style="width: 100%; margin-top: 0;" class="ssel"
+            placeholder="Give a description about the group" onkeyup="statusMax(this, 3000)">
+          </textarea>
+          <button id="des_save_btn" class="main_btn_fill fixRed" onclick="saveDesGr()">
+            Save description
+          </button>
         </div>
       <?php }else{ ?>
         <div id="grdes_holder">
-          <b style="font-size: 14px;">Description: </b><span id="current_des"><p style="font-size: 14px; margin-top: 0;" id="hide_<?php echo $gr_id; ?>"><?php echo $gr_des; ?><?php echo $gr_des_old; ?></p></span>
-          <?php if(in_array($_SESSION['username'], $moderators)){ ?><span id="hdit"><button class="main_btn_fill fixRed" onclick="changeDesGr()">Change description</button></span><?php } ?>
+          <b style="font-size: 14px;">Description: </b>
+          <span id="current_des">
+            <p style="font-size: 14px; margin-top: 0;" id="hide_<?php echo $gr_id; ?>">
+              <?php echo $gr_des; ?>
+              <?php echo $gr_des_old; ?>
+            </p>
+          </span>
+
+          <?php if(in_array($_SESSION['username'], $moderators)){ ?>
+            <span id="hdit">
+              <button class="main_btn_fill fixRed" onclick="changeDesGr()">
+                Change description
+              </button>
+            </span>
+          <?php } ?>
         </div>
       <?php } ?>
     </div>
-    <?php echo "<p style='color: #999; text-align: center; id='ghere'>".$record_count." comments recorded</p>"; ?>
+
+    <?php echo "<p style='color: #999; text-align: center; id='ghere'>".$record_count."
+      comments recorded</p>"; ?>
     <?php if(in_array($u, $app_array)){
       echo $btfo;
     } ?>
+
     <?php if(in_array($_SESSION['username'], $approved)){ ?>
       <?php echo $status_ui; ?>
     <?php } ?>
-  <div id="listBlabs">
-    <?php if(!in_array($_SESSION['username'], $approved)){ ?>
-        <p style="color: #999;" class="txtc">Claim a membership from the group leader to see the comments</p>
-    <?php } ?>
-    <?php 
-      if(in_array($_SESSION['username'], $approved)){
-        echo $mainPosts;
-      }
-    ?>
-  </div>
-  </div>
-  <div id="uptoea">
-      <div class="compdiv genWhiteHolder">
-        <b style="font-size: 16px;">Related groups</b>
-        <div class="relgroups" id="relgs">
-          <?php echo $rgroups ?>
-          </div>
-        </div>
-
-      <div class="compdiv genWhiteHolder">
-        <b style="font-size: 16px;">My groups</b>
-        <div class="relgroups" id="mygs">
-          <?php echo $myallgroups; ?>
-          </div>
-        </div>
+    
+    <div id="listBlabs">
+      <?php if(!in_array($_SESSION['username'], $approved)){ ?>
+        <p style="color: #999;" class="txtc">
+          Claim a membership from the group leader to see the comments
+        </p>
+      <?php } ?>
+      <?php 
+        if(in_array($_SESSION['username'], $approved)){
+          echo $mainPosts;
+        }
+      ?>
     </div>
+  </div>
+
+  <div id="uptoea">
+    <div class="compdiv genWhiteHolder">
+      <b style="font-size: 16px;">Related groups</b>
+      <div class="relgroups" id="relgs">
+        <?php echo $rgroups ?>
+      </div>
+    </div>
+
+    <div class="compdiv genWhiteHolder">
+      <b style="font-size: 16px;">My groups</b>
+      <div class="relgroups" id="mygs">
+        <?php echo $myallgroups; ?>
+      </div>
+    </div>
+  </div>
   <div class="clear"></div>
   <div id="pagination_controls"><?php echo $paginationCtrls; ?></div>
   </div>
   <?php require_once 'template_pageBottom.php'; ?>
-  <script type="text/javascript">
-	function getCookie(e) {
-    for (var l = e + "=", s = decodeURIComponent(document.cookie).split(";"), o = 0; o < s.length; o++) {
-        for (var r = s[o];
-            " " == r.charAt(0);) r = r.substring(1);
-        if (0 == r.indexOf(l)) return r.substring(l.length, r.length)
-    }
-    return ""
-}
-
-function setDark() {
-    var e = "thisClassDoesNotExist";
-    if (!document.getElementById(e)) {
-        var l = document.getElementsByTagName("head")[0],
-            s = document.createElement("link");
-        s.id = e, s.rel = "stylesheet", s.type = "text/css", s.href = "/style/dark_style.css", s.media = "all", l.appendChild(s)
-    }
-}
-var isdarkm = getCookie("isdark");
-"yes" == isdarkm && setDark();
-var us = "less";
-
-function showReply(e, l) {
-    "less" == us ? (_("showreply_" + e).innerText = "Hide replies (" + l + ")", _("allrply_" + e).style.display = "block", us = "more") : "more" == us && (_("showreply_" + e).innerText = "Show replies (" + l + ")", _("allrply_" + e).style.display = "none", us = "less")
-}
-  let cur = `<?php echo $gr_des; ?>`;
-  let old = `<?php echo $gr_des_old; ?>`;
-
-  if(old == "") old = cur;
-
-  old = old.replace(/<br \/>/g, "\n");
-
-  function changeDesGr(){
-    _("grdes_holder").innerHTML = `<p style="font-size: 16px;">New description</p>
-          <textarea id="desgivegr" style="width: 100%; margin-top: 0;" class="ssel" placeholder="Give a description about the group" onkeyup="statusMax(this, 3000)">${old}</textarea>
-          <button id="des_save_btn" class="main_btn_fill fixRed" onclick="saveDesGr()">Save description</button>`;
-  }
-
-  </script>
-</body>
+  </body>
 </html>

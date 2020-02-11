@@ -174,4 +174,18 @@ function quitGroup(id) {
   xhr.send("action=quit_group&g=" + id);
 }
 
+  if(GRDES_OLD == "") GRDES_OLD = GRDES;
 
+  GRDES_OLD = GRDES_OLD.replace(/<br \/>/g, "\n");
+
+  function changeDesGr(){
+    _("grdes_holder").innerHTML = `
+      <p style="font-size: 16px;">New description</p>
+      <textarea id="desgivegr" style="width: 100%; margin-top: 0;" class="ssel"
+        placeholder="Give a description about the group"
+        onkeyup="statusMax(this, 3000)">${GRDES_OLD}</textarea>
+      <button id="des_save_btn" class="main_btn_fill fixRed" onclick="saveDesGr()">
+        Save description
+      </button>
+    `;
+  }

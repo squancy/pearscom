@@ -18,10 +18,15 @@ function showError() {
   _(t).innerHTML = "Try again later";
 }
 
-function toggleLike(e, o, t) {
-  var result = ajaxObj("POST", "/php_parsers/like_system_art.php");
+function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_system_art.php') {
+  var toSend = "type=" + e + "&id=" + o;
+  if (isGr) {
+    toSend += '&group=' + isGr; 
+  }
+
+  var result = ajaxObj("POST", serverSide);
   result.onreadystatechange = function() {
-    if (1 == ajaxReturn(result)) {
+    if (ajaxReturn(result)) {
       if ("like_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
@@ -56,13 +61,19 @@ function toggleLike(e, o, t) {
       }
     }
   }
-  result.send("type=" + e + "&id=" + o);
+  result.send(toSend);
 }
 
-function toggleLike_reply(e, o, t) {
-  var result = ajaxObj("POST", "/php_parsers/like_reply_system_art.php");
+function toggleLike_reply(e, o, t, isGr = false,
+  serverSide = '/php_parsers/like_reply_system_art.php') {
+  var toSend = "type=" + e + "&id=" + o;
+  if (isGr) {
+    toSend += '&group=' + isGr; 
+  }
+
+  var result = ajaxObj("POST", serverSide);
   result.onreadystatechange = function() {
-    if (1 == ajaxReturn(result)) {
+    if (ajaxReturn(result)) {
       if ("like_reply_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
@@ -89,11 +100,12 @@ function toggleLike_reply(e, o, t) {
           e = Number(e) - 1;
           _("ipanr_" + o).innerText = e + " likes";
         } else {
+          console.log(result.responseText);
           prepareDialog();
           showError();
         }
       }
     }
   }
-  result.send("type=" + e + "&id=" + o);
+  result.send(toSend);
 }

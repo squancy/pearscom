@@ -115,12 +115,12 @@
     $space = true, $serverSide = "/php_parsers/article_status_system.php") {
     if($author == $log_username || $account_name == $log_username){
       if($isStatus) {
-        $id = "sdb_'.$statusid.'"; 
+        $id = "sdb_".$statusid; 
         $what = 'Post';
         $fname = 'deleteStatus';
         $half = 'status_';
       } else {
-        $id = "srdb_'.$statusid.'"; 
+        $id = "srdb_".$statusid; 
         $what = 'Reply';
         $fname = 'deleteReply';
         $half = 'reply_';
@@ -149,10 +149,14 @@
     return '';
   }
 
-  function genStatLikeBtn($isLike, $statusid, $isStatus = true, $extraArg = '') {
+  function genStatLikeBtn($isLike, $statusid, $isStatus = true, $extraArg = false,
+    $serverSide = '/php_parsers/like_system_art.php') {
     if($isStatus) {
       $postfix = '';
     } else {
+      if (!$extraArg) {
+        $serverSide = '/php_parsers/like_reply_system_art.php';
+      }
       $postfix = '_reply';
     }
 
@@ -161,7 +165,7 @@
     if($isLike == true){
       $likeButton = '
         <a href="#" onclick="return false;" 
-          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\''.$extraArg.')">
+          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\', \''.$extraArg.'\', \''.$serverSide.'\')">
           <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
@@ -169,7 +173,7 @@
     }else{
       $likeButton = '
         <a href="#" onclick="return false;"
-          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\''.$extraArg.')">
+          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\', \''.$extraArg.'\', \''.$serverSide.'\')">
           <img src="/images/nf.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';

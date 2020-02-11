@@ -152,7 +152,7 @@ function replyToStatus(id, supr, o, dizhi, isGr = false,
               <b>Reply by you just now:</b>
               <span id="srdb_${l}">
                 <button onclick="return false;" class="delete_s"
-                  onmousedown="deleteReply('${l}', 'reply_${l}', ${serverSide});"
+                  onmousedown="deleteReply('${l}', 'reply_${l}', '${serverSide}');"
                   title="Delete Comment">X</button>
               </span>
               <br />

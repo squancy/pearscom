@@ -822,13 +822,13 @@ if(isset($_POST["action"]) && $_POST['action'] == "add_admin"){
 			mysqli_close($conn);
 			exit();
 		}
-		if(!isset($_POST['group']) || $_POST['group'] == ""){
+		if(!isset($_SESSION['gname']) || $_SESSION['gname'] == ""){
 		    echo "Invalid input: missing group name.";
 			mysqli_close($conn);
 			exit();
 		}
 		$replyid = preg_replace('#[^0-9]#', '', $_POST['replyid']);
-		$group = mysqli_real_escape_string($conn, $_POST["group"]);
+		$group = mysqli_real_escape_string($conn, $_SESSION["gname"]);
 		// Check to make sure the person deleting this reply is either the account owner or the person who wrote it
 		$sql = "SELECT author FROM grouppost WHERE id=? AND gname = ? LIMIT 1";
 		$stmt = $conn->prepare($sql);
@@ -837,9 +837,6 @@ if(isset($_POST["action"]) && $_POST['action'] == "add_admin"){
 		$stmt->bind_result($author);
 		$stmt->fetch();
 		$stmt->close();
-		echo "Repid: ".$replyid."|";
-		echo "Group: ".$group."|";
-		echo "Auth: ".$author."|";
 	    if ($author == $log_username) {
 			$sql = "DELETE FROM grouppost WHERE id=? AND gname = ?";
 			$stmt = $conn->prepare($sql);
