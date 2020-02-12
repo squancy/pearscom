@@ -84,6 +84,10 @@
       padding: 30px; font-size: 14px; margin-bottom: 10px !important;
     }
 
+    select, textarea {
+      background-color: white;
+    }
+
     @media only screen and (max-width: 768px){
       #pageMiddle_2{
         width: 80%;

@@ -35,7 +35,7 @@ function sendProb() {
   } else {
     _("help_submit").style.display = "none";
     l.innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
-    var t = ajaxObj("POST", "help.php");
+    var t = ajaxObj("POST", "/help.php");
     t.onreadystatechange = function() {
       if (ajaxReturn(t)) {
         if (t.responseText != "send_success") {
@@ -46,7 +46,7 @@ function sendProb() {
           successfully send your problem report! We will process and answer it soon!</p>`;
         }
       }
-      t.send("p=" + e + "&d=" + s);
     }
+    t.send("p=" + e + "&d=" + s);
   }
 }
