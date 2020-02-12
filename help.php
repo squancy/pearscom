@@ -1,62 +1,62 @@
 <?php
-	require_once "php_includes/check_login_statues.php";
-	require_once 'timeelapsedstring.php';
-	require_once 'headers.php';
+  require_once "php_includes/check_login_statues.php";
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
 
-	$u = "";
-	if(isset($_SESSION['username'])){
-		$u = $_SESSION['username'];
-	}
+  $u = "";
+  if(isset($_SESSION['username'])){
+    $u = $_SESSION['username'];
+  }
 
-	// Ajax calls this code to execute
-	if(isset($_POST["p"]) && isset($_POST["d"])){
-		// Clean the variables
-		$p = preg_replace('#[^a-z ]#i', '', $_POST['p']);
-		$d = $_POST['d'];
-		$d = htmlspecialchars($d);
-		$d = htmlentities($d);
-		$d = mysqli_real_escape_string($conn, $d);
+  // Ajax calls this code to execute
+  if(isset($_POST["p"]) && isset($_POST["d"])){
+    // Clean the variables
+    $p = preg_replace('#[^a-z ]#i', '', $_POST['p']);
+    $d = $_POST['d'];
+    $d = htmlspecialchars($d);
+    $d = htmlentities($d);
+    $d = mysqli_real_escape_string($conn, $d);
 
-		// Form data error handling
-		if ($p == "" || $d == "") {
-			echo 'Please fill all the form data';
-			exit();
-		} else if ($p != "Other" && $p != "Cannot Log In" && $p != "Cannot Sign Up" &&
+    // Form data error handling
+    if ($p == "" || $d == "") {
+      echo 'Please fill all the form data';
+      exit();
+    } else if ($p != "Other" && $p != "Cannot Log In" && $p != "Cannot Sign Up" &&
       $p != "Found a Bug" && $p != "Stolen Account" && $p != "Harmful Content" &&
       $p != "General Question"){
-		    echo "Please give a valid category!";
-		    exit();
-		}
+        echo "Please give a valid category!";
+        exit();
+    }
 
-		// Connect to the database
-		require_once 'php_includes/conn.php';
+    // Connect to the database
+    require_once 'php_includes/conn.php';
 
-		// Insert into database
-		$sql = "INSERT INTO problem_report(selected_problem, discuss_problem, username,
+    // Insert into database
+    $sql = "INSERT INTO problem_report(selected_problem, discuss_problem, username,
       report_time) VALUES (?,?,?,NOW())";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("sss", $p, $d, $log_username);
-		$stmt->execute();
-		$stmt->close();
-		echo "send_success";
-		exit();
-	}
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $p, $d, $log_username);
+    $stmt->execute();
+    $stmt->close();
+    echo "send_success";
+    exit();
+  }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Help & Support Centre</title>
-	<meta charset="utf-8">
-	<meta lang="en">
-	<link rel="icon" type="image/x-icon" href="/images/newfav.png">
-	<link rel="stylesheet" type="text/css" href="/style/style.css">
-	<link rel="stylesheet" href="/font-awesome-4.7.0/css/font-awesome.min.css">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Help &amp; Support on Pearscom.
+  <title>Help & Support Centre</title>
+  <meta charset="utf-8">
+  <meta lang="en">
+  <link rel="icon" type="image/x-icon" href="/images/newfav.png">
+  <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <link rel="stylesheet" href="/font-awesome-4.7.0/css/font-awesome.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Help &amp; Support on Pearscom.
     If you need any help feel free to check our support page or ask a question about the
     problem.">
-	<script src="/js/jjs.js"></script>
-	<script src="/text_editor.js" async></script>
+  <script src="/js/jjs.js"></script>
+  <script src="/text_editor.js" async></script>
   <link rel="manifest" href="/manifest.json">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,8 +65,8 @@
   <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
   <meta name="theme-color" content="#282828" />
 
-	<script src="/js/main.js"></script>
-	<script src="/js/ajax.js" async></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/ajax.js" async></script>
   <meta name="description" content="Help and support for Pearscom users, learn how to upload
     your images, files and videos, sign up or log in. If you have any problem feel free to
     ask and share your question.">
@@ -75,11 +75,11 @@
     ask, learn">
   <meta name="author" content="Pearscom">
 
-	<script src="/js/specific/dd.js" defer></script>
-	<script src="/js/specific/mode.js" defer></script>
-	<script src="/js/specific/help.js" defer></script>
-	<script src="/js/specific/status_max.js" defer></script>
-	<style type="text/css">
+  <script src="/js/specific/dd.js" defer></script>
+  <script src="/js/specific/mode.js" defer></script>
+  <script src="/js/specific/help.js" defer></script>
+  <script src="/js/specific/status_max.js" defer></script>
+  <style type="text/css">
     #pageMiddle_2{
       padding: 30px; font-size: 14px; margin-bottom: 10px !important;
     }
@@ -103,8 +103,8 @@
   </style>
 </head>
 <body style="background-color: #fafafa; height: auto;">
-	<?php require_once 'template_pageTop.php'; ?>
-	<div id="pageMiddle_2">
+  <?php require_once 'template_pageTop.php'; ?>
+  <div id="pageMiddle_2">
     <p style="font-size: 22px; color: #999; margin-top: 0;">Help &amp; Support Centre</p>
     <br>
     <div class="collection" id="ccSu">
@@ -807,6 +807,6 @@
       <?php } ?>
     </div>
   </div>
-	<?php require_once 'template_pageBottom.php'; ?>
+  <?php require_once 'template_pageBottom.php'; ?>
 </body>
 </html>
