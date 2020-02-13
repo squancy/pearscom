@@ -1,32 +1,32 @@
 <?php
-	require_once 'php_includes/check_login_statues.php';
-	require_once 'php_includes/perform_checks.php';
-	require_once 'php_includes/status_common.php';
-	require_once 'php_includes/friends_common.php';
-	require_once 'php_includes/wrapText.php';
-	require_once 'timeelapsedstring.php';
-	require_once 'headers.php';
+  require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/perform_checks.php';
+  require_once 'php_includes/status_common.php';
+  require_once 'php_includes/friends_common.php';
+  require_once 'php_includes/wrapText.php';
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
 
-	// Make sure the user is logged in
+  // Make sure the user is logged in
   $u = checkU($_SESSION['username'], $conn);
-	
+  
   userExists($conn, $u); 
 
-	$otype = "all";
+  $otype = "all";
   $limit = 'LIMIT 100';
 
   // Initialize vars
-	$moMoFriends = "";
+  $moMoFriends = "";
   $one = "1";
-	$their_friends = array();
-	$myf = array();
+  $their_friends = array();
+  $myf = array();
 
   if(isset($_GET["otype"])){
     $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
   }
  
   // Main logic is wrapped in a separate file; used elsewhere
-  require_once 'friendsugg_fetch.php'; 	
+  require_once 'friendsugg_fetch.php';   
 ?>
 <!DOCTYPE html>
 <html>
