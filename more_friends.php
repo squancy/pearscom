@@ -116,10 +116,10 @@
       </div>
       <?php require_once 'template_pageBottom.php'; ?>
       <script type="text/javascript">
-          doAnim('#sort', '#sortTypes');
+        doAnim('#sort', '#sortTypes');
 
-          applyListeners(12, "suggf_", "momofdif", "/more_friends.php?otype=", "momofdif");
-          changeStyle("suggf_0", "suggf_", 12);
+        applyListeners(12, "suggf_", "momofdif", "/more_friends.php?otype=", "momofdif");
+        changeStyle("suggf_0", "suggf_", 12);
     </script>
   </body>
 </html>

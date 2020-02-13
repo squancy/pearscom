@@ -1,36 +1,36 @@
 <?php
   // Get Friend Array
-  $my_friends = getUsersFriends($conn, $u, $log_username);	
+  $my_friends = getUsersFriends($conn, $u, $log_username);  
 
   $countFs = 0;
 
-	$my_friends = array_diff($my_friends, array($log_username));
-	$my_friends = array_values($my_friends);
-	$myfs = join("','",$my_friends);
+  $my_friends = array_diff($my_friends, array($log_username));
+  $my_friends = array_values($my_friends);
+  $myfs = join("','",$my_friends);
 
-	foreach ($my_friends as $k => $v) {
-		$sql = "SELECT user1, user2 
-				FROM friends
-				WHERE (user1=? OR user2=?) 
-				AND accepted=? 
-				AND user1!=? 
-				AND user2!=?
-				AND user1 NOT IN ('$myfs')
-				AND user2 NOT IN ('$myfs')
-				ORDER BY RAND()";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("sssss", $v, $v, $one, $log_username, $log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			array_push($their_friends, $row["user2"]);
-			array_push($their_friends, $row["user1"]);
-			
-			$their_friends = array_unique($their_friends);
-			$their_friends = array_diff($their_friends, $my_friends);
-			$their_friends = array_values($their_friends);
-		}
-	}	
+  foreach ($my_friends as $k => $v) {
+    $sql = "SELECT user1, user2 
+        FROM friends
+        WHERE (user1=? OR user2=?) 
+        AND accepted=? 
+        AND user1!=? 
+        AND user2!=?
+        AND user1 NOT IN ('$myfs')
+        AND user2 NOT IN ('$myfs')
+        ORDER BY RAND()";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssss", $v, $v, $one, $log_username, $log_username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while($row = $result->fetch_assoc()){
+      array_push($their_friends, $row["user2"]);
+      array_push($their_friends, $row["user1"]);
+      
+      $their_friends = array_unique($their_friends);
+      $their_friends = array_diff($their_friends, $my_friends);
+      $their_friends = array_values($their_friends);
+    }
+  }  
 
   if($_GET["otype"] == "suggf_4" || $otype == "all"){
     $sex = "Male";
@@ -55,14 +55,14 @@
     }
     isMoMo($_GET['otype'], $moMoFriends);
   }
-	
-	$myfriends = join("','",$my_friends);
-	$foffi = join("','",$foff);
-	//$page_rows = $page_rows - $countFs;
+  
+  $myfriends = join("','",$my_friends);
+  $foffi = join("','",$foff);
+  //$page_rows = $page_rows - $countFs;
   //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
 
-	$geous = array();
-	if($_GET["otype"] == "suggf_0" || $_GET["otype"] == "suggf_1" || $_GET["otype"] == "suggf_2"
+  $geous = array();
+  if($_GET["otype"] == "suggf_0" || $_GET["otype"] == "suggf_1" || $_GET["otype"] == "suggf_2"
     || $_GET["otype"] == "suggf_3" || $otype == "all"){
     if($moMoFriends == "" || $countFs < 100 || isset($_GET["otype"])){
       if(isset($_GET["otype"])){
@@ -101,7 +101,7 @@
         $lon_m2 = $lon-0.6;
         $lon_p2 = $lon+0.6;
       }
-    		
+        
       // LIST USERS NEARBY
       $sql = "SELECT * FROM users WHERE username NOT IN ('$myfriends') AND username NOT
         IN ('$foffi') AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? AND username != ?
@@ -110,15 +110,15 @@
       $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $log_username, $one);
       $stmt->execute();
       $res = $stmt->get_result();
-    		while($row = $res->fetch_assoc()){
+        while($row = $res->fetch_assoc()){
           array_push($geous, $row["username"]);
           $countFs++;
           $moMoFriends .= genUserBox($row, $conn);
-    		}
-    	}
+        }
+      }
       isMoMo($_GET['otype'], $moMoFriends);
-	  }
-	
+    }
+  
     $geos = join("','",$geous);
     //$page_rows = $page_rows - $countFs;
     //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
@@ -186,13 +186,13 @@
       }
       isMoMo($_GET['otype'], $moMoFriends);  
     }
-	
-	//$page_rows = $page_rows - $countFs;
+  
+  //$page_rows = $page_rows - $countFs;
   //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
   $eaketto = join("','", $editarray);
-	
-	$yearsarr = array();
-	if($otype == "all" || $_GET["otype"] == "suggf_8" || $_GET["otype"] == "suggf_9" ||
+  
+  $yearsarr = array();
+  if($otype == "all" || $_GET["otype"] == "suggf_8" || $_GET["otype"] == "suggf_9" ||
     $_GET["otype"] == "suggf_10" || $_GET["otype"] == "suggf_11"){
     if($moMoFriends == "" || $countFs < 100 || isset($_GET["otype"])){
       if(isset($_GET["otype"])){
@@ -235,16 +235,16 @@
         array_push($yearsarr, $row["username"]);
         $countFs++;
         $moMoFriends .= genUserBox($row, $conn);
-    	}    
+      }    
       $stmt->close();
       isMoMo($_GET['otype'], $moMoFriends);
     }
-	}
+  }
 
-	$yearsarr = join("','", $yearsarr);
+  $yearsarr = join("','", $yearsarr);
 
   // Leave it for future purposes
-	if($otype == "all"){
+  if($otype == "all"){
     if($moMoFriends == "" || $countFs < 100){
       $sql = "SELECT * FROM users WHERE activated = ? AND username NOT IN ('$myfriends')
         AND username NOT IN ('$foffi') AND username NOT IN ('$geos') AND username
