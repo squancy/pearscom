@@ -1,2 +1,16 @@
-function ajaxObj(e,t){var n=new XMLHttpRequest;return n.open(e,t,!0),n.setRequestHeader("Content-type","application/x-www-form-urlencoded"),n}function ajaxReturn(e){if(4==e.readyState&&200==e.status)return!0}
+/*
+  Shorthand way of making an ajax request to the server
+*/
 
+function ajaxObj(type, serverSide) {
+  var req = new XMLHttpRequest;
+  req.open(type, serverSide, true);
+  req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  return req;
+}
+
+function ajaxReturn(e) {
+  if (e.readyState == 4 && e.status == 200) {
+    return true;
+  }
+}
