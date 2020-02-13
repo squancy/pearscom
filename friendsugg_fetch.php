@@ -112,81 +112,81 @@
       $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $log_username, $one);
       $stmt->execute();
       $res = $stmt->get_result();
-        while($row = $res->fetch_assoc()){
-          array_push($geous, $row["username"]);
-          $countFs++;
-          $moMoFriends .= genUserBox($row, $conn);
-        }
+      while($row = $res->fetch_assoc()){
+        array_push($geous, $row["username"]);
+        $countFs++;
+        $moMoFriends .= genUserBox($row, $conn);
       }
-      isMoMo($_GET['otype'], $moMoFriends);
     }
-  
-    $geos = join("','",$geous);
+    isMoMo($_GET['otype'], $moMoFriends);
+  }
 
-    // Suggest friends with a similar bio
-    $editarray = array();
-    if($otype == "all" || $_GET["otype"] == "suggf_5" || $_GET["otype"] == "suggf_6" ||
-      $_GET["otype"] == "suggf_7"){
-      if(isset($_GET["otype"])){
-        $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
-      }
+  $geos = join("','",$geous);
 
-      $sql = "SELECT state, city FROM edit WHERE username = ? LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s",$log_username);
-      $stmt->execute();
-      $stmt->bind_result($province, $city);
-      $stmt->fetch();
-      $stmt->close();
-
-      $sql = "SELECT country FROM users WHERE username = ? LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s",$log_username);
-      $stmt->execute();
-      $stmt->bind_result($logCountry);
-      $stmt->fetch();
-      $stmt->close();
-
-      if($moMoFriends == "" || $countFs < 100 || isset($_GET["otype"])){
-        if($otype == "suggf_5" && $city != ""){
-          $sql = "SELECT u.username, u.country, u.avatar, u.gender FROM users AS u LEFT JOIN
-            edit AS e ON u.username = e.username WHERE e.city = ? AND u.username != ? AND
-            u.username NOT IN ('$myfriends') AND u.username NOT IN ('$foffi') AND u.username
-            NOT IN ('$geos') AND activated = ? $limit";
-        }else if($otype == "suggf_6" && $province != ""){
-          $sql = "SELECT u.username, u.country, u.avatar, u.gender FROM users AS u LEFT JOIN
-            edit AS e ON u.username = e.username WHERE e.state = ? AND u.username != ? AND
-            u.username NOT IN ('$myfriends') AND u.username NOT IN ('$foffi') AND u.username
-            NOT IN ('$geos') AND activated = ? $limit";
-        }else if(!isset($_GET["otype"])){
-          $sql = "SELECT username, country, avatar, gender FROM users WHERE country = ? AND
-            username != ? AND username NOT IN ('$myfriends') AND username NOT IN ('$foffi')
-            AND username NOT IN ('$geos') AND activated = ? $limit";
-        }else if(isset($_GET["otype"])){
-          $sql = "SELECT username, country, avatar, gender FROM users WHERE country = ? AND
-            username != ? AND username NOT IN ('$myfriends') AND activated = ? $limit";
-        }
-
-        $stmt = $conn->prepare($sql);
-        if(($otype == "suggf_5" || $otype == "all") && $city != ""){
-          $stmt->bind_param("sss", $city, $log_username, $one);
-        }else if(($otype == "suggf_6" || $otype == "all") && $province != ""){
-          $stmt->bind_param("sss", $province, $log_username, $one);
-        }else{
-          $stmt->bind_param("sss", $logCountry, $log_username, $one);
-        }
-
-        $stmt->execute();
-        $res = $stmt->get_result();
-
-        while($row = $res->fetch_assoc()){
-          array_push($editarray, $row["username"]);
-          $countFs++;
-          $moMoFriends .= genUserBox($row, $conn);
-        }
-      }
-      isMoMo($_GET['otype'], $moMoFriends);  
+  // Suggest friends with a similar bio
+  $editarray = array();
+  if($otype == "all" || $_GET["otype"] == "suggf_5" || $_GET["otype"] == "suggf_6" ||
+    $_GET["otype"] == "suggf_7"){
+    if(isset($_GET["otype"])){
+      $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
     }
+
+    $sql = "SELECT state, city FROM edit WHERE username = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s",$log_username);
+    $stmt->execute();
+    $stmt->bind_result($province, $city);
+    $stmt->fetch();
+    $stmt->close();
+
+    $sql = "SELECT country FROM users WHERE username = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s",$log_username);
+    $stmt->execute();
+    $stmt->bind_result($logCountry);
+    $stmt->fetch();
+    $stmt->close();
+
+    if($moMoFriends == "" || $countFs < 100 || isset($_GET["otype"])){
+      if($otype == "suggf_5" && $city != ""){
+        $sql = "SELECT u.username, u.country, u.avatar, u.gender FROM users AS u LEFT JOIN
+          edit AS e ON u.username = e.username WHERE e.city = ? AND u.username != ? AND
+          u.username NOT IN ('$myfriends') AND u.username NOT IN ('$foffi') AND u.username
+          NOT IN ('$geos') AND activated = ? $limit";
+      }else if($otype == "suggf_6" && $province != ""){
+        $sql = "SELECT u.username, u.country, u.avatar, u.gender FROM users AS u LEFT JOIN
+          edit AS e ON u.username = e.username WHERE e.state = ? AND u.username != ? AND
+          u.username NOT IN ('$myfriends') AND u.username NOT IN ('$foffi') AND u.username
+          NOT IN ('$geos') AND activated = ? $limit";
+      }else if(!isset($_GET["otype"])){
+        $sql = "SELECT username, country, avatar, gender FROM users WHERE country = ? AND
+          username != ? AND username NOT IN ('$myfriends') AND username NOT IN ('$foffi')
+          AND username NOT IN ('$geos') AND activated = ? $limit";
+      }else if(isset($_GET["otype"])){
+        $sql = "SELECT username, country, avatar, gender FROM users WHERE country = ? AND
+          username != ? AND username NOT IN ('$myfriends') AND activated = ? $limit";
+      }
+
+      $stmt = $conn->prepare($sql);
+      if(($otype == "suggf_5" || $otype == "all") && $city != ""){
+        $stmt->bind_param("sss", $city, $log_username, $one);
+      }else if(($otype == "suggf_6" || $otype == "all") && $province != ""){
+        $stmt->bind_param("sss", $province, $log_username, $one);
+      }else{
+        $stmt->bind_param("sss", $logCountry, $log_username, $one);
+      }
+
+      $stmt->execute();
+      $res = $stmt->get_result();
+
+      while($row = $res->fetch_assoc()){
+        array_push($editarray, $row["username"]);
+        $countFs++;
+        $moMoFriends .= genUserBox($row, $conn);
+      }
+    }
+    isMoMo($_GET['otype'], $moMoFriends);  
+  }
   
   $eaketto = join("','", $editarray);
  
