@@ -2,12 +2,14 @@
   // Get Friend Array
   $my_friends = getUsersFriends($conn, $u, $log_username);  
 
+  // Count the number of suggested friends
   $countFs = 0;
 
   $my_friends = array_diff($my_friends, array($log_username));
   $my_friends = array_values($my_friends);
   $myfs = join("','",$my_friends);
 
+  // Get friends of friends
   foreach ($my_friends as $k => $v) {
     $sql = "SELECT user1, user2 
         FROM friends
@@ -32,6 +34,7 @@
     }
   }  
 
+  // Suggest users who are friends of my friends but not my friends
   if($_GET["otype"] == "suggf_4" || $otype == "all"){
     $sex = "Male";
     $foff = array();
@@ -58,9 +61,9 @@
   
   $myfriends = join("','",$my_friends);
   $foffi = join("','",$foff);
-  //$page_rows = $page_rows - $countFs;
-  //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
 
+  // Suggest users based on geolocation (users nearby)
+  // TODO: check that the lat and lon coordinate values are valid
   $geous = array();
   if($_GET["otype"] == "suggf_0" || $_GET["otype"] == "suggf_1" || $_GET["otype"] == "suggf_2"
     || $_GET["otype"] == "suggf_3" || $otype == "all"){
@@ -102,7 +105,6 @@
         $lon_p2 = $lon+0.6;
       }
         
-      // LIST USERS NEARBY
       $sql = "SELECT * FROM users WHERE username NOT IN ('$myfriends') AND username NOT
         IN ('$foffi') AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? AND username != ?
         AND activated = ? $limit";
@@ -120,9 +122,8 @@
     }
   
     $geos = join("','",$geous);
-    //$page_rows = $page_rows - $countFs;
-    //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
 
+    // Suggest friends with a similar bio
     $editarray = array();
     if($otype == "all" || $_GET["otype"] == "suggf_5" || $_GET["otype"] == "suggf_6" ||
       $_GET["otype"] == "suggf_7"){
@@ -187,10 +188,9 @@
       isMoMo($_GET['otype'], $moMoFriends);  
     }
   
-  //$page_rows = $page_rows - $countFs;
-  //$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
   $eaketto = join("','", $editarray);
-  
+ 
+  // Suggest users with a similar age
   $yearsarr = array();
   if($otype == "all" || $_GET["otype"] == "suggf_8" || $_GET["otype"] == "suggf_9" ||
     $_GET["otype"] == "suggf_10" || $_GET["otype"] == "suggf_11"){
