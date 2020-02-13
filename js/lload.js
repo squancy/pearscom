@@ -1,8 +1,8 @@
-document.addEventListener("DOMContentLoaded", function() {
+function startLazy() {
 let lazyImages = [].slice.call(document.querySelectorAll(".lazy-bg"));
 let active = false;
 
-var lazyLoad = function(isFrom = false) {
+function lazyLoad(isFrom = false) {
 if (active === false) {
   active = true;
 
@@ -32,6 +32,7 @@ if (active === false) {
     });
 
     active = false;
+    hhh = lazyLoad;
   }, 200);
 }
 };
@@ -53,4 +54,6 @@ if(document.body.scrollTop === 0 || isPWA){
     if((window.location.pathname == '/' && window.innerWidth > 400) || (isPWA && window.location.pathname == '/index.php')) lazyLoad(true);
     else lazyLoad();
 }
-});
+}
+
+document.addEventListener("DOMContentLoaded", startLazy);

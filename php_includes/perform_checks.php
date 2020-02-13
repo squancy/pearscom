@@ -121,6 +121,22 @@
     return $all_friends;
   }
 
+  function getFollowers($conn, $curar, $u){
+    $all_followers = array();
+    $sql = "SELECT following FROM follow WHERE follower = ? AND following NOT IN('$curar')";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $u);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+      if ($row["following"] != $u) {
+        array_push($all_followers, $row["following"]);
+      }
+    }
+    $stmt->close();
+    return $all_followers;
+  }
+
   function getLatLon($conn, $log_username) {
     $sql = "SELECT lat, lon FROM users WHERE username = ? LIMIT 1";
     $stmt = $conn->prepare($sql);
