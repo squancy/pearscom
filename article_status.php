@@ -128,7 +128,7 @@
 </div>
 
 <div id="statusarea">
-  <?php echo $statuslist; ?>
+  <?php echo $statartl; ?>
 </div>
 
 <div style="text-align: center; padding: 20px;">

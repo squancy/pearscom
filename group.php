@@ -273,7 +273,7 @@
       $funames = $post_auth;
       
       $funames = wrapText($funames, 20);
-      $funames = wrapText($fuco, 20);
+      $fuco = wrapText($fuco, 20);
 
       $numoffs = numOfFriends($conn, $post_auth);
 
@@ -302,7 +302,8 @@
         false, '/php_parsers/group_parser2.php');
 
       // Add share button
-      $shareButton = genShareBtn($log_username, $post_auth, $post_id);
+      $shareButton = genShareBtn($log_username, $post_auth, $post_id,
+      '/php_parsers/group_parser2.php', $g, 'group');
 
       $isLike = isLiked($conn, $user_ok, $log_username, $post_id, $g, 'group_status_likes');
       
@@ -360,10 +361,15 @@
           $re_avatar_pic = avatarImg($reply_auth, $reply_avatar);
           
           $cClass = chooseClass($moderators, $reply_auth, $creator); 
-          
+
+          $mgin = true;
+          if ($reply_auth != $log_username) {
+            $mgin = false;
+          }
+
           // Generate reply img avatar + pop up info box
           $reply_image = genUserImage($reply_auth, $re_avatar_pic, $funames, $isonimg, $fucor,
-            $dist, $numoffs, true, $cClass); 
+            $dist, $numoffs, $mgin, $cClass); 
           
           // Add delete btn
           $replyDeleteButton = genDelBtn($reply_auth, $log_username, $reply_auth,
@@ -771,7 +777,9 @@
   <script src='/js/specific/group.js' defer></script>
   <script src='/js/specific/see_hide.js' defer></script>
   <script src='/js/specific/open_emoji.js' defer></script>
+  <script src='/js/specific/share_status.js' defer></script>
   <script src='/js/specific/insert_emoji.js' defer></script>
+  <script src='/js/specific/like_status.js' defer></script>
   <script src='/js/specific/upload_funcs.js' defer></script>
   <script src='/js/specific/btn_div.js' defer></script>
   <script src='/js/specific/post_reply.js' defer></script>

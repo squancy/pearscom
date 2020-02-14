@@ -38,7 +38,7 @@
     $unamerq = $row["username"];
    
     $uname = wrapText($uname, 20);
-    $country = wrapText($uname, 20);
+    $country = wrapText($country, 20);
     $gender = wrapText($gender, 20);
 
     $online = $row["online"];

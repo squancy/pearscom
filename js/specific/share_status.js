@@ -3,10 +3,12 @@
   Note: prepareDialog() is defined in p_dialog.js
 */
 
-function shareStatus(type) {
-  var request = ajaxObj("POST", "/php_parsers/article_status_system.php");
+function shareStatus(type, serverSide = '/php_parsers/article_status_system.php', what = '',
+  key = '') {
+  if (key) key = '&' + key + '=';
+  var request = ajaxObj("POST", serverSide);
   request.onreadystatechange = function() {
-    if (1 == ajaxReturn(request)) {
+    if (ajaxReturn(request)) {
       if ("share_ok" == request.responseText) {
         prepareDialog();
         _("dialogbox").innerHTML = `
@@ -39,5 +41,5 @@ function shareStatus(type) {
       }
     }
   }
-  request.send("action=share&id=" + type);
+  request.send("action=share&id=" + type + key + what);
 }

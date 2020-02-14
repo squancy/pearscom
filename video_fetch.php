@@ -1,20 +1,11 @@
 <?php
   while ($row = $result->fetch_assoc()) {
 			$statusid = $row["id"];
-			$type = $row["type"];
-      $p = $row["photo"];
 			$account_name = $row["account_name"];
 			$author = $row["author"];
 			$postdate_ = $row["postdate"];
 			$postdate = strftime("%R, %b %d, %Y", strtotime($postdate_));
-			$avatar = $row["avatar"];
-			$class = "";
-			if($author == $log_username){
-			    $class = "class='round ptshov'";
-			}else{
-			    $class = 'id="round_2" class="ptshov"';
-			}
-			$fuco = $row["country"];
+			$avatar = $row["avatar"];$fuco = $row["country"];
     		$ison = $row["online"];
     		$flat = $row["lat"];
     		$flon = $row["lon"];
@@ -39,17 +30,12 @@
     		    $fuco = mb_substr($fuco, 0, 16, "utf-8");
     		    $fuco .= " ...";
     		}
+    		
     		$mgin = "";
-    		if($log_username == $u){
+    		if(isset($_SESSION["username"])){
     		    $mgin = "margin-left: -11px;";
     		}
-
-    		if ($avatar == NULL) {
-                $pcurl = '/images/avdef.png';
-            } else {
-                $pcurl = '/user/' . $author . '/' . $avatar;
-            }
-
+    		
     		$sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
     		$stmt = $conn->prepare($sql);
     		$stmt->bind_param("sss",$author,$author,$one);
@@ -57,8 +43,8 @@
     		$stmt->bind_result($numoffs);
     		$stmt->fetch();
     		$stmt->close();
-			$user_image = '<a href="/user/' . $author . '/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; ' . $mgin . ' background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block; border-radius: 50%;" class="tshov bbmob lazy-bg"></div><div class="infostdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left; border-radius: 50%;" class="tshov lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>' . $funames . '</u>&nbsp;' . $isonimg . '<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;' . $fuco . '<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: ' . $dist . ' miles<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: ' . $numoffs . '</span></div></a>';
-
+			$user_image = '<a href="/user/'.$author.'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; '.$mgin.' background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tshov bbmob lazy-bg"></div><div class="infostdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left; border-radius: 50%;" class="lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
+			$agoform = time_elapsed_string($postdate_);
 			$data = $row["data"];
 			$data_old = $row["data"];
 			$data_old = nl2br($data_old);
@@ -97,9 +83,8 @@
     				$data_old = "";
     			}
 			$data = nl2br($data);
-		    $data = str_replace("&amp;","&",$data);
-		    $data = stripslashes($data);
-			$agoform = time_elapsed_string($postdate_);
+			$data = str_replace("&amp;","&",$data);
+			$data = stripslashes($data);
 			$statusDeleteButton = '';
 			if($author == $log_username || $account_name == $log_username ){
 				$statusDeleteButton = '<span id="sdb_'.$statusid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" onclick="return false;" onmousedown="deleteStatus(\''.$statusid.'\',\'status_'.$statusid.'\');" title="Delete Post And Its Replies">X</button></span> &nbsp; &nbsp;';
@@ -112,9 +97,9 @@
 
 			$isLike = false;
 			if($user_ok == true){
-				$like_check = "SELECT id FROM photo_stat_likes WHERE username=? AND status=? LIMIT 1";
+				$like_check = "SELECT id FROM video_status_likes WHERE username=? AND video=? AND status=? LIMIT 1";
 				$stmt = $conn->prepare($like_check);
-				$stmt->bind_param("si",$log_username,$statusid);
+				$stmt->bind_param("sii",$log_username,$vi,$statusid);
 				$stmt->execute();
 				$stmt->store_result();
 				$stmt->fetch();
@@ -122,88 +107,87 @@
 			if($numrows > 0){
 			        $isLike = true;
 				}
+				$stmt->close();
 		    }
-
-		    $stmt->close();
 			// Add status like button
 			$likeButton = "";
 			$likeText = "";
 			if($isLike == true){
-				$likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'unlike\',\''.$statusid.'\',\'likeBtn_'.$statusid.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" style="vertical-align: middle;"></a>';
+				$likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'unlike\',\''.$statusid.'\',\'likeBtn_'.$statusid.'\', \''.$vi.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" style="vertical-align: middle;"></a>';
 				$likeText = '<span style="vertical-align: middle;">Dislike</span>';
 			}else{
-				$likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'like\',\''.$statusid.'\',\'likeBtn_'.$statusid.'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike" style="vertical-align: middle;"></a>';
+				$likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike(\'like\',\''.$statusid.'\',\'likeBtn_'.$statusid.'\', \''.$vi.'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike" style="vertical-align: middle;"></a>';
 				$likeText = '<span style="vertical-align: middle;">Like</span>';
 			}
-			
+
 			// GATHER UP ANY STATUS REPLIES
 			$status_replies = "";
-			$sql2 = "SELECT s.*, u.avatar, u.country, u.online, u.lat, u.lon 
-					FROM photos_status AS s 
+			$sql2 = "SELECT s.*, u.avatar, u.online, u.lat, u.lon, u.country
+					FROM video_status AS s
 					LEFT JOIN users AS u ON u.username = s.author
-					WHERE s.photo = ? 
-					AND s.osid = ? 
+					WHERE s.vidid = ? AND  s.osid = ? 
 					AND s.type = ? 
-					ORDER BY s.postdate DESC";
+					ORDER BY postdate DESC";
 
 			$stmt = $conn->prepare($sql2);
-			$stmt->bind_param("sis",$p,$statusid,$b);
+			$stmt->bind_param("iis",$vi,$statusid,$b);
 			$stmt->execute();
 			$result2 = $stmt->get_result();
 		    if($result2->num_rows > 0){
 		        while ($row2 = $result2->fetch_assoc()) {
 					$statusreplyid = $row2["id"];
-                        $replyauthor = $row2["author"];
-                        $replydata = $row2["data"];
-                        $replydata = nl2br($replydata);
-                        $replypostdate_ = $row2["postdate"];
-                        $replypostdate = strftime("%R, %b %d, %Y", strtotime($replypostdate_));
-                        $avatar2 = $row2["avatar"];
-                        $replydata = str_replace("&amp;", "&", $replydata);
-                        $replydata = stripslashes($replydata);
-                        $friend_pic = "";
-                        if ($avatar2 == NULL) {
-                            $friend_pic = '/images/avdef.png';
-                        } else {
-                            $friend_pic = '/user/' . $replyauthor . '/' . $avatar2;
-                        }
-                        $flat = $row["lat"];
-                        $flon = $row["lon"];
-                        $ison = $row["online"];
-                        $fuco = $row["country"];
-                        $dist = vincentyGreatCircleDistance($lat, $lon, $flat, $flon);
-                        $isonimg = '';
-                        if ($ison == "yes") {
-                            $isonimg = "<img src='/images/wgreen.png' width='12' height='12'>";
-                        } else {
-                            $isonimg = "<img src='/images/wgrey.png' width='12' height='12'>";
-                        }
-                        $funames = $replyauthor;
-                        if (strlen($funames) > 20) {
-                            $funames = mb_substr($funames, 0, 16, "utf-8");
-                            $funames.= " ...";
-                        }
-                        if (strlen($fuco) > 20) {
-                            $fuco = mb_substr($fuco, 0, 16, "utf-8");
-                            $fuco.= " ...";
-                        }
-                        $sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("sss", $replyauthor, $replyauthor, $one);
-                        $stmt->execute();
-                        $stmt->bind_result($numoffs);
-                        $stmt->fetch();
-                        $stmt->close();
-					$user_image2 = '<a href="/user/'.urlencode($replyauthor).'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tsrhov bbmob lazy-bg"></div><div class="infotsrdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left;" class="tsrhov lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
-
+					$replyauthor = $row2["author"];
+					$replydata = $row2["data"];
+					$avatar2 = $row2["avatar"];
+					$fuco = $row["country"];
+            		$ison = $row["online"];
+            		$flat = $row["lat"];
+            		$flon = $row["lon"];
+            		$dist = vincentyGreatCircleDistance($lat, $lon, $flat, $flon);
+            		$isonimg = '';
+            		if($ison == "yes"){
+            		    $isonimg = "<img src='/images/wgreen.png' width='12' height='12'>";
+            		}else{
+            		    $isonimg = "<img src='/images/wgrey.png' width='12' height='12'>";
+            		}
+            		if($avatar2 != ""){
+            			$friend_pic = '/user/'.$replyauthor.'/'.$avatar2.'';
+            		} else {
+            			$friend_pic = '/images/avdef.png';
+            		}
+            		$funames = $replyauthor;
+            		if(strlen($funames) > 20){
+            		    $funames = mb_substr($funames, 0, 16, "utf-8");
+            		    $funames .= " ...";
+            		}
+            		if(strlen($fuco) > 20){
+            		    $fuco = mb_substr($fuco, 0, 16, "utf-8");
+            		    $fuco .= " ...";
+            		}
+            		$sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
+            		$stmt = $conn->prepare($sql);
+            		$stmt->bind_param("sss",$replyauthor,$replyauthor,$one);
+            		$stmt->execute();
+            		$stmt->bind_result($numoffs);
+            		$stmt->fetch();
+            		$stmt->close();
+					$user_image2 = '<a href="/user/'.$author.'/"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tsrhov bbmob lazy-bg"></div><div class="infotsrdiv"><div data-src=\''.$friend_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block; float: left; border-radius: 50%;" class="lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
+					$replydata = nl2br($replydata);
 					$replypostdate_ = $row2["postdate"];
-					$replypostdate = strftime("%b %d, %Y", strtotime($replypostdate_));
+					$replypostdate = strftime("%R, %b %d, %Y", strtotime($replypostdate_));
+					$replydata = str_replace("&amp;","&",$replydata);
+					$replydata = stripslashes($replydata);
+					$replyDeleteButton = '';
+					if($replyauthor == $log_username || $account_name == $log_username ){
+						$replyDeleteButton = '<span id="srdb_'.$statusreplyid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" href="#" onclick="return false;" onmousedown="deleteReply(\''.$statusreplyid.'\',\'reply_'.$statusreplyid.'\');" title="Delete Comment">X</button ></span>';
+					}
+
 					$agoformrply = time_elapsed_string($replypostdate_);
 					$data_old_reply = $row2["data"];
 					$data_old_reply = nl2br($data_old_reply);
-				    $data_old_reply = str_replace("&amp;","&",$data_old_reply);
-				    $data_old_reply = stripslashes($data_old_reply);
-    				$isex = false;
+		            $data_old_reply = str_replace("&amp;","&",$data_old_reply);
+		            $data_old_reply = stripslashes($data_old_reply);
+					$isex = false;
                     	$sec_data = "";
                     	$first_data = "";
                     	if(strpos($data_old_reply,'<img src="/permUploads/') !== false){
@@ -233,19 +217,14 @@
             			}else{
             				$data_old_reply = "";
             			}
-    				$replydata = nl2br($replydata);
-				    $replydata = str_replace("&amp;","&",$replydata);
-				    $replydata = stripslashes($replydata);
-					$replyDeleteButton = '';
-					if($replyauthor == $log_username || $account_name == $log_username ){
-						$replyDeleteButton = '<span id="srdb_'.$statusreplyid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" href="#" onclick="return false;" onmousedown="deleteReply(\''.$statusreplyid.'\',\'reply_'.$statusreplyid.'\');" title="Delete Comment">X</button ></span>';
-					}
-
+                    $replydata = nl2br($replydata);
+		            $replydata = str_replace("&amp;","&",$replydata);
+		            $replydata = stripslashes($replydata);
 					$isLike_reply = false;
 					if($user_ok == true){
-						$like_check_reply = "SELECT id FROM photo_reply_likes WHERE username=? AND reply=? LIMIT 1";
+						$like_check_reply = "SELECT id FROM video_reply_likes WHERE user=? AND video=? AND reply = ? LIMIT 1";
 						$stmt = $conn->prepare($like_check_reply);
-						$stmt->bind_param("si",$log_username,$statusreplyid);
+						$stmt->bind_param("sii",$log_username,$vi,$statusreplyid);
 						$stmt->execute();
 						$stmt->store_result();
 						$stmt->fetch();
@@ -254,36 +233,37 @@
 					        $isLike_reply = true;
 						}
 				    }
-
 				    $stmt->close();
 
 					// Add reply like button
 					$likeButton_reply = "";
 					$likeText_reply = "";
 					if($isLike_reply == true){
-						$likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'unlike\',\''.$statusreplyid.'\',\'likeBtn_reply_'.$statusreplyid.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" title="Dislike"></a>';
+						$likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'unlike\',\''.$statusreplyid.'\',\'likeBtn_reply_'.$statusreplyid.'\', \''.$vi.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" title="Dislike"></a>';
 						$likeText_reply = '<span style="vertical-align: middle;">Dislike</span>';
 					}else{
-						$likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'like\',\''.$statusreplyid.'\',\'likeBtn_reply_'.$statusreplyid.'\')"><img src="/images/nf.png" width="18" height="18" title="Like" class="like_unlike"></a>';
+						$likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply(\'like\',\''.$statusreplyid.'\',\'likeBtn_reply_'.$statusreplyid.'\', \''.$vi.'\')"><img src="/images/nf.png" width="18" height="18" title="Like" class="like_unlike"></a>';
 						$likeText_reply = '<span style="vertical-align: middle;">Like</span>';
 					}
-					$sql = "SELECT COUNT(id) FROM photo_reply_likes WHERE reply = ? AND photo = ?";
+
+					$sql = "SELECT COUNT(id) FROM video_reply_likes WHERE video = ? AND reply = ?";
 				    $stmt = $conn->prepare($sql);
-				    $stmt->bind_param("is",$statusreplyid,$p);
+				    $stmt->bind_param("ii",$vi,$statusreplyid);
 				    $stmt->execute();
 				    $stmt->bind_result($rpycount);
 				    $stmt->fetch();
 				    $stmt->close();
 				    $rpycl = ''.$rpycount;
 				    
-				    $replyLog = "";
-			    $statusLog = "";
-			    if($_SESSION["username"] != ""){
-			        $replyLog = '<span id="likeBtn_reply_'.$statusreplyid.'" class="likeBtn">'
+				    $statusLog = "";
+        		    $replyLog = "";
+        		    if($_SESSION["username"] != ""){
+                            $replyLog = '<span id="likeBtn_reply_'.$statusreplyid.'" class="likeBtn">'
 							.$likeButton_reply.'
 							<span style="vertical-align: middle;">'.$likeText_reply.'</span>
-						</span>';
-			    }
+						</span>
+						';
+        		    }
 
 					$status_replies .= '
 					<div id="reply_'.$statusreplyid.'" class="reply_boxes">
@@ -301,7 +281,7 @@
 
 						<hr class="dim">
                         '.$replyLog.'
-						<div style="float: left; padding: 0px 10px 0px 10px;">
+                        <div style="float: left; padding: 0px 10px 0px 10px;">
                             <b class="ispan" id="ipanr_' . $statusreplyid . '">' . $rpycl . ' likes</b>
                         </div>
                         <div class="clear"></div>
@@ -310,10 +290,9 @@
 		        }
 		    }
 
-		    // Count status likes
-		    $sql = "SELECT COUNT(id) FROM photo_stat_likes WHERE status = ? AND photo = ?";
+		    $sql = "SELECT COUNT(id) FROM video_status_likes WHERE video = ? AND status=?";
 		    $stmt = $conn->prepare($sql);
-		    $stmt->bind_param("is",$statusid,$p);
+		    $stmt->bind_param("ii",$vi,$statusid);
 		    $stmt->execute();
 		    $stmt->bind_result($count);
 		    $stmt->fetch();
@@ -321,9 +300,10 @@
 		    $cl = ''.$count;
 
 		    // Count the replies
-		    $sql = "SELECT COUNT(id) FROM photos_status WHERE type = ? AND account_name = ? AND osid = ?";
+		    $b = "b";
+		    $sql = "SELECT COUNT(id) FROM video_status WHERE type = ? AND account_name = ? AND osid = ? AND vidid = ?";
 		    $stmt = $conn->prepare($sql);
-		    $stmt->bind_param("ssi",$b,$u,$statusid);
+		    $stmt->bind_param("ssii",$b,$u,$statusid,$vi);
 		    $stmt->execute();
 		    $stmt->bind_result($countrply);
 		    $stmt->fetch();
@@ -347,8 +327,8 @@
                             <span style="vertical-align: middle;">Share</span>
                         </div>';
 	    }
-				$statphol .= '
-					<div id="status_'.$statusid.'" class="status_boxes">
+
+				$statuslist .= '<div id="status_'.$statusid.'" class="status_boxes">
 						<div>'.$statusDeleteButton.'
 							<p id="status_date">
 								<b class="status_title">Post: </b>
@@ -365,33 +345,32 @@
 						</div>
 
 						<hr class="dim">
-
-					    '.$statusLog.'
-
+                        '.$statusLog.'
                         <div style="float: left; padding: 0px 10px 0px 10px;">
-                            <b class="ispan" id="ipanf_' . $statusid . '">
-                                ' . $cl . ' likes
-                            </b>
-                        </div>
+                                    <b class="ispan" id="ipanf_' . $statusid . '">
+                                        ' . $cl . ' likes
+                                    </b>
+                                </div>
                         <div class="clear"></div>
 				</div>'.$showmore.'<span id="allrply_'.$statusid.'" class="hiderply">'.$status_replies.'</span>
 				</div>';
-			if($isFriend == true || $log_username == $u){
-			    $statphol .= '<textarea id="replytext_'.$statusid.'" class="replytext" onfocus="showBtnDiv_reply('.$statusid.')" placeholder="Write a comment"></textarea>';
-				$statphol .= '<div id="uploadDisplay_SP_reply_'.$statusid.'"></div>';
-				$statphol .= '<div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">';
-					$statphol .= '<span id="swithidbr_'.$statusid.'"><button id="replyBtn_'.$statusid.'" class="btn_rply" onclick="replyToStatus('.$statusid.',\''.$u.'\',\'replytext_'.$statusid.'\',this)">Reply</button></span>';
-					$statphol .= '<img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply" onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22" title="Upload A Photo" />';
-					$statphol .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">';
-					$statphol .= '<div class="clear"></div>';
-					$statphol.= generateEList($statusid, 'emojiBox_reply_' . $statusid . '', 'replytext_'.$statusid.'');
-		
-				$statphol .= '</div>';
-				$statphol .= '<div id="standardUpload_reply" class="hiddenStuff">';
-					$statphol .= '<form id="image_SP_reply" enctype="multipart/form-data" method="post">';
-					$statphol .= '<input type="file" name="FileUpload" id="fu_SP_reply" onchange="doUpload_reply(\'fu_SP_reply\', '.$statusid.')" accept="image/*"/>';
-					$statphol .= '</form>';
-				$statphol .= '</div>';	
+			if($isFriend == true || $log_username == $author){
+			    $statuslist .= '<textarea id="replytext_'.$statusid.'" class="replytext" onfocus="showBtnDiv_reply('.$statusid.')" placeholder="Write a comment"></textarea>';
+				$statuslist .= '<div id="uploadDisplay_SP_reply_'.$statusid.'"></div>';
+				$statuslist .= '<div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">';
+					$statuslist .= '<span id="swithidbr_'.$statusid.'"><button id="replyBtn_'.$statusid.'" class="btn_rply" onclick="replyToStatus('.$statusid.',\''.$u.'\',\'replytext_'.$statusid.'\',this)">Reply</button></span>';
+					$statuslist .= '<img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply" onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22" title="Upload A Photo" />';
+					$statuslist .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">';
+				$statuslist .= '<div class="clear"></div>';
+				$statuslist.= generateEList($statusid, 'emojiBox_reply_' . $statusid . '', 'replytext_'.$statusid.'');
+				$statuslist .= '</div>';
+				$statuslist .= '<div id="standardUpload_reply" class="hiddenStuff">';
+					$statuslist .= '<form id="image_SP_reply" enctype="multipart/form-data" method="post">';
+					$statuslist .= '<input type="file" name="FileUpload" id="fu_SP_reply" onchange="doUpload_reply(\'fu_SP_reply\', '.$statusid.')" accept="image/*"/>';
+					$statuslist .= '</form>';
+				$statuslist .= '</div>';
 			}
 		}
+    if($fuck) {
+    }
 ?>

@@ -139,12 +139,14 @@
     return '';
   }
 
-  function genShareBtn($log_username, $author, $statusid) {
+  function genShareBtn($log_username, $author, $statusid,
+    $serverSide = '/php_parsers/article_status_system.php', $isGr = '', $key = '') {
     if($log_username != "" && $author != $log_username){
       return '
         <img src="/images/black_share.png" width="18" height="18" onclick="return false;"
-          onmousedown="shareStatus(\'' . $statusid . '\');" id="shareBlink"
-          style="vertical-align: middle;">';
+          onmousedown="shareStatus(\'' . $statusid . '\', \''.$serverSide.'\', \''.$isGr.'\',
+          \''.$key.'\');"
+          id="shareBlink" style="vertical-align: middle;">';
     }
     return '';
   }
@@ -154,7 +156,7 @@
     if($isStatus) {
       $postfix = '';
     } else {
-      if (!$extraArg) {
+      if (!$extraArg && $serverSide == '/php_parsers/like_system_art.php') {
         $serverSide = '/php_parsers/like_reply_system_art.php';
       }
       $postfix = '_reply';
@@ -182,14 +184,17 @@
     return [$likeButton, $likeText];
   }
 
-  function userLiked($user_ok, $conn, $statusid, $log_username, $isStatus = true) {
+  function userLiked($user_ok, $conn, $statusid, $log_username, $isStatus = true, $db = '',
+    $field = '') {
     if($user_ok){
-      if($isStatus) {
-        $db = 'art_stat_likes';
-        $field = 'status';
-      } else {
-        $db = 'art_reply_likes';
-        $field = 'reply'; 
+      if ($db == "" && $field == "") {
+        if ($isStatus) {
+          $db = 'art_stat_likes';
+          $field = 'status';
+        } else {
+          $db = 'art_reply_likes';
+          $field = 'reply'; 
+        }
       }
       $like_check = "SELECT id FROM ".$db." WHERE username=? AND ".$field."=? LIMIT 1";
       $stmt = $conn->prepare($like_check);

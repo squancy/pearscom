@@ -877,7 +877,7 @@ if(isset($_POST["action"]) && $_POST['action'] == "add_admin"){
 ?>
 <?php
     // Share group status
-    if(isset($_POST["action"]) && $_POST["action"] == "share_status"){
+    if(isset($_POST["action"]) && $_POST["action"] == "share"){
         // Error handling: make sure id is set
         if(!isset($_POST["id"]) || $_POST["id"] == ""){
             echo "Invalid input: id is missing.";

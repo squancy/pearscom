@@ -102,7 +102,7 @@
 				}
 
 				mysqli_close($conn);
-				echo "like_success_reply";
+				echo "like_reply_success";
 				exit();
 			}
 		}else if($_POST['type'] == "unlike"){
@@ -121,7 +121,7 @@
 				$stmt->execute();
 				$stmt->close();
 				mysqli_close($conn);
-		        echo "unlike_success_reply";
+		        echo "unlike_reply_success";
 		        exit();
 		    }else{
 		    	mysqli_close($conn);

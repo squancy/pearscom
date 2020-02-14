@@ -107,7 +107,7 @@
 
         $data_old_reply = $row2["data"];
         $data_old_reply = sanitizeData($data_old_reply);
-        $isex = clearImg($data_old_img); 
+        $isex = clearImg($data_old_reply); 
         list($replydata, $data_old_reply) = seeHideWrap($replydata, $data_old_reply,
           $statusreplyid, false, false, false);
         
@@ -170,7 +170,7 @@
       $statusLog = genLog($_SESSION["username"], $statusid, $likeButton, $likeText,
         true, $shareButton);
 
-      $statuslist .= '
+      $statartl .= '
         <div id="status_'.$statusid.'" class="status_boxes">
           <div>
             '.$statusDeleteButton.'
@@ -209,7 +209,7 @@
         </div>';
 
     if($isFriend == true || $log_username == $_SESSION['username']){
-      $statuslist .= '
+      $statartl .= '
         <textarea id="replytext_'.$statusid.'" class="replytext"
           onfocus="showBtnDiv_reply('.$statusid.')"
           placeholder="Write a comment..."></textarea>
@@ -226,10 +226,10 @@
               title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
             <div class="clear"></div>
         ';
-      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
+      $statartl .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
           'replytext_'.$statusid);
-      $statuslist .= '</div>';
-      $statuslist .= '
+      $statartl .= '</div>';
+      $statartl .= '
         <div id="standardUpload_reply" class="hiddenStuff">
           <form id="image_SP_reply" enctype="multipart/form-data" method="post">
             <input type="file" name="FileUpload" id="fu_SP_reply"

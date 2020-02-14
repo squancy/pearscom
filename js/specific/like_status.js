@@ -30,7 +30,8 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
       if ("like_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
-            onmousedown="toggleLike('unlike', '${o}','likeBtn_${o}');">
+            onmousedown="toggleLike('unlike', '${o}','likeBtn_${o}', '${isGr}',
+            '${serverSide}');">
             <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike">
           </a>
           <span style="vertical-align: middle; margin-left: 5px;">Dislike</span>
@@ -45,7 +46,8 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
         if ("unlike_success" == result.responseText) {
           _(t).innerHTML = `
             <a href="#" onclick="return false;"
-              onmousedown="toggleLike('like', '${o}', 'likeBtn_${o}')">
+              onmousedown="toggleLike('like', '${o}', 'likeBtn_${o}', '${isGr}',
+              '${serverSide}')">
               <img src="/images/nf.png" width="18" height="18" class="like_unlike">
             </a>
             <span style="vertical-align: middle; margin-left: 5px;">Like</span>
@@ -77,7 +79,8 @@ function toggleLike_reply(e, o, t, isGr = false,
       if ("like_reply_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
-            onmousedown="toggleLike_reply('unlike', '${o}', 'likeBtn_reply_${o}')">
+            onmousedown="toggleLike_reply('unlike', '${o}', 'likeBtn_reply_${o}', '${isGr}',
+            '${serverSide}')">
             <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike">
           </a>
           <span style="vertical-align: middle; margin-left: 5px;">Dislike</span>
@@ -90,7 +93,8 @@ function toggleLike_reply(e, o, t, isGr = false,
         if ("unlike_reply_success" == result.responseText) {
           _(t).innerHTML = `
             <a href="#" onclick="return false;"
-              onmousedown="toggleLike_reply('like', '${o}', 'likeBtn_reply_${o}')">
+              onmousedown="toggleLike_reply('like', '${o}', 'likeBtn_reply_${o}', '${isGr}',
+              '${serverSide}')">
               <img src="/images/nf.png" width="18" height="18" class="like_unlike">
             </a>
             <span style="vertical-align: middle; margin-left: 5px;">Like</span>
