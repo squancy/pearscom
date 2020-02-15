@@ -1,5 +1,6 @@
 <?php
   require_once 'perform_checks.php';
+  require_once 'elist.php';
   /*
     Common functions for status pages.
   */
@@ -28,7 +29,7 @@
           </div>
 
           <span style="float: left; margin-left: 2px;">
-            <u>'.$funames.'</u>
+            <span style="color: red;">'.$funames.'</span>
             &nbsp;'.$isonimg.'<br>
             <img src="/images/pcountry.png" width="12" height="12">
             &nbsp;'.$fuco.'<br>
@@ -196,7 +197,13 @@
           $field = 'reply'; 
         }
       }
-      $like_check = "SELECT id FROM ".$db." WHERE username=? AND ".$field."=? LIMIT 1";
+      
+      $f = 'username';
+      if ($db == 'video_reply_likes') {
+        $f = 'user';
+      }
+
+      $like_check = "SELECT id FROM ".$db." WHERE ".$f."=? AND ".$field."=? LIMIT 1";
       $stmt = $conn->prepare($like_check);
       $stmt->bind_param("si", $log_username, $statusid);
       $stmt->execute();
@@ -300,6 +307,109 @@
             href="'.$link.'">'.$text.'</a>
         </div>
       ';
+    }
+    return '';
+  }
+
+  function genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
+    $agoformreply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl) {
+    return '
+      <div id="reply_'.$statusreplyid.'" class="reply_boxes">
+        <div>
+        '.$replyDeleteButton.'
+        <p id="float">
+          <b class="sreply">Reply: </b>
+          <b class="rdate">
+            <span class="tooLong">'.$replypostdate.'</span> ('.$agoformrply.' ago)
+          </b>
+        </p>
+
+        '.$user_image2.'
+
+        <p id="reply_text">
+          <b class="sdata" id="hide_reply_'.$statusreplyid.'">
+            '.$replydata.''.$data_old_reply.'
+          </b>
+        </p>
+
+        <hr class="dim">
+        '.$replyLog.'
+        <div style="float: left; padding: 0px 10px 0px 10px;">
+          <b class="ispan" id="ipanr_' . $statusreplyid . '">' . $rpycl . ' likes</b>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>'; 
+  }
+
+  function genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform, $user_image,
+    $data, $data_old, $statusLog, $cl, $showmore, $status_replies) {
+    return '
+      <div id="status_'.$statusid.'" class="status_boxes">
+        <div>'.$statusDeleteButton.'
+          <p id="status_date">
+            <b class="status_title">Post: </b>
+            <b class="pdate">
+              <span class="tooLong">'.$postdate.'</span> ('.$agoform.' ago)
+            </b>
+          </p>
+
+        '.$user_image.'
+
+        <div id="sdata_'.$statusid.'">
+          <p id="status_text">
+            <b class="sdata" id="hide_'.$statusid.'">
+              '.$data.''.$data_old.'
+            </b>
+          </p>
+        </div>
+
+        <hr class="dim">
+        '.$statusLog.'
+        <div style="float: left; padding: 0px 10px 0px 10px;">
+          <b class="ispan" id="ipanf_' . $statusid . '">
+            ' . $cl . ' likes
+          </b>
+        </div>
+        <div class="clear"></div>
+      </div>
+      '.$showmore.'
+      <span id="allrply_'.$statusid.'" class="hiderply">'.$status_replies.'</span>
+    </div>';
+  }
+
+  function genReplyInput($isFriend, $log_username, $u, $statusid, $parser) {
+    if($isFriend == true || $log_username == $u){
+      $statuslist = '
+        <textarea id="replytext_'.$statusid.'" class="replytext"
+          onfocus="showBtnDiv_reply(\''.$statusid.'\')"
+          placeholder="Write a comment"></textarea>
+        <div id="uploadDisplay_SP_reply_'.$statusid.'"></div>
+        <div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">
+        <span id="swithidbr_'.$statusid.'">
+          <button id="replyBtn_'.$statusid.'" class="btn_rply"
+            onclick="replyToStatus(\''.$statusid.'\',\''.$u.'\',\'replytext_'.$statusid.'\',
+            this,false,\''.$parser.'\')">Reply</button>
+        </span>
+        <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
+          onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"
+          title="Upload A Photo" />
+        <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
+          title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
+        <div class="clear"></div>
+      ';
+      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
+        'replytext_'.$statusid);
+      $statuslist .= '</div>';
+      $statuslist .= '
+        <div id="standardUpload_reply" class="hiddenStuff">
+          <form id="image_SP_reply" enctype="multipart/form-data" method="post">
+            <input type="file" name="FileUpload" id="fu_SP_reply"
+              onchange="doUpload_reply(\'fu_SP_reply\', \''.$statusid.'\')" accept="image/*"/>
+          </form>
+        </div>
+      ';
+      return $statuslist;
     }
     return '';
   }

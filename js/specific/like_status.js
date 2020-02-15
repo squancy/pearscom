@@ -23,7 +23,7 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
   if (isGr) {
     toSend += '&group=' + isGr; 
   }
-
+  console.log(toSend);
   var result = ajaxObj("POST", serverSide);
   result.onreadystatechange = function() {
     if (ajaxReturn(result)) {

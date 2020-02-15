@@ -1,6 +1,8 @@
 <?php
-	include_once("../php_includes/check_login_statues.php");
+	require_once '../php_includes/check_login_statues.php';
 	require_once '../safe_encrypt.php';
+	require_once '../php_includes/conn.php';
+
 	if($user_ok != true || $log_username == "") {
 		exit();
 	}
@@ -11,7 +13,7 @@
         $vi = mysqli_real_escape_string($conn, $_POST["vi"]);
     }else{
         $vi = $_SESSION["id"];
-	    $vi = base64url_decode($vi);
+	    $vi = base64url_decode($vi, $hshkey);
     }
 ?>
 <?php
