@@ -5,6 +5,7 @@
   */
 
   require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/gr_common.php';
   require_once 'php_includes/perform_checks.php';
   require_once 'php_includes/friends_common.php';
   require_once 'php_includes/art_common.php';
@@ -27,6 +28,7 @@
   if (isset($log_username) && $log_username != "") {
     $isfeed = true;
     $htmlTitle = "Home";
+    $isIndex = true;
     $newsfeed = "";
     $u = $log_username;
 
@@ -41,6 +43,7 @@
     
     // Select blocked users by the viewer
     $blocked_array = getBlockedUsers($conn, $log_username);
+    $bUsers = join("','", $blocked_array);
 
     list($lat, $lon) = getLatLon($conn, $log_username);
 
@@ -87,7 +90,7 @@
               FROM status AS s
               LEFT JOIN users AS u ON u.username = s.author
               WHERE s.author IN ('$friendsCSV') OR ((u.lat BETWEEN ? AND ?) AND
-              (u.lon BETWEEN ? AND ?))
+              (u.lon BETWEEN ? AND ?)) AND s.author NOT IN ('$bUsers')
               AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
               ORDER BY s.postdate DESC LIMIT 6";
     }else if($cnt_near > 0){
@@ -96,6 +99,7 @@
               LEFT JOIN users AS u ON u.username = s.author
               WHERE (u.lat BETWEEN ? AND ?) AND (u.lon BETWEEN ? AND ?) AND
               (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
               ORDER BY s.postdate DESC LIMIT 6";
     }else{
       $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
@@ -103,6 +107,7 @@
               LEFT JOIN users AS u ON u.username = s.author
               WHERE u.country = ? AND (s.type=? OR s.type=? OR s.type = ?) AND
               s.author != ?
+              AND s.author NOT IN ('$bUsers')
               GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
     }
 
@@ -132,16 +137,20 @@
     // Get photos from friends & nearby users
     $gallery_list = "";
     if (!empty($all_friends)) {
-      $sql = "SELECT * FROM photos WHERE user IN ('$friendsCSV') ORDER BY uploaddate
+      $sql = "SELECT * FROM photos WHERE user IN ('$friendsCSV')
+        AND user NOT IN ('$bUsers')
+        ORDER BY uploaddate
         LIMIT 15";
     } else if($cnt_near > 0) {
       $sql = "SELECT u.*, p.* FROM users AS u LEFT JOIN photos AS p ON
         u.username = p.user WHERE (u.lat BETWEEN ? AND ?) AND (u.lon BETWEEN ? AND ?)
+        AND p.user NOT IN ('$bUsers')
         AND p.user != ? ORDER BY RAND() LIMIT 15";
     }else{
       $sql = "SELECT p.*, u.country
               FROM photos AS p
               LEFT JOIN users AS u ON u.username = p.user
+              AND p.user NOT IN ('$bUsers')
               WHERE u.country = ? ORDER BY p.uploaddate DESC LIMIT 15";
     }
 
@@ -165,7 +174,7 @@
      
       $pcurl = '/user/' . $uder . '/' . $fname . '';
       list($width, $height) = getimagesize('user/' . $uder . '/' . $fname . '');
-      $gallery_list.= "
+      $gallery_list .= "
         <a href='/photo_zoom/" . urlencode($uder) . "/" . $fname . "'>
           <div class='pccanvas'>
             <div class='lazy-bg' data-src=\"".$pcurl."\">
@@ -182,7 +191,9 @@
 
   // Get photo posts
   $sql = "SELECT COUNT(id) FROM photos_status
-          WHERE author IN ('$friendsCSV') AND (type=? OR type=?)";
+          WHERE author IN ('$friendsCSV')
+          AND author NOT IN ('$bUsers')
+          AND (type=? OR type=?)";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("ss", $a, $c);
   $stmt->execute();
@@ -196,6 +207,7 @@
             LEFT JOIN users AS u ON u.username = s.author
             WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
             BETWEEN ? AND ?
+            AND s.author NOT IN ('$bUsers')
             AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
             ORDER BY s.postdate DESC LIMIT 6";
   }else if($cnt_near > 0){
@@ -204,12 +216,14 @@
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
             (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
             ORDER BY s.postdate DESC LIMIT 6";
   }else{
     $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
             FROM photos_status AS s
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.country = ? AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
             GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
    }
   $stmt = $conn->prepare($sql);
@@ -225,7 +239,6 @@
   $stmt->execute();
   $result = $stmt->get_result();
   if ($result->num_rows > 0) {
-    $isIndex = true;
     $statphol = '--start photo stat--';
     require_once 'photo_fetch.php';
     $statphol .= '--end photo stat--';
@@ -242,28 +255,33 @@
   }
   $statphol .= '<hr class="dim">';
   $stmt->close();
+
   $imgs = "";
   $inc = 0;
+
   // Get recent articles from friends
   $mx = 0;
   if ($ismobile == true) {
-      $mx = 4;
+    $mx = 4;
   } else {
-      $mx = 8;
+    $mx = 8;
   }
   $sugglist = "";
   if (!empty($all_friends)) {
     $sql = "SELECT * FROM articles WHERE written_by IN ('$friendsCSV') AND written_by
+      AND written_by NOT IN ('$bUsers')
       != ? ORDER BY post_time DESC LIMIT $mx";
   } else if ($cnt_near > 0) {
     $sql = "SELECT u.*, a.* FROM users AS u LEFT JOIN articles AS a
       ON u.username = a.written_by WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ?
+      AND a.written_by NOT IN ('$bUsers')
       AND a.written_by != ? ORDER BY post_time DESC LIMIT $mx";
   }else{
     $sql = "SELECT a.*, u.country
             FROM articles AS a
             LEFT JOIN users AS u ON u.username = a.written_by
             WHERE u.country = ?
+            AND a.written_by NOT IN ('$bUsers')
             GROUP BY a.written_by ORDER BY a.post_time DESC LIMIT $mx";
   }
   $stmt = $conn->prepare($sql);
@@ -307,7 +325,7 @@
 
       $cover = chooseCover($cat);
 
-      $sugglist.= '
+      $sugglist .= '
         <div class="newsfar">
           <div id="pcbk">
             <b>Title: </b>' . $tit . '
@@ -361,20 +379,23 @@
   // Get article posts
   $sql = "SELECT COUNT(id)
           FROM article_status
-          WHERE author IN ('$friendsCSV') AND (type=? OR type=?)";
+          WHERE author IN ('$friendsCSV')
+          AND author NOT IN ('$bUsers')
+          AND (type=? OR type=?)";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("ss", $a, $c);
   $stmt->execute();
   $stmt->bind_result($artrcnt);
   $stmt->fetch();
   $stmt->close();
-  $statartl.= "";
+  $statartl = "";
   if($friendsCSV != ""){
     $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
             FROM article_status AS s
             LEFT JOIN users AS u ON u.username = s.author
             WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
             BETWEEN ? AND ? 
+            AND s.author NOT IN ('$bUsers')
             AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
             ORDER BY s.postdate DESC LIMIT 6";
   }else if ($cnt_near > 0){
@@ -382,6 +403,7 @@
             FROM article_status AS s
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
+            s.author NOT IN ('$bUsers') AND
             (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
             ORDER BY s.postdate DESC LIMIT 6";
   }else{
@@ -389,6 +411,7 @@
             FROM article_status AS s
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.country = ? AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
             GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
   }
   $stmt = $conn->prepare($sql);
@@ -421,8 +444,8 @@
   }
   $stmt->close();
   $statartl .= '<hr class="dim">';
+
   // Give friend suggestions
-  // Initialize Some Things
   $moMoFriends = "";
   $their_friends = array();
   $my_friends = array();
@@ -446,15 +469,20 @@
   // Get videos for news feed
   $relvids = "";
   if($friendsCSV != ""){
-    $sql = "SELECT * FROM videos WHERE user IN('$friendsCSV') ORDER BY RAND() LIMIT 12";
+    $sql = "SELECT * FROM videos WHERE user IN('$friendsCSV')
+      AND user NOT IN ('$bUsers')
+      ORDER BY RAND() LIMIT 12";
   }else if($cnt_near > 0){
     $sql = "SELECT v.* FROM videos AS v LEFT JOIN users AS u ON u.username = v.user WHERE 
-      u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? ORDER BY v.video_upload DESC LIMIT 12";
+      u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ?
+      AND v.user NOT IN ('$bUsers')
+      ORDER BY v.video_upload DESC LIMIT 12";
   }else{
     $sql = "SELECT v.*, u.country
             FROM videos AS v
             LEFT JOIN users AS u ON u.username = v.user
             WHERE u.country = ?
+            AND v.user NOT IN ('$bUsers')
             GROUP BY v.user ORDER BY v.video_upload DESC LIMIT 6";
   }
   $stmt = $conn->prepare($sql);
@@ -485,10 +513,8 @@
       if ($vvname == NULL) {
         $vvname = "Untitiled";
       }
-      if (strlen($vvname) > 18) {
-        $vvname = mb_substr($vvname, 0, 14, "utf-8");
-        $vvname.= " ...";
-      }
+
+      $vvname = wrapText($vvname, 18);
       if ($vposter != NULL) {
         $pcurlo = '/user/' . $vuser . '/videos/' . $vposter . '';
       } else {
@@ -496,7 +522,7 @@
       }
 
       $uds = time_elapsed_string($vdate_);
-      $relvids .=  "
+      $relvids .= "
         <a href='/video_zoom/" . $vid . "'>
           <div class='nfrelv'>
             <div data-src=\"".$pcurlo."\" class='lazy-bg' id='pcgetc'></div>
@@ -530,6 +556,7 @@
             LEFT JOIN users AS u ON u.username = s.author
             WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
             AND ?
+            AND s.author NOT IN ('$bUsers')
             AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
             ORDER BY s.postdate DESC LIMIT 6";
   }else if($cnt_near > 0){
@@ -538,12 +565,14 @@
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=? OR s.type=?
             OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
             ORDER BY s.postdate DESC LIMIT 6";
   }else{
     $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
             FROM video_status AS s
             LEFT JOIN users AS u ON u.username = s.author
             WHERE u.country = ? AND (s.type=? OR s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
             GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
   }
   $stmt = $conn->prepare($sql);
@@ -559,8 +588,9 @@
   $stmt->execute();
   $result = $stmt->get_result();
 	if($result->num_rows > 0){
-    $fuck = true;
+    $statvidl = '---video stat start---';
     require_once 'video_fetch.php';
+    $statvidl .= '---video stat end---';
   } else {
     $statvidl = "
       <p>
@@ -573,437 +603,65 @@
       </p>
     ";
   }
-  $statvidl.= '<hr class="dim">';
+  $statvidl .= '<hr class="dim">';
   $stmt->close();
   
   // Get group posts for news feed
   $mainPosts = "";
   if($friendsCSV != ""){
-      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM grouppost AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ?
-              AND (s.type=? OR s.type = ?) AND s.author != ?
-               ORDER BY s.pdate DESC LIMIT 6";
+    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+            FROM grouppost AS s
+            LEFT JOIN users AS u ON u.username = s.author
+            WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
+            AND ? AND (s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
+            ORDER BY s.pdate DESC LIMIT 6";
   }else if($cnt_near > 0){
-      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM grouppost AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=? OR s.type = ?) AND s.author != ?
-               ORDER BY s.pdate DESC LIMIT 6";
+    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+            FROM grouppost AS s
+            LEFT JOIN users AS u ON u.username = s.author
+            WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=? OR
+            s.type = ?)
+            AND s.author NOT IN ('$bUsers')
+            AND s.author != ? ORDER BY s.pdate DESC LIMIT 6";
   }else{
-      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM grouppost AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
-              GROUP BY s.author ORDER BY s.pdate DESC LIMIT 6";
+    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+            FROM grouppost AS s
+            LEFT JOIN users AS u ON u.username = s.author
+            WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
+            AND s.author NOT IN ('$bUsers')
+            GROUP BY s.author ORDER BY s.pdate DESC LIMIT 6";
   }
   $stmt = $conn->prepare($sql);
   if($friendsCSV != ""){
-      $stmt->bind_param("sssssss",$lat_m2, $lat_p2, $lon_m2, $lon_p2,$zero,$one,$log_username);
+    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero, $one,
+      $log_username);
   }else if($cnt_near > 0){
-      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero,$one,$log_username);
+    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero, $one,
+      $log_username);
   }else{
-      $stmt->bind_param("ssss", $ucountry, $zero,$one,$log_username);
+    $stmt->bind_param("ssss", $ucountry, $zero, $one, $log_username);
   }
-$stmt->execute();
-$result_new = $stmt->get_result();
-if ($result_new->num_rows > 0){
-  while ($row = $result_new->fetch_assoc()) {
-    $g = $row["gname"];
-    $post_id = $row["grouppost_id"];
-    $post_auth = $row["author"];
-    $post_type = $row["type"];
-    $post_data = $row["data"];
-    $post_date_ = $row["pdate"];
-    $post_date = strftime("%R, %b %d, %Y", strtotime($post_date_));
-    $post_avatar = $row["avatar"];
-    $fuco = $row["country"];
-$ison = $row["online"];
-$flat = $row["lat"];
-$flon = $row["lon"];
-$dist = vincentyGreatCircleDistance($lat, $lon, $flat, $flon);
-$isonimg = '';
-if($ison == "yes"){
-    $isonimg = "<img src='/images/wgreen.png' width='12' height='12'>";
-}else{
-    $isonimg = "<img src='/images/wgrey.png' width='12' height='12'>";
-}
-if($avatar != ""){
-  $friend_pic = '/user/'.$post_auth.'/'.$avatar.'';
-} else {
-  $friend_pic = '/images/avdef.png';
-}
-$funames = $post_auth;
-if(strlen($funames) > 20){
-    $funames = mb_substr($funames, 0, 16, "utf-8");
-    $funames .= " ...";
-}
-if(strlen($fuco) > 20){
-    $fuco = mb_substr($fuco, 0, 16, "utf-8");
-    $fuco .= " ...";
-}
-$sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sss",$post_auth,$post_auth,$one);
-$stmt->execute();
-$stmt->bind_result($numoffs);
-$stmt->fetch();
-$stmt->close();
-    $avatar_pic = '/user/'.$post_auth.'/'.$post_avatar;
-    $user_image = "";
-    $agoform = time_elapsed_string($post_date_);
-    if($post_auth == $log_username){
-      $class = "round";
+
+  $stmt->execute();
+  $result_new = $stmt->get_result();
+  if ($result_new->num_rows > 0){
+    $mainPosts = '--start gr post--';  
+    $g = $row['gname'];
+    require_once 'group_fetch.php';
+    $mainPosts .= '--end gr post--';  
   }else{
-      $class = "margin-bottom: 7px;";
+    $mainPosts = "
+      <p>
+        Recommended group posts from your friends & followings
+      </p>
+      <p style='font-size: 14px;'>
+        Your friends have not posted or replied anything yet recently.
+        Check your <a href='/friend_suggestions'>friend suggestions</a> to get new friends
+        or encourage them to post & reply more!
+      </p>
+    ";
   }
-
-    if($post_avatar != NULL){
-      $user_image = '<a href="/user/'.$post_auth.'"><div data-src=\''.$avatar_pic.'\' style="background-repeat: no-repeat; background-size: cover; margin-bottom: 5px; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tshov bbmob lazy-bg"></div><div class="infostdiv"><div data-src=\''.$avatar_pic.'\' style="background-repeat: no-repeat; float: left; background-size: cover; background-position: center; width: 60px; height: 60px; display: inline-block;" class="lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
-    }else{
-      $user_image = '<a href="/user/'.$post_auth.'"><img src="/images/avdef.png" alt="'.$post_auth.'" width="50" height="50" padding-bottom: 3px; margin-bottom: 5px;" style="'.$class.' tshov bbmob"><div class="infostdiv"><img src="'.$friend_pic.'"><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fuco.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
-    }
-
-    $statusDeleteButton = '';
-    if($post_auth == $log_username){
-      $statusDeleteButton = '<span id="sdb_'.$post_id.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" onclick="return false;" onmousedown="deleteStatus(\''.$post_id.'\',\'status_'.$post_id.'\');" title="Delete Post And Its Replies">X</button></span> &nbsp; &nbsp;';
-    }
-
-    // Add share button
-    $shareButton = "";
-    if($log_username != "" && $post_auth != $log_username){
-      $shareButton = '<img src="/images/black_share.png" width="18" height="18" onclick="return false;" onmousedown="shareStatus_gr(\''.$post_id.'\',\''.$g.'\');" id="shareBlink">';
-    }
-
-    $isLike = false;
-    if($user_ok == true){
-      $like_check = "SELECT id FROM group_status_likes WHERE username=? AND gpost=? AND gname = ? LIMIT 1";
-      $stmt = $conn->prepare($like_check);
-      $stmt->bind_param("sis",$log_username,$post_id,$g);
-      $stmt->execute();
-      $stmt->store_result();
-      $stmt->fetch();
-      $numrows = $stmt->num_rows;
-    if($numrows > 0){
-            $isLike = true;
-      }
-      $stmt->close();
-      }
-    // Add status like button
-    $likeButton = "";
-    $likeText = "";
-    if($isLike == true){
-      $likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike_gr(\'unlike\',\''.$post_id.'\',\'likeBtn_gr_'.$post_id.'\',\''.$g.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" title="Dislike"></a>';
-      $likeText = '<span style="vertical-align: middle;">Dislike</span>';
-    }else{
-      $likeButton = '<a href="#" onclick="return false;" onmousedown="toggleLike_gr(\'like\',\''.$post_id.'\',\'likeBtn_gr_'.$post_id.'\',\''.$g.'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike" title="Like"></a>';
-      $likeText = '<span style="vertical-align: middle;">Like</span>';
-    }
-
-    $post_data_old = $row["data"];
-    $post_data_old = nl2br($post_data_old);
-      $post_data_old = str_replace("&amp;","&",$post_data_old);
-      $post_data_old = stripslashes($post_data_old);
-    $pos = strpos($data_old,'<br /><br /><i style="font-size: 14px;">Shared via <a href="/user/');
-              
-  $isex = false;
-  $sec_data = "";
-  $first_data = "";
-  if(strpos($post_data_old,'<img src="/permUploads/') !== false){
-      $split = explode('<img src="/permUploads/',$post_data_old);
-      clearstatcache();
-      $sec_data = '<img src="/permUploads/'.$split[1];
-      $first_data = $split[0];
-      $img = str_replace('"','',$split[1]); // remove double quotes
-      $img = str_replace('/>','',$img); // remove img end tag
-      $img = str_replace(' ','',$img); // remove spaces
-      $img = str_replace('<br>','',$img); // remove spaces
-      $img = trim($img);
-      $fn = "permUploads/".$img; // file name with dynamic variable in it
-      if(file_exists($fn)){
-          $isex = true;
-      }
-  }
-  if(strlen($post_data) > 1000){
-      if($pos === false && $isex == false){
-          $post_data = mb_substr($post_data, 0,1000, "utf-8");
-          $post_data .= " ...";
-          $post_data .= '&nbsp;<a id="toggle_gr_'.$post_id.'" onclick="opentext(\''.$post_id.'\',\'gr\')">See More</a>';
-          $post_data_old = '<div id="lessmore_gr_'.$post_id.'" class="lmml"><p id="status_text">'.$post_data_old.'&nbsp;<a id="toggle_gr_'.$post_id.'" onclick="opentext(\''.$post_id.'\',\'gr\')">See Less</a></p></div>';
-      }else{
-          $post_data_old = "";
-      }
-  }else{
-      $post_data_old = "";
-  }
-      $post_data = nl2br($post_data);
-      $post_data = str_replace("&amp;","&",$post_data);
-      $post_data = stripslashes($post_data);
-    // <b class="ispan">('.$cl.')</b> <span id="likeBtn">'.$likeButton.'</span> <div id="isornot_div">'.$isLikeOrNot.'</div>
-    // '.$showmore.'<span id="allrply_'.$post_id.'" class="hiderply">'.$status_replies.'</span>
-    
-    // Get replies and user images using inner loop
-    $status_replies = "";
-    $sql_b = 'SELECT g.*, u.avatar, u.online, u.country, u.lat, u.lon
-         FROM grouppost AS g
-         LEFT JOIN users AS u ON u.username = g.author
-        WHERE g.pid = ? AND g.type = ? ORDER BY g.pdate DESC';
-    $stmt = $conn->prepare($sql_b);
-    $stmt->bind_param("is",$post_id,$one);
-    $stmt->execute();
-    $result_old = $stmt->get_result();
-    if($result_old->num_rows > 0){
-      while ($row2 = $result_old->fetch_assoc()) {
-        $statusreplyid = $row2["id"];
-        $reply_auth = $row2["author"];
-        $reply_data = $row2["data"];
-        $reply_date_ = $row2["pdate"];
-        $reply_date = strftime("%R, %b %d, %Y", strtotime($reply_date_));
-        $reply_avatar = $row2["avatar"];
-        $fucor = $row2["country"];
-      $ison = $row2["online"];
-      $flat = $row2["lat"];
-      $flon = $row2["lon"];
-      $dist = vincentyGreatCircleDistance($lat, $lon, $flat, $flon);
-      $isonimg = '';
-      if($ison == "yes"){
-          $isonimg = "<img src='/images/wgreen.png' width='12' height='12'>";
-      }else{
-          $isonimg = "<img src='/images/wgrey.png' width='12' height='12'>";
-      }
-      if($avatar2 != ""){
-        $friend_pic = '/user/'.$reply_auth.'/'.$avatar2.'';
-      } else {
-        $friend_pic = '/images/avdef.png';
-      }
-      $funames = $reply_auth;
-      if(strlen($funames) > 20){
-          $funames = mb_substr($funames, 0, 16, "utf-8");
-          $funames .= " ...";
-      }
-      if(strlen($fucor) > 20){
-          $fucor = mb_substr($fucor, 0, 16, "utf-8");
-          $fucor .= " ...";
-      }
-      $sql = "SELECT COUNT(id) FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted = ?";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("sss",$reply_auth,$reply_auth,$one);
-      $stmt->execute();
-      $stmt->bind_result($numoffs);
-      $stmt->fetch();
-      $stmt->close();
-        $re_avatar_pic = '/user/'.$reply_auth.'/'.$reply_avatar;
-        if($reply_avatar != NULL){
-          $reply_image = '<a href="/user/'.$reply_auth.'/"><div data-src=\''.$re_avatar_pic.'\' style="background-repeat: no-repeat; background-size: cover; margin-bottom: 5px; background-position: center; width: 50px; height: 50px; display: inline-block;" class="tsrhov bbmob lazy-bg"></div><div class="infotsrdiv"><div data-src=\''.$re_avatar_pic.'\' style="background-repeat: no-repeat; background-size: cover; background-position: center; width: 60px; height: 60px; float: left; display: inline-block;" class="tshov lazy-bg"></div><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fucor.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
-        }else{
-          $reply_image = '<a href="/user/'.$reply_auth.'/"><img src="/images/avdef.png" alt="'.$reply_auth.'" style="margin-bottom: 5px;" width="50" height="50" class="tsrhov bbmob lazy-bg"><div class="infotsrdiv"><img src="'.$re_avatar_pic.'"><span style="float: left; margin-left: 2px;"><u>'.$funames.'</u>&nbsp;'.$isonimg.'<br><img src="/images/pcountry.png" width="12" height="12">&nbsp;'.$fucor.'<br><img src="/images/udist.png" width="12" height="12">&nbsp;Distance: '.$dist.' km<br><img src="/images/fus.png" width="12" height="12">&nbsp;Friends: '.$numoffs.'</span></div></a>';
-        }
-
-        $replyDeleteButton = '';
-        if($reply_auth == $log_username){
-          $replyDeleteButton = '<span id="srdb_'.$statusreplyid.'"><button onclick="Confirm.render("Delete Post?","delete_post","post_1")" class="delete_s" href="#" onclick="return false;" onmousedown="deleteReply(\''.$statusreplyid.'\',\'reply_gr_'.$statusreplyid.'\',\'group\',\''.$g.'\');" title="Delete Comment">X</button ></span>';
-        }
-        $agoformrply = time_elapsed_string($reply_date_);
-        $data_old_reply = $row2["data"];
-        $data_old_reply = nl2br($data_old_reply);
-      $data_old_reply = str_replace("&amp;","&",$data_old_reply);
-      $data_old_reply = stripslashes($data_old_reply);
-        $isex = false;
-      $sec_data = "";
-      $first_data = "";
-      if(strpos($data_old_reply,'<img src="/permUploads/') !== false){
-          $split = explode('<img src="/permUploads/',$data_old_reply);
-          clearstatcache();
-          $sec_data = '<img src="/permUploads/'.$split[1];
-          $first_data = $split[0];
-          $img = str_replace('"','',$split[1]); // remove double quotes
-          $img = str_replace('/>','',$img); // remove img end tag
-          $img = str_replace(' ','',$img); // remove spaces
-          $img = str_replace('<br>','',$img); // remove spaces
-          $img = trim($img);
-          $fn = "permUploads/".$img; // file name with dynamic variable in it
-          if(file_exists($fn)){
-              $isex = true;
-          }
-      }
-      if(strlen($reply_data) > 1000){
-          if($isex == false){
-              $reply_data = mb_substr($reply_data, 0,1000, "utf-8");
-              $reply_data .= " ...";
-              $reply_data .= '&nbsp;<a id="toggle_gr_r_'.$statusreplyid.'" onclick="opentext(\''.$statusreplyid.'\',\'gr_r\')">See More</a>';
-              $data_old_reply = '<div id="lessmore_gr_r_'.$statusreplyid.'" class="lmml"><p id="status_text">'.$data_old_reply.'&nbsp;<a id="toggle_gr_r_'.$statusreplyid.'" onclick="opentext(\''.$statusreplyid.'\',\'gr_r\')">See Less</a></p></div>';
-          }else{
-              $data_old_reply = "";
-          }
-      }else{
-          $data_old_reply = "";
-      }
-      $reply_data = nl2br($reply_data);
-      $reply_data = str_replace("&amp;","&",$reply_data);
-      $reply_data = stripslashes($reply_data);
-        $isLike_reply = false;
-        if($user_ok == true){
-          $like_check_reply = "SELECT id FROM group_reply_likes WHERE username=? AND gpost=? AND gname=? LIMIT 1";
-          $stmt = $conn->prepare($like_check_reply);
-          $stmt->bind_param("sis",$log_username,$statusreplyid,$g);
-          $stmt->execute();
-          $stmt->store_result();
-          $stmt->fetch();
-          $numrows = $stmt->num_rows;
-        if($numrows > 0){
-                $isLike_reply = true;
-          }
-        }
-        
-        // Add reply like button
-        $likeButton_reply = "";
-        $likeText_reply = "";
-        if($isLike_reply == true){
-          $likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply_gr(\'unlike\',\''.$statusreplyid.'\',\'likeBtn_reply_gr_'.$statusreplyid.'\',\''.$g.'\')"><img src="/images/fillthumb.png" width="18" height="18" class="like_unlike" title="Dislike"></a>';
-          $likeText_reply = '<span style="vertical-align: middle;">Dislike</span>';
-        }else{
-          $likeButton_reply = '<a href="#" onclick="return false;" onmousedown="toggleLike_reply_gr(\'like\',\''.$statusreplyid.'\',\'likeBtn_reply_gr_'.$statusreplyid.'\',\''.$g.'\')"><img src="/images/nf.png" width="18" height="18" class="like_unlike" title="Like"></a>';
-          $likeText_reply = '<span style="vertical-align: middle;">Like</span>';
-        }
-
-          // Count reply likes
-          $sql = "SELECT COUNT(id) FROM group_reply_likes WHERE gpost = ? AND gname = ?";
-          $stmt = $conn->prepare($sql);
-          $stmt->bind_param("is",$statusreplyid,$g);
-          $stmt->execute();
-          $stmt->bind_result($rpycount);
-          $stmt->fetch();
-          $stmt->close();
-          $rpycl = ''.$rpycount;
-
-        // Build replies
-        $status_replies .= '
-        <div id="reply_gr_'.$statusreplyid.'" class="reply_boxes">
-          <div>'.$replyDeleteButton.'
-          <p id="float">
-              <b class="sreply">Replied: </b>
-              <span class="tooLong">'.$reply_date.'</span> ('.$agoformrply.' ago)</b>
-          </p>'.$reply_image.'
-          <p id="reply_text">
-              <b class="sdata" id="hide_gr_r_'.$statusreplyid.'">'.$reply_data.''.$data_old_reply.'</b>
-          </p>
-
-          <hr class="dim">
-
-          <span id="likeBtn_reply_gr_'.$statusreplyid.'" class="likeBtn">
-              '.$likeButton_reply.'
-              <span style="vertical-align: middle;">'.$likeText_reply.'</span>
-          </span>
-          <div style="float: left; padding: 0px 10px 0px 10px;">
-              <b class="ispan" id="ipan_gr_reply_'.$statusreplyid.'">'.$rpycl.' likes</b>
-          </div>
-          <div class="clear"></div>
-          </div>
-        </div>';
-        //$stmt->close(); <b class="ispan">('.$rpycl.')</b><span id="likeBtn_reply">'.$likeButton_reply.'</span>
-         // </div><div id="isornot_div_rly">'.$isRpyLikeOrNot.'</div>
-      }
-    }
-
-    // Count likes
-    $sql = "SELECT COUNT(id) FROM group_status_likes WHERE gname = ? AND gpost = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si",$g,$post_id);
-    $stmt->execute();
-    $stmt->bind_result($count);
-    $stmt->fetch();
-    $stmt->close();
-    $cl = ''.$count;
-
-    // Count the replies
-    $sql = "SELECT COUNT(id) FROM grouppost WHERE type = ? AND gname = ? AND pid = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi",$one,$g,$post_id);
-    $stmt->execute();
-    $stmt->bind_result($countrply);
-    $stmt->fetch();
-    $stmt->close();
-
-    $crply = ''.$countrply;
-
-    $showmore = "";
-    if($countrply > 0){
-      $showmore = '<div class="showrply"><a id="showreply_gr_'.$post_id.'" onclick="showReply('.$post_id.','.$crply.',\'gr\')">Show replies ('.$crply.')</a></div>';
-    }
-    
-    if(strlen($post_auth) > 12){
-      $post_auth = mb_substr($post_auth, 0, 8, "utf-8");
-      $post_auth .= ' ...';
-    }
-
-    $dec = "";
-      $urlId = "";
-      if($row["type"] != "1"){
-          $dec = "post";
-          $urlId = "status";
-      }else{
-          $dec = $urlId = "reply";
-      }
-
-    // Build threads
-    $mainPosts .= '
-          <div id="status_'.$post_id.'" class="status_boxes">
-              <div>'.$statusDeleteButton.'
-                  <p id="status_date">
-                      <b class="status_title">Post: </b>
-                      <span class="tooLong">'.$post_date.'</span> ('.$agoform.' ago)</b>
-                  </p>'.$user_image.'
-                  <div id="sdata_'.$post_id.'">
-                  <p id="status_text">
-                      <b class="sdata" id="hide_gr_'.$post_id.'">'.$post_data.''.$post_data_old.'</b>
-                  </p>
-              </div>
-
-              <hr class="dim">
-
-              <span id="likeBtn_gr_'.$post_id.'" class="likeBtn">
-                  '.$likeButton.'
-                  <span style="vertical-align: middle;">'.$likeText.'</span>
-              </span>
-              <div class="shareDiv">
-                  ' . $shareButton . '
-                  <span style="vertical-align: middle;">Share</span>
-              </div>
-              <span class="indinf">
-                  <a href="/group/'.$g.'/#'.$urlId.'_'.$post_id.'" style="color: #999; padding: 0px 10px 0px 10px; vertical-align: middle;">Group '.$dec.'</a>
-              </span>
-              <div style="float: left; padding: 0px 10px 0px 10px;">
-                  <b class="ispan" id="ipan_gr_'.$post_id.'">'.$cl.' likes</b>
-              </div>
-              <div class="clear"></div>
-          </div>
-          '.$showmore.'<span id="allrply_gr_'.$post_id.'" class="hiderply">'.$status_replies.'</span>
-          </div>';
-    $mainPosts .= '</div><div class="clear">';
-
-    // Time to build the Reply To section
-    if($isFriend == true && $row["type"] != 1 && !in_array($post_auth, $blocked_array)){
-        $mainPosts .= '<textarea id="replytext_gr_'.$post_id.'" class="replytext" placeholder="Write a comment ..." onfocus="showBtnDiv_reply(\''.$post_id.'\',\'gr\')"></textarea><div class="clear"></div>';
-    $mainPosts .= '<div id="uploadDisplay_SP_reply_gr_'.$post_id.'"></div>';
-    $mainPosts .= '<div id="btns_SP_reply_gr_'.$post_id.'" class="hiddenStuff">';
-      $mainPosts .= '<span id="swithidbr_gr_' . $post_id . '"><button id="replyBtn_gr_'.$post_id.'" class="btn_rply" onclick="replyPost(\''.$post_id.'\',\''.$g.'\')">Reply</button></span>';
-      $mainPosts .= '<img src="/images/camera.png" id="triggerBtn_SP_reply_gr_" class="triggerBtnreply" onclick="triggerUpload_reply(event, \'fu_SP_reply_gr_\')" width="22" height="22" title="Upload A Photo" />';
-      $mainPosts .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$post_id.', \'gr\')">';
-      $mainPosts .= '<div class="clear"></div>';
-      $mainPosts .= generateEList($post_id, 'emojiBox_reply_gr_' . $post_id . '', 'replytext_gr_' . $post_id . '');
-      $mainPosts .= '</div>';
-    $mainPosts .= '<div id="standardUpload_reply" class="hiddenStuff">';
-      $mainPosts .= '<form id="image_SP_reply" enctype="multipart/form-data" method="post">';
-      $mainPosts .= '<input type="file" name="FileUpload" id="fu_SP_reply_gr_" onchange="doUpload_reply(\'fu_SP_reply_gr_\', \''.$post_id.'\', \'triggerBtn_SP_reply_gr_\')" accept="image/*"/>';
-      $mainPosts .= '</form>';
-    $mainPosts .= '</div>';
-    $mainPosts .= '<div class="clear"></div>';
-  }
-}
-}else{
-  $mainPosts = "<p>Recommended group posts from your friends & followings</p><p style='font-size: 14px;'>Your friends have not posted or replied anything yet recently. Check your <a href='/friend_suggestions'>friend suggestions</a> to get new friends or encourage them to post & reply more!</p>";
-}
 ?>
 <!DOCTYPE html>
 <html>
