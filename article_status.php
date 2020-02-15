@@ -3,11 +3,6 @@
     Comment section of an article. Implement status posts, replies, likes etc.
   */
 
-  if(isset($_POST['main_status'])) {
-    echo $log_username;
-    exit();
-  }
-
   require_once 'php_includes/check_login_statues.php';
   require_once 'php_includes/status_common.php';
   require_once 'php_includes/perform_checks.php';

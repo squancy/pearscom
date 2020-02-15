@@ -4,7 +4,6 @@
 	require_once 'php_includes/pagination.php';
 	require_once 'php_includes/perform_checks.php';
 	require_once 'php_includes/wrapText.php';
-	//require_once 'user.php';
   require_once 'headers.php';
   require_once 'elist.php';
   require_once 'php_includes/dist.php';
@@ -23,17 +22,7 @@
   list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'ss', $url_n, $u, $a);
 
   // Display the number of status posts recorded
-	$sql = "SELECT COUNT(id) FROM status WHERE account_name = ?";
-	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("s",$u);
-	$stmt->execute();
-	$stmt->bind_result($countRs);
-	$stmt->fetch();
-	$stmt->close();
-	$toDis = "";
-	if($countRs > 0){
-		$toDis = '<p style="color: #999; text-align: center;">'.$countRs.' comments recorded</p>';
-	}
+  $toDis = numOfPosts($conn, 'status', 'account_name', $u);
 
 	$wmes = "What&#39;s in your mind?";
 

@@ -34,7 +34,7 @@
     $funames = wrapText($funames, 20);
     $fuco = wrapText($fuco, 20);
 
-    $numoffs = getUsersFriends($conn, $u, $log_username);
+    $numoffs = numOfFriends($conn, $author);
 
     // Avatar pic of user + popup on desktop
     $user_image = genUserImage($author, $friend_pic, $funames, $isonimg, $fuco, $dist,
@@ -104,7 +104,7 @@
         $funames = wrapText($funames, 20);
         $fuco = wrapText($fuco, 20);
     
-        $numoffs = getUsersFriends($conn, $replyauthor, $log_username);
+        $numoffs = numOfFriends($conn, $replyauthor);
 
         $user_image2 = genUserImage($replyauthor, $friend_pic, $funames, $isonimg, $fuco,
           $dist, $numoffs, true);
@@ -180,7 +180,7 @@
       $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
         $shareButton);
       
-        $statuslist .= '
+      $statuslist .= '
         <div id="status_'.$statusid.'" class="status_boxes">
           <div>'.$statusDeleteButton.'
             <p id="status_date">

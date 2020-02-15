@@ -211,10 +211,18 @@
     return false;
   }
 
-  function getAllLikes($db, $field, $statusid, $conn) {
-    $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$field." = ?";
+  function getAllLikes($db, $field, $statusid, $conn, $isMore = false, $keys = '', ...$params) {
+    if (!$isMore) {
+      $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$field ." = ?";
+    } else {
+      $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$isMore;
+    }
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $statusid);
+    if (!$isMore) {  
+      $stmt->bind_param("i", $statusid);
+    } else {
+      $stmt->bind_param("{$keys}", ...$params);
+    }
     $stmt->execute();
     $stmt->bind_result($likecount);
     $stmt->fetch();
@@ -246,10 +254,10 @@
     return '';
   }
 
-  function countReplies($u, $statusid, $ar, $conn) {
+  function countReplies($u, $statusid, $ar, $conn, $db = 'article_status', $plus = 'artid') {
     $b = 'b';
-    $sql = "SELECT COUNT(id) FROM article_status WHERE type = ? AND account_name = ?
-          AND osid = ? AND artid = ?";
+    $sql = "SELECT COUNT(id) FROM ".$db." WHERE type = ? AND account_name = ?
+          AND osid = ? AND ".$plus." = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssii", $b, $u, $statusid, $ar);
     $stmt->execute();
@@ -268,5 +276,19 @@
           </a>
         </div>';
     }
+  }
+
+  function numOfPosts($conn, $db, $field, $param) {
+    $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$field." = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $param);
+    $stmt->execute();
+    $stmt->bind_result($countRs);
+    $stmt->fetch();
+    $stmt->close();
+    if($countRs > 0){
+      return '<p style="color: #999; text-align: center;">'.$countRs.' comments recorded</p>';
+    }
+    return '';
   }
 ?>

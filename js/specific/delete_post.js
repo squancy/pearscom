@@ -4,7 +4,7 @@
 */
 
 function deleteStatus(id, status, serverSide = "/php_parsers/article_status_system.php") {
-  if (1 != confirm("Press OK to confirm deletion of this status and its replies")) {
+  if (!confirm("Press OK to confirm deletion of this status and its replies")) {
     return false;
   }
   var xhr = ajaxObj("POST", serverSide);
@@ -25,7 +25,7 @@ function deleteStatus(id, status, serverSide = "/php_parsers/article_status_syst
 }
 
 function deleteReply(result, data, serverSide = "/php_parsers/article_status_system.php") {
-  if (1 != confirm("Press OK to confirm deletion of this reply")) {
+  if (!confirm("Press OK to confirm deletion of this reply")) {
     return false;
   }
   var res = ajaxObj("POST", serverSide);

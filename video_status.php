@@ -604,6 +604,6 @@
   <?php echo $status_ui; ?>
 </div>
 <div id="statusarea">
-  <?php echo $statuslist; ?>
+  <?php echo $statvidl; ?>
 </div>
 <div id="pagination_controls"><?php echo $paginationCtrls; ?></div>

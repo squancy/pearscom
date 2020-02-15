@@ -328,7 +328,7 @@
                         </div>';
 	    }
 
-				$statuslist .= '<div id="status_'.$statusid.'" class="status_boxes">
+				$statvidl .= '<div id="status_'.$statusid.'" class="status_boxes">
 						<div>'.$statusDeleteButton.'
 							<p id="status_date">
 								<b class="status_title">Post: </b>
@@ -355,22 +355,20 @@
 				</div>'.$showmore.'<span id="allrply_'.$statusid.'" class="hiderply">'.$status_replies.'</span>
 				</div>';
 			if($isFriend == true || $log_username == $author){
-			    $statuslist .= '<textarea id="replytext_'.$statusid.'" class="replytext" onfocus="showBtnDiv_reply('.$statusid.')" placeholder="Write a comment"></textarea>';
-				$statuslist .= '<div id="uploadDisplay_SP_reply_'.$statusid.'"></div>';
-				$statuslist .= '<div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">';
-					$statuslist .= '<span id="swithidbr_'.$statusid.'"><button id="replyBtn_'.$statusid.'" class="btn_rply" onclick="replyToStatus('.$statusid.',\''.$u.'\',\'replytext_'.$statusid.'\',this)">Reply</button></span>';
-					$statuslist .= '<img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply" onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22" title="Upload A Photo" />';
-					$statuslist .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">';
-				$statuslist .= '<div class="clear"></div>';
-				$statuslist.= generateEList($statusid, 'emojiBox_reply_' . $statusid . '', 'replytext_'.$statusid.'');
-				$statuslist .= '</div>';
-				$statuslist .= '<div id="standardUpload_reply" class="hiddenStuff">';
-					$statuslist .= '<form id="image_SP_reply" enctype="multipart/form-data" method="post">';
-					$statuslist .= '<input type="file" name="FileUpload" id="fu_SP_reply" onchange="doUpload_reply(\'fu_SP_reply\', '.$statusid.')" accept="image/*"/>';
-					$statuslist .= '</form>';
-				$statuslist .= '</div>';
+			    $statvidl .= '<textarea id="replytext_'.$statusid.'" class="replytext" onfocus="showBtnDiv_reply('.$statusid.')" placeholder="Write a comment"></textarea>';
+				$statvidl .= '<div id="uploadDisplay_SP_reply_'.$statusid.'"></div>';
+				$statvidl .= '<div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">';
+					$statvidl .= '<span id="swithidbr_'.$statusid.'"><button id="replyBtn_'.$statusid.'" class="btn_rply" onclick="replyToStatus('.$statusid.',\''.$u.'\',\'replytext_'.$statusid.'\',this)">Reply</button></span>';
+					$statvidl .= '<img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply" onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22" title="Upload A Photo" />';
+					$statvidl .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">';
+				$statvidl .= '<div class="clear"></div>';
+				$statvidl.= generateEList($statusid, 'emojiBox_reply_' . $statusid . '', 'replytext_'.$statusid.'');
+				$statvidl .= '</div>';
+				$statvidl .= '<div id="standardUpload_reply" class="hiddenStuff">';
+					$statvidl .= '<form id="image_SP_reply" enctype="multipart/form-data" method="post">';
+					$statvidl .= '<input type="file" name="FileUpload" id="fu_SP_reply" onchange="doUpload_reply(\'fu_SP_reply\', '.$statusid.')" accept="image/*"/>';
+					$statvidl .= '</form>';
+				$statvidl .= '</div>';
 			}
 		}
-    if($fuck) {
-    }
 ?>
