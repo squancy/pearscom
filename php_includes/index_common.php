@@ -21,6 +21,7 @@
     while($row = $result->fetch_assoc()){
         array_push($blocked_array, $row["blocker"]);
     }
+    return $blocked_array;
   }
 
   function feedCount($conn, $friendsCSV) {

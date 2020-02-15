@@ -291,4 +291,16 @@
     }
     return '';
   }
+
+  function addIndexText($isIndex, $link, $text) {
+    if ($isIndex) {
+      return '
+        <div class="shareDiv">
+          <a style="color: #999;"
+            href="'.$link.'">'.$text.'</a>
+        </div>
+      ';
+    }
+    return '';
+  }
 ?>

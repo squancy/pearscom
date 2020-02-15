@@ -2,7 +2,9 @@
   while ($row = $result->fetch_assoc()) {
     $statusid = $row["id"];
     $type = $row["type"];
-    $p = $row["photo"];
+    if ($isIndex) {
+      $p = $row["photo"];
+    }
     $account_name = $row["account_name"];
     $author = $row["author"];
     $postdate_ = $row["postdate"];
@@ -140,11 +142,12 @@
           // Count reply likes
           $rpycl = getAllLikes('photo_reply_likes', 'reply', $statusreplyid, $conn); 
 
-          $replyLog = "";
-          $statusLog = "";
-
           $replyLog = genLog($_SESSION['username'], $statusreplyid, $likeButton_reply,
             $likeText_reply, false);
+
+          // If file is used on index.php add 'status post' text
+          $replyLog .= addIndexText($isIndex, '/photo_zoom/'.$account_name.'/'.$p.'/#reply_'.$statusid, 'Photo reply');
+
   
           // Build reply output
           $status_replies .= '
@@ -184,6 +187,15 @@
         $showmore = genShowMore($crply, $statusid);        
         $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
           $shareButton);
+
+        // If file is used on index.php add 'status post' text
+        if ($row["type"] != "b") {
+          $statusLog .= addIndexText($isIndex,
+            '/photo_zoom/'.$account_name.'/'.$p.'/#status_'.$statusid, 'Photo post');
+        } else {
+          $statusLog .= addIndexText($isIndex,
+            '/photo_zoom/'.$account_name.'/'.$p.'/#reply_'.$statusid, 'Photo reply');
+        }
         
         // Merge everything and send it to display
         $statphol .= '

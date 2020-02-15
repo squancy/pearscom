@@ -1,125 +1,46 @@
 <?php
 	require_once 'php_includes/check_login_statues.php';
+	require_once 'php_includes/status_common.php';
+	require_once 'php_includes/pagination.php';
+	require_once 'php_includes/isfriend.php';
+	require_once 'php_includes/perform_checks.php';
+	require_once 'php_includes/wrapText.php';
 	require_once 'safe_encrypt.php';
 	require_once 'headers.php';
 	require_once 'elist.php';
 	require_once 'php_includes/dist.php';
- 	
-    // Select user's lat and lon
-    $sql = "SELECT lat, lon FROM users WHERE username = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s",$log_username);
-    $stmt->execute();
-    $stmt->bind_result($lat,$lon);
-    $stmt->fetch();
-    $stmt->close();
+
+  list($lat, $lon) = getLatLon($conn, $log_username);
+
 	$status_ui = "";
 	$statuslist = "";
-	$statusid = "";
 	$a = "a";
 	$b = "b";
 	$c = "c";
-	// Get the length of each posts
 
 	$vi = $_SESSION["id"];
 
-	$isOwner = "No";
-	if($u == $log_username && $user_ok == true){
-		$isOwner = "Yes";
-	}
+	$isOwner = isOwner($u, $log_username, $user_ok); 
 	
-	$vi = base64url_decode($vi,$hshkey);
+	$vi = base64url_decode($vi, $hshkey);
 
-	// This first query is just to get the total count of rows
-	$sql = "SELECT COUNT(id) FROM video_status WHERE account_name=? AND vidid = ?";
-	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("si",$u,$vi);
-	$stmt->execute();
-	$stmt->bind_result($rows);
-	$stmt->fetch();
-	$stmt->close();
-	// Here we have the total row count
-	// This is the number of results we want displayed per page
-	$page_rows = 10;
-	// This tells us the page number of our last page
-	$last = ceil($rows/$page_rows);
-	// This makes sure $last cannot be less than 1
-	if($last < 1){
-		$last = 1;
-	}
-	// Establish the $pagenum variable
-	$pagenum = 1;
-	// Get pagenum from URL vars if it is present, else it is = 1
-	if(isset($_GET['pn'])){
-		$pagenum = preg_replace('#[^0-9]#', '', $_GET['pn']);
-	}
-	// This makes sure the page number isn't below 1, or more than our $last page
-	if ($pagenum < 1) { 
-	    $pagenum = 1; 
-	} else if ($pagenum > $last) { 
-	    $pagenum = $last; 
-	}
-	// This sets the range of rows to query for the chosen $pagenum
-	$limit = 'LIMIT ' .($pagenum - 1) * $page_rows .',' .$page_rows;
-	// Establish the $paginationCtrls variable
-	$paginationCtrls = '';
-	// If there is more than 1 page worth of results
-	if($last != 1){
-		/* First we check if we are on page one. If we are then we don't need a link to 
-		   the previous page or the first page so we do nothing. If we aren't then we
-		   generate links to the first page, and to the previous page. */
-		if ($pagenum > 1) {
-	        $previous = $pagenum - 1;
-			$paginationCtrls .= '<a href="/video_zoom/'.$vi_en.'&pn='.$previous.'#posts">Previous</a> &nbsp; &nbsp; ';
-			// Render clickable number links that should appear on the left of the target page number
-			for($i = $pagenum-4; $i < $pagenum; $i++){
-				if($i > 0){
-			        $paginationCtrls .= '<a href="/video_zoom/'.$vi_en.'&pn='.$i.'#posts">'.$i.'</a> &nbsp; ';
-				}
-		    }
-	    }
-		// Render the target page number, but without it being a link
-		$paginationCtrls .= ''.$pagenum.' &nbsp; ';
-		// Render clickable number links that should appear on the right of the target page number
-		for($i = $pagenum+1; $i <= $last; $i++){
-			$paginationCtrls .= '<a href="/video_zoom/'.$vi_en.'&pn='.$i.'#posts">'.$i.'</a> &nbsp; ';
-			if($i >= $pagenum+4){
-				break;
-			}
-		}
-		// This does the same as above, only checking if we are on the last page, and then generating the "Next"
-	    if ($pagenum != $last) {
-	        $next = $pagenum + 1;
-	        $paginationCtrls .= ' &nbsp; &nbsp; <a href="/video_zoom/'.$vi_en.'&pn='.$next.'#posts">Next</a> ';
-	    }
-	}
+  // Handle pagination
+  $sql_s = "SELECT COUNT(id) FROM video_status WHERE account_name=? AND vidid = ?";
+  $url_n = "/video_zoom/{$vi_en}";
+  list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'si', $url_n, $u, $vi);
 
-	$isFriend = false;
-	if($u != $log_username && $user_ok == true){
-		$friend_check = "SELECT id FROM friends WHERE user1=? AND user2=? AND accepted=? OR user1=? AND user2=? AND accepted=? LIMIT 1";
-		$stmt = $conn->prepare($friend_check);
-		$stmt->bind_param("ssssss",$log_username,$u,$one,$u,$log_username,$one);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-		$numrows = $stmt->num_rows;
-		if($numrows > 0){
-		    $isFriend = true;
-	    }
-    	$stmt->close();
-	}
-
-	$wtext = "";
+	$isFriend = isFriend($u, $log_username, $user_ok, $conn); 
 
 	if($isOwner == "Yes"){
 		$wtext = "Post something about your video!";
 	} else {
 		$wtext = "What do you think about this video?";
 	}
-	
+
+  // Count num of posts
 	$sql = "SELECT COUNT(id) FROM video_status WHERE account_name = ? AND vidid = ?";
 	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("ss",$u,$vi);
+	$stmt->bind_param("ss", $u, $vi);
 	$stmt->execute();
 	$stmt->bind_result($countRs);
 	$stmt->fetch();
@@ -129,41 +50,56 @@
 		$toDis = '<p style="color: #999; text-align: center;">'.$countRs.' comments recorded</p>';
 	}
 
-    if($_SESSION["username"] != ""){
-	$status_ui = $toDis.'<textarea id="statustext" class="user_status" onfocus="showBtnDiv()" placeholder="'.$wtext.'"></textarea>';
-	$status_ui .= '<div id="uploadDisplay_SP"></div>';
-	$status_ui .= '<div id="pbc">
-					<div id="progressBar"></div>
-					<div id="pbt"></div>
-				   </div>';
-	$status_ui .= '<div id="btns_SP" class="hiddenStuff" style="width: 90%;">';
-		$status_ui .= '<span id="swithspan"><button id="statusBtn" onclick="postToStatus(\'status_post\',\'a\',\''.$u.'\',\'statustext\')" class="btn_rply">Post</button></span>';
-		$status_ui .= '<img src="/images/camera.png" id="triggerBtn_SP" class="triggerBtnreply" onclick="triggerUpload(event, \'fu_SP\')" width="22" height="22" title="Upload A Photo" />';
-		$status_ui .= '<img src="/images/emoji.png" class="triggerBtn" width="22" height="22" title="Send emoticons" id="emoji" onclick="openEmojiBox()">';
-		$status_ui .= '<div class="clear"></div>';
-		$status_ui .= generateEList($statusid, 'emojiBox', 'statustext');
-	$status_ui .= '</div>';
-	$status_ui .= '<div id="standardUpload" class="hiddenStuff">';
-		$status_ui .= '<form id="image_SP" enctype="multipart/form-data" method="post">';
-		$status_ui .= '<input type="file" name="FileUpload" id="fu_SP" onchange="doUpload(\'fu_SP\')" accept="image/*">';
-		$status_ui .= '</form>';
-	$status_ui .= '</div>';
-	$status_ui .= '<div class="clear"></div>';
-    }else{
-        $status_ui = "<p class='txtc' style='color: #999;'>Please <a href='/login'>log in</a> in order to leave a comment</p>";
-    }
-	?>
-	<?php
-		$sql = "SELECT s.*, u.avatar, u.lat, u.lon, u.country, u.online
+  // Build user input
+  if($_SESSION["username"] != ""){
+    $status_ui = $toDis.'
+      <textarea id="statustext" class="user_status" onfocus="showBtnDiv()"
+        placeholder="'.$wtext.'"></textarea>
+      <div id="uploadDisplay_SP"></div>
+      <div id="pbc">
+        <div id="progressBar"></div>
+        <div id="pbt"></div>
+      </div>
+      <div id="btns_SP" class="hiddenStuff" style="width: 90%;">
+        <span id="swithspan">
+          <button id="statusBtn"
+            onclick="postToStatus(\'status_post\',\'a\',\''.$u.'\',\'statustext\')"
+            class="btn_rply">Post</button>
+        </span>
+        <img src="/images/camera.png" id="triggerBtn_SP" class="triggerBtnreply"
+          onclick="triggerUpload(event, \'fu_SP\')" width="22" height="22"
+          title="Upload A Photo" />
+        <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
+          title="Send emoticons" id="emoji" onclick="openEmojiBox()">
+        <div class="clear"></div>
+    ';
+    $status_ui .= generateEList($statusid, 'emojiBox', 'statustext');
+    $status_ui .= '</div>';
+    $status_ui .= '
+      <div id="standardUpload" class="hiddenStuff">
+        <form id="image_SP" enctype="multipart/form-data" method="post">
+          <input type="file" name="FileUpload" id="fu_SP" onchange="doUpload(\'fu_SP\')"
+            accept="image/*">
+        </form>
+      </div>
+      <div class="clear"></div>
+    ';  
+  }else{
+    $status_ui = "
+      <p class='txtc' style='color: #999;'>
+        Please <a href='/login'>log in</a> in order to leave a comment
+      </p>
+    ";
+  }
+
+  $sql = "SELECT s.*, u.avatar, u.lat, u.lon, u.country, u.online
 		FROM video_status AS s 
 		LEFT JOIN users AS u ON u.username = s.author
 		WHERE s.vidid = ? AND (s.account_name=? AND s.type=?) 
 		OR (s.account_name=? AND s.type=?) 
 		ORDER BY s.postdate DESC $limit";
-	?>
-	<?php 
 	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("issss",$vi,$u,$a,$u,$c);
+	$stmt->bind_param("issss", $vi, $u, $a, $u, $c);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	if($result->num_rows > 0){

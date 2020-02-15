@@ -1,5 +1,8 @@
 <?php
   while ($row = $result->fetch_assoc()) {
+    if ($isIndex) {
+      $p_en = base64url_encode($row["postdate"], $hshkey);
+    }
     $statusid = $row["id"];
     $account_name = $row["account_name"];
     $author = $row["author"];
@@ -122,11 +125,12 @@
 
         $rpycl = getAllLikes('art_reply_likes', 'reply', $statusreplyid, $conn);
         
-        $replyLog = "";
-        $statusLog = "";
-
         $replyLog = genLog($_SESSION["username"], $statusreplyid, $likeButton_reply,
           $likeText_reply, false);
+        $replyLog .= addIndexText($isIndex,
+          '/articles/'.$account_name.'/#reply_'.$statusreplyid,
+          'Article reply');
+
 
         $status_replies .= '
           <div id="reply_'.$statusreplyid.'" class="reply_boxes">
@@ -169,6 +173,16 @@
         
       $statusLog = genLog($_SESSION["username"], $statusid, $likeButton, $likeText,
         true, $shareButton);
+
+      // If file is used on index.php add 'status post' text
+      if ($row["type"] != "b") {
+        $statusLog .= addIndexText($isIndex, '/articles/'.$account_name.'/#status_'.$statusid,
+          'Article post');
+      } else {
+        $statusLog .= addIndexText($isIndex,
+          '/articles/'.$account_name.'/#reply_'.$statusreplyid,
+          'Article reply');
+      }
 
       $statartl .= '
         <div id="status_'.$statusid.'" class="status_boxes">

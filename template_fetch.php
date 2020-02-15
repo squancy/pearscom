@@ -8,7 +8,7 @@
     $stmt->fetch();
     $stmt->close();
     return $countrply;
-  }
+  } 
 
   while ($row = $result->fetch_assoc()) {
     $statusid = $row["id"];
@@ -137,12 +137,14 @@
 
         // Count reply likes
         $rpycl = getAllLikes('reply_likes', 'reply', $statusreplyid, $conn);
-
-        $replyLog = "";
-        $statusLog = "";
         
         $replyLog = genLog($_SESSION['username'], $statusreplyid, $likeButton_reply,
           $likeText_reply, false);
+
+        // If file is used on index.php add 'reply post' text
+        $replyLog .= addIndexText($isIndex, '/user/'.$account_name.'/#reply_'.$statusreplyid,
+          'Status reply');
+
           
         $status_replies .= '
         <div id="reply_'.$statusreplyid.'" class="reply_boxes">
@@ -179,6 +181,15 @@
       $showmore = genShowMore($crply, $statusid);
       $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
         $shareButton);
+      
+      // If file is used on index.php add 'status post' text
+      if ($row["type"] != "b") {
+        $statusLog .= addIndexText($isIndex, '/user/'.$account_name.'/#status_'.$statusid,
+          'Status post');
+      } else {
+        $statusLog .= addIndexText($isIndex, '/user/'.$account_name.'/#reply_'.$statusid,
+          'Status reply');
+      }
       
       $statuslist .= '
         <div id="status_'.$statusid.'" class="status_boxes">
@@ -222,7 +233,8 @@
         <div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">
         <span id="swithidbr_'.$statusid.'">
           <button id="replyBtn_'.$statusid.'" class="btn_rply"
-            onclick="replyToStatus(\''.$statusid.'\',\''.$u.'\',\'replytext_'.$statusid.'\',this,false,\'/php_parsers/status_system.php\')">Reply</button>
+            onclick="replyToStatus(\''.$statusid.'\',\''.$u.'\',\'replytext_'.$statusid.'\',
+            this,false,\'/php_parsers/status_system.php\')">Reply</button>
         </span>
         <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
           onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"
@@ -231,8 +243,8 @@
           title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
         <div class="clear"></div>
       ';
-      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid . '',
-        'replytext_'.$statusid.'');
+      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
+        'replytext_'.$statusid);
       $statuslist .= '</div>';
       $statuslist .= '
         <div id="standardUpload_reply" class="hiddenStuff">
