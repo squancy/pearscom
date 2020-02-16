@@ -131,127 +131,36 @@
           '/articles/'.$account_name.'/#reply_'.$statusreplyid,
           'Article reply');
 
-
-        $status_replies .= '
-          <div id="reply_'.$statusreplyid.'" class="reply_boxes">
-            <div>
-              '.$replyDeleteButton.'
-              <p id="float">
-                <b class="sreply">Reply: </b>
-                <b class="rdate">
-                  <span class="tooLong">'.$replypostdate.'</span>
-                  ('.$agoform_reply.' ago)
-                </b>
-              </p>
-
-              '.$user_image2.'
-              <p id="reply_text">
-                <b class="sdata" id="hide_reply_'.$statusreplyid.'">
-                  '.$replydata.''.$data_old_reply.'
-                </b>
-              </p>
-
-            <hr class="dim">
-
-            '.$replyLog.'
-            <div style="float: left; padding: 0px 10px 0px 10px;">
-              <b class="ispan" id="ipanr_' . $statusreplyid . '">' . $rpycl . ' likes</b>
-            </div>
-            <div class="clear"></div>
-            </div>
-          </div>';
-        }
+        $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
+          $agoform_reply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl);
       }
-
-      // Count the replies
-      $crply = countReplies($u, $statusid, $ar, $conn);
-
-      $showmore = genShowMore($crply, $statusid);
-
-      // Count likes
-      $cl = getAllLikes('art_stat_likes', 'status', $statusid, $conn);
-        
-      $statusLog = genLog($_SESSION["username"], $statusid, $likeButton, $likeText,
-        true, $shareButton);
-
-      // If file is used on index.php add 'status post' text
-      if ($row["type"] != "b") {
-        $statusLog .= addIndexText($isIndex, '/articles/'.$account_name.'/#status_'.$statusid,
-          'Article post');
-      } else {
-        $statusLog .= addIndexText($isIndex,
-          '/articles/'.$account_name.'/#reply_'.$statusreplyid,
-          'Article reply');
-      }
-
-      $statartl .= '
-        <div id="status_'.$statusid.'" class="status_boxes">
-          <div>
-            '.$statusDeleteButton.'
-            <p id="status_date">
-              <b class="status_title">Post: </b>
-              <b class="pdate">
-                <span class="tooLong">'.$postdate.'</span> ('.$agoform.' ago)
-              </b>
-            </p>
-
-            '.$user_image.'
-
-            <div id="sdata_'.$statusid.'">
-              <p id="status_text">
-                <b class="sdata" id="hide_'.$statusid.'">
-                  '.$data.''.$data_old.'
-                </b>
-              </p>
-            </div>
-
-            <hr class="dim">
-
-            '.$statusLog.'
-
-            <div style="float: left; padding: 0px 10px 0px 10px;">
-              <b class="ispan" id="ipanf_' . $statusid . '">
-                ' . $cl . ' likes
-              </b>
-            </div>
-            <div class="clear"></div>
-          </div>
-          '.$showmore.'
-          <span id="allrply_'.$statusid.'" class="hiderply">
-            '.$status_replies.'
-          </span>
-        </div>';
-
-    if($isFriend == true || $log_username == $_SESSION['username']){
-      $statartl .= '
-        <textarea id="replytext_'.$statusid.'" class="replytext"
-          onfocus="showBtnDiv_reply('.$statusid.')"
-          placeholder="Write a comment..."></textarea>
-        <div id="uploadDisplay_SP_reply_'.$statusid.'"></div>
-        <div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">
-          <span id="swithidbr_'.$statusid.'">
-            <button id="replyBtn_'.$statusid.'" class="btn_rply"
-              onclick="replyToStatus('.$statusid.',\''.$u.'\',\'replytext_'.$statusid.'\',this)">Reply</button>
-            </span>
-            <img src="/images/camera.png" id="triggerBtn_SP_reply_" class="triggerBtnreply"
-              onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"
-              title="Upload a photo" />
-            <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
-              title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
-            <div class="clear"></div>
-        ';
-      $statartl .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
-          'replytext_'.$statusid);
-      $statartl .= '</div>';
-      $statartl .= '
-        <div id="standardUpload_reply" class="hiddenStuff">
-          <form id="image_SP_reply" enctype="multipart/form-data" method="post">
-            <input type="file" name="FileUpload" id="fu_SP_reply"
-              onchange="doUpload_reply(\'fu_SP_reply\', '.$statusid.')" accept="image/*"/>
-          </form>
-        </div>
-        <div class="clear"></div>
-      ';
     }
+
+    // Count the replies
+    $crply = countReplies($u, $statusid, $ar, $conn);
+
+    $showmore = genShowMore($crply, $statusid);
+
+    // Count likes
+    $cl = getAllLikes('art_stat_likes', 'status', $statusid, $conn);
+      
+    $statusLog = genLog($_SESSION["username"], $statusid, $likeButton, $likeText,
+      true, $shareButton);
+
+    // If file is used on index.php add 'status post' text
+    if ($row["type"] != "b") {
+      $statusLog .= addIndexText($isIndex, '/articles/'.$account_name.'/#status_'.$statusid,
+        'Article post');
+    } else {
+      $statusLog .= addIndexText($isIndex,
+        '/articles/'.$account_name.'/#reply_'.$statusreplyid,
+        'Article reply');
+    }
+
+    $statartl .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
+      $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);
+
+    $statartl .= genReplyInput($isFriend, $log_username, $u, $statusid,
+      '/php_parsers/article_status_system.php'); 
   }
 ?>

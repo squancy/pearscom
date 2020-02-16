@@ -312,7 +312,7 @@
   }
 
   function genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
-    $agoformreply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl) {
+    $agoformrply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl) {
     return '
       <div id="reply_'.$statusreplyid.'" class="reply_boxes">
         <div>
@@ -378,7 +378,13 @@
     </div>';
   }
 
-  function genReplyInput($isFriend, $log_username, $u, $statusid, $parser) {
+  function genReplyInput($isFriend, $log_username, $u, $statusid, $parser, $g = false) {
+    if ($parser == '/php_parsers/group_parser2.php') {
+      $param = "'{$statusid}', false, 'replytext_{$statusid}', false, '{$g}',
+        '/php_parsers/group_parser2.php'";
+    } else {
+      $param = "'{$statusid}', '{$u}', 'replytext_{$statusid}', this, false, '{$parser}'";
+    }
     if($isFriend == true || $log_username == $u){
       $statuslist = '
         <textarea id="replytext_'.$statusid.'" class="replytext"
@@ -388,8 +394,7 @@
         <div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">
         <span id="swithidbr_'.$statusid.'">
           <button id="replyBtn_'.$statusid.'" class="btn_rply"
-            onclick="replyToStatus(\''.$statusid.'\',\''.$u.'\',\'replytext_'.$statusid.'\',
-            this,false,\''.$parser.'\')">Reply</button>
+            onclick="replyToStatus('.$param.')">Reply</button>
         </span>
         <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
           onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"

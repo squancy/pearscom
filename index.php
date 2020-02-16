@@ -451,7 +451,7 @@
   $my_friends = array();
   $myf = array();
   $otype = 'all';
-  $limit = 'LIMIT 10';
+  $limit = 'LIMIT 3';
   
   require_once 'friendsugg_fetch.php';
 

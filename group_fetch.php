@@ -1,5 +1,9 @@
 <?php
   while ($row = $result_new->fetch_assoc()) {
+    if ($isIndex) {
+      $g = $row["gname"];
+      $cClass = "";
+    }
     $post_id = $row["grouppost_id"];
     $post_auth = $row["author"];
     $post_type = $row["type"];
@@ -39,7 +43,9 @@
       $style = true;
     }
     
-    $cClass = chooseClass($moderators, $post_auth, $creator);
+    if (!$isIndex) {
+      $cClass = chooseClass($moderators, $post_auth, $creator);
+    }
     
     $user_image = genUserImage($post_auth, $avatar_pic, $funames, $isonimg, $fuco, $dist,
       $numoffs, $style, $cClass);
@@ -107,7 +113,9 @@
         $numoffs = numOfFriends($conn, $reply_auth); 
         $re_avatar_pic = avatarImg($reply_auth, $reply_avatar);
         
-        $cClass = chooseClass($moderators, $reply_auth, $creator); 
+        if (!$isIndex) {
+          $cClass = chooseClass($moderators, $reply_auth, $creator); 
+        }
 
         $mgin = true;
         if ($reply_auth != $log_username) {
@@ -142,41 +150,15 @@
         // Count reply likes
         $rpycl = cntLikes($conn, $statusreplyid, $g, 'group_reply_likes');
 
+        $replyLog = genLog($_SESSION['username'], $statusreplyid, $likeButton_reply,
+          $likeText_reply, false);
+
+        $replyLog .= addIndexText($isIndex, '/group/'.$g.'/#reply_'.$statusreplyid,
+          'Group reply');
+
         // Build replies
-        $status_replies .= '
-          <div id="reply_'.$statusreplyid.'" class="reply_boxes">
-            <div>
-              '.$replyDeleteButton.'
-              <p id="float">
-                <b class="sreply">Reply: </b>
-                <b class="rdate">
-                  <span class="tooLong">'.$reply_date.'</span> ('.$agoformrply.' ago)
-                </b>
-              </p>
-
-              '.$reply_image.'
-
-              <p id="reply_text">
-                <b class="sdata" id="hide_reply_'.$statusreplyid.'">
-                  '.$reply_data.''.$data_old_reply.'
-                </b>
-              </p>
-
-              <hr class="dim">
-
-              <span id="likeBtn_reply_'.$statusreplyid.'" class="likeBtn">'
-                .$likeButton_reply.'
-                <span style="vertical-align: middle;">'.$likeText_reply.'</span>
-              </span>
-
-              <div style="float: left; padding: 0px 10px 0px 10px;">
-                <b class="ispan" id="ipanr_' . $statusreplyid . '">' . $rpycl . ' likes</b>
-              </div>
-
-              <div class="clear"></div>
-            </div>
-          </div>
-        ';
+        $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $reply_date,
+          $agoformrply, $reply_image, $reply_data, $data_old_reply, $replyLog, $rpycl);
       }
     }
 
@@ -186,97 +168,26 @@
     // Count the replies
     $crply = cntReplies($conn, $g, $post_id);
 
-    $showmore = "";
-    if($crply > 0){
-      $showmore = '
-        <div class="showrply">
-          <a id="showreply_'.$post_id.'" onclick="showReply('.$post_id.','.$crply.')">
-            Show replies ('.$crply.')
-          </a>
-        </div>
-      ';
-    }
-    
+    $showmore = genShowMore($crply, $post_id);    
     $post_auth = wrapText($post_auth, 12);
+    $statusLog = genLog($_SESSION['username'], $post_id, $likeButton, $likeText, true,
+      $shareButton);
+
+    // If file is used on index.php add custom text
+    if ($post_type != $one) {
+      $statusLog .= addIndexText($isIndex, '/group/'.$g.'/#status_'.$post_id,
+        'Group post');
+    } else {
+      $statusLog .= addIndexText($isIndex, '/group/'.$g.'/#reply_'.$post_id,
+        'Group reply');
+    }
 
     // Build threads
-    $mainPosts .= '
-      <div id="status_'.$post_id.'" class="status_boxes">
-        <div>
-          '.$statusDeleteButton.'
-          <p id="status_date">
-            <b class="status_title">Post: </b>
-            <b class="pdate">
-              <span class="tooLong">'.$post_date.'</span> ('.$agoform.' ago)
-            </b>
-          </p>
-
-          '.$user_image.'
-
-          <div id="sdata_'.$post_id.'">
-            <p id="status_text">
-              <b class="sdata" id="hide_'.$post_id.'">
-                '.$post_data.''.$post_data_old.'
-              </b>
-            </p>
-          </div>
-
-          <hr class="dim">
-
-          <span id="likeBtn_'.$post_id.'" class="likeBtn">
-            '.$likeButton.'
-            <span style="vertical-align: middle;">'.$likeText.'</span>
-          </span>
-
-          <div class="shareDiv">
-            ' . $shareButton . '
-            <span style="vertical-align: middle;">Share</span>
-          </div>
-
-          <div style="float: left; padding: 0px 10px 0px 10px;">
-            <b class="ispan" id="ipanf_' . $post_id . '">
-              ' . $cl . ' likes
-            </b>
-          </div>
-
-          <div class="clear"></div>
-        </div>
-        '.$showmore.'
-        <span id="allrply_'.$post_id.'" class="hiderply">'.$status_replies.'</span>
-      </div>
-    ';
-    $mainPosts .= '</div><div class="clear">';
+    $mainPosts .= genStatCommon($post_id, $statusDeleteButton, $post_date, $agoform,
+      $user_image, $post_data, $post_data_old, $statusLog, $cl, $showmore, $status_replies);
 
     // Time to build the Reply To section
-    $mainPosts .= '
-      <textarea id="replytext_'.$post_id.'" class="replytext" placeholder="Write a comment"
-        onfocus="showBtnDiv_reply(\''.$post_id.'\')"></textarea>
-      <div id="uploadDisplay_SP_reply_'.$post_id.'"></div>
-      <div id="btns_SP_reply_'.$post_id.'" class="hiddenStuff rply_joiner">
-        <span id="swithidbr_'.$post_id.'">
-          <button id="replyBtn_'.$post_id.'" class="btn_rply"
-            onclick="replyToStatus(\''.$post_id.'\', false, \'replytext_'.$post_id.'\', false, \''.$g.'\', \'/php_parsers/group_parser2.php\')">Reply</button>
-        </span>
-
-        <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
-          onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"
-          title="Upload A Photo" />
-
-        <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
-          title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$post_id.')">
-
-        <div class="clear"></div>
-    ';
-    $mainPosts .= generateEList($post_id, 'emojiBox_reply_' . $post_id,
-        'replytext_'.$post_id);
-    $mainPosts .= '</div>';
-    $mainPosts .= '
-      <div id="standardUpload_reply" class="hiddenStuff">
-        <form id="image_SP_reply" enctype="multipart/form-data" method="post">
-          <input type="file" name="FileUpload" id="fu_SP_reply"
-            onchange="doUpload_reply(\'fu_SP_reply\', \''.$post_id.'\')" accept="image/*"/>
-        </form>
-      </div>
-    ';
+    $mainPosts .= genReplyInput($isFriend, $log_username, $u, $post_id,
+      '/php_parsers/group_parser2.php', $g);
   }
 ?>

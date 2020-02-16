@@ -144,10 +144,9 @@
         // If file is used on index.php add 'reply post' text
         $replyLog .= addIndexText($isIndex, '/user/'.$account_name.'/#reply_'.$statusreplyid,
           'Status reply');
-
           
         $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
-          $agoformreply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl);
+          $agoformrply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl);
       }
     }
 
