@@ -1,8 +1,16 @@
 <?php
-  function countReplies_stat($conn, $b, $u, $statusid) {
-    $sql = "SELECT COUNT(id) FROM status WHERE type = ? AND account_name = ? AND osid = ?";
+  function countReplies_stat($conn, $b, $u, $statusid, $ind = false) {
+    $accountName = 'AND account_name = ?';
+    if ($ind) {
+      $accountName = '';
+    }
+    $sql = "SELECT COUNT(id) FROM status WHERE type = ? ".$accountName." AND osid = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $b, $u, $statusid);
+    if ($ind) {
+      $stmt->bind_param("si", $b, $statusid);
+    } else {
+      $stmt->bind_param("ssi", $b, $u, $statusid);
+    }
     $stmt->execute();
     $stmt->bind_result($countrply);
     $stmt->fetch();
@@ -55,8 +63,15 @@
     $statusDeleteButton = '';
 
     // Status delete button
-    $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
-      true, '/php_parsers/status_system.php');
+    if (!$isIndex) {
+      $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
+        true, '/php_parsers/status_system.php');
+    } else {
+      // ugly button to position user avatar
+      $statusDeleteButton = '
+        <button style="visibility: hidden; margin-left: -5px;"></button>
+      ';
+    }
 
     // Add share button
     $shareButton = genShareBtn($log_username, $author, $statusid,
@@ -114,8 +129,15 @@
 
         // Reply delete button
         $replyDeleteButton = '';
-        $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
-          $statusreplyid, false, true, '/php_parsers/status_system.php');
+
+        if (!$isIndex) {
+          $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
+            $statusreplyid, false, true, '/php_parsers/status_system.php');
+        } else {
+          $replyDeleteButton = '
+            <button style="visibility: hidden; margin-left: -5px;"></button>
+          ';
+        }
 
         $agoformrply = time_elapsed_string($replypostdate_);
         $data_old_reply = sanitizeData($row2["data"]);
@@ -154,26 +176,27 @@
     $cl = getAllLikes('status_likes', 'status', $statusid, $conn);
 
     // Count the replies
-    $crply = countReplies_stat($conn, $b, $u, $statusid);
+    if (!$isIndex) {
+      $crply = countReplies_stat($conn, $b, $u, $statusid);
+    } else {
+      $crply = countReplies_stat($conn, $b, $u, $statusid, true);
+    }
 
     $showmore = genShowMore($crply, $statusid);
     $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
       $shareButton);
     
     // If file is used on index.php add 'status post' text
-    if ($row["type"] != "b") {
-      $statusLog .= addIndexText($isIndex, '/user/'.$account_name.'/#status_'.$statusid,
-        'Status post');
-    } else {
-      $statusLog .= addIndexText($isIndex, '/user/'.$account_name.'/#reply_'.$statusid,
-        'Status reply');
-    }
+    $statusLog .= addIndexText($isIndex, '/user/'.$account_name.'/#status_'.$statusid,
+      'Status post');
     
     $statuslist .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
       $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);
 
     // Build potential reply section
-    $statuslist .= genReplyInput($isFriend, $log_username, $u, $statusid,
-      '/php_parsers/status_system.php');
+    if ($isFriend || $log_username == $u || $author == $log_username) {
+      $statuslist .= genReplyInput($isFriend, $log_username, $u, $statusid,
+        '/php_parsers/status_system.php');
+    }
   }
 ?>

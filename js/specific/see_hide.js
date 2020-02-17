@@ -33,14 +33,14 @@ function opentext(name) {
 }
 
 var us = "less";
-function showReply(name, index) {
+function showReply(name, index, sType) {
   if ("less" == us) {
-    _("showreply_" + name).innerText = "Hide replies (" + index + ")";
-    _("allrply_" + name).style.display = "block";
+    _("showreply_" + sType + "_" + name).innerText = "Hide replies (" + index + ")";
+    _("allrply_" + sType + "_" + name).style.display = "block";
     us = "more";
   } else if ("more" == us) {
-    _("showreply_" + name).innerText = "Show replies (" + index + ")";
-    _("allrply_" + name).style.display = "none";
+    _("showreply_" + sType + "_" + name).innerText = "Show replies (" + index + ")";
+    _("allrply_" + sType + "_" + name).style.display = "none";
     us = "less";
   }
 }

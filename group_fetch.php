@@ -51,8 +51,11 @@
       $numoffs, $style, $cClass);
 
     // Add delete button
-    $statusDeleteButton = genDelBtn($post_auth, $log_username, $post_auth, $post_id, true,
-      false, '/php_parsers/group_parser2.php');
+    $statusDeleteButton = '';
+    if (!$isIndex) {
+      $statusDeleteButton = genDelBtn($post_auth, $log_username, $post_auth, $post_id, true,
+        false, '/php_parsers/group_parser2.php');
+    } 
 
     // Add share button
     $shareButton = genShareBtn($log_username, $post_auth, $post_id,
@@ -118,7 +121,7 @@
         }
 
         $mgin = true;
-        if ($reply_auth != $log_username) {
+        if ($reply_auth != $log_username && !$isIndex) {
           $mgin = false;
         }
 
@@ -127,9 +130,11 @@
           $dist, $numoffs, $mgin, $cClass); 
         
         // Add delete btn
-        $replyDeleteButton = genDelBtn($reply_auth, $log_username, $reply_auth,
-          $statusreplyid, false, false, '/php_parsers/group_parser2.php');
-
+        if(!$isIndex) {
+          $replyDeleteButton = genDelBtn($reply_auth, $log_username, $reply_auth,
+            $statusreplyid, false, false, '/php_parsers/group_parser2.php');
+        } 
+       
         $agoformrply = time_elapsed_string($reply_date_);
         $data_old_reply = sanitizeData($row2["data"]);
 
@@ -174,20 +179,17 @@
       $shareButton);
 
     // If file is used on index.php add custom text
-    if ($post_type != $one) {
-      $statusLog .= addIndexText($isIndex, '/group/'.$g.'/#status_'.$post_id,
-        'Group post');
-    } else {
-      $statusLog .= addIndexText($isIndex, '/group/'.$g.'/#reply_'.$post_id,
-        'Group reply');
-    }
+    $statusLog .= addIndexText($isIndex, '/group/'.$g.'/#status_'.$post_id,
+      'Group post');
 
     // Build threads
     $mainPosts .= genStatCommon($post_id, $statusDeleteButton, $post_date, $agoform,
       $user_image, $post_data, $post_data_old, $statusLog, $cl, $showmore, $status_replies);
 
     // Time to build the Reply To section
-    $mainPosts .= genReplyInput($isFriend, $log_username, $u, $post_id,
-      '/php_parsers/group_parser2.php', $g);
+    if ($isFriend || $log_username == $u || $post_auth == $log_username) {
+      $mainPosts .= genReplyInput($isFriend, $log_username, $u, $post_id,
+        '/php_parsers/group_parser2.php', $g);
+    }
   }
 ?>

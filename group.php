@@ -17,6 +17,7 @@
   
   list($lat, $lon) = getLatLon($conn, $log_username);
   $one = "1";
+  $sType = 'group';
   $u = $_SESSION["username"];
 
   // Select the member from the users table

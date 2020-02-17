@@ -52,8 +52,16 @@
 
     // Get status delete button
     $statusDeleteButton = '';
-    $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
-      true, '/php_parsers/photo_status_system.php');
+
+    if (!$isIndex) {
+      $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
+        true, '/php_parsers/photo_status_system.php');
+    } else {
+      // ugly button to position user avatar
+      $statusDeleteButton = '
+        <button style="visibility: hidden; margin-left: -5px;"></button>
+      ';
+    }
 
     // Add share button
     $shareButton = genShareBtn($log_username, $author, $statusid,
@@ -128,8 +136,16 @@
 
         // Get reply delete button
         $replyDeleteButton = '';
-        $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
-          $statusreplyid, false, true, '/php_parsers/photo_status_system.php');
+
+        if (!$isIndex) {
+          $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
+            $statusreplyid, false, true, '/php_parsers/photo_status_system.php');
+        }  else {
+          // ugly button to position user avatar
+          $replyDeleteButton = '
+            <button style="visibility: hidden; margin-left: -5px;"></button>
+          ';
+        }
 
         // Check if user liked the reply
         $isLike_reply = userLiked($user_ok, $conn, $statusreplyid, $log_username, false,
@@ -162,27 +178,28 @@
       'status = ? AND photo = ?', 'is', $statusid, $p); 
 
     // Count the replies
-    $crply = countReplies($u, $statusid, $p, $conn, 'photos_status', 'photo'); 
+    if (!$isIndex) {
+      $crply = countReplies($u, $statusid, $p, $conn, 'photos_status', 'photo'); 
+    } else {
+      $crply = countReplies($u, $statusid, $p, $conn, 'photos_status', 'photo', true); 
+    }
 
     $showmore = genShowMore($crply, $statusid);        
     $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
       $shareButton);
 
     // If file is used on index.php add 'status post' text
-    if ($row["type"] != "b") {
-      $statusLog .= addIndexText($isIndex,
-        '/photo_zoom/'.$account_name.'/'.$p.'/#status_'.$statusid, 'Photo post');
-    } else {
-      $statusLog .= addIndexText($isIndex,
-        '/photo_zoom/'.$account_name.'/'.$p.'/#reply_'.$statusid, 'Photo reply');
-    }
+    $statusLog .= addIndexText($isIndex,
+      '/photo_zoom/'.$account_name.'/'.$p.'/#status_'.$statusid, 'Photo post');
     
     // Merge everything and send it to display
     $statphol .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
       $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);
         
     // Comment section
-    $statphol .= genReplyInput($isFriend, $log_username, $u, $statusid,
-      '/php_parsers/photo_status_system.php');
+    if ($isFriend || $log_username == $u || $author == $log_username) {
+      $statphol .= genReplyInput($isFriend, $log_username, $u, $statusid,
+        '/php_parsers/photo_status_system.php');
+    }
   }
 ?>

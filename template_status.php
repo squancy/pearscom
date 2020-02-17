@@ -10,6 +10,7 @@
 
 	$status_ui = "";
 	$statuslist = "";
+  $sType = "status";
 	$a = "a";
 	$b = "b";
 	$c = "c";

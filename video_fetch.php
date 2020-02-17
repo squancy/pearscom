@@ -1,5 +1,9 @@
 <?php
   while ($row = $result->fetch_assoc()) {
+    if ($isIndex) {
+      $_SESSION['id'] = '';
+      $vi = $row["video_id"];
+    }
     $statusid = $row["id"];
     $account_name = $row["account_name"];
     $author = $row["author"];
@@ -45,8 +49,16 @@
 
     // Status delete button
     $statusDeleteButton = '';
-    $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
-      true, '/php_parsers/video_status_parser.php');
+
+    if(!$isIndex) {
+      $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid, true,
+        true, '/php_parsers/video_status_parser.php');
+    } else {
+      // ugly button to position user avatar
+      $statusDeleteButton = '
+        <button style="visibility: hidden; margin-left: -5px;"></button>
+      ';
+    }
 
     // Add share button
     $shareButton = genShareBtn($log_username, $author, $statusid,
@@ -104,8 +116,16 @@
 
         // Create reply delete button
         $replyDeleteButton = '';
-        $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
-          $statusreplyid, false, true, '/php_parsers/video_status_parser.php'); 
+
+        if (!$isIndex) {
+          $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
+            $statusreplyid, false, true, '/php_parsers/video_status_parser.php'); 
+        } else {
+          // ugly button to position user avatar
+          $replyDeleteButton = '
+            <button style="visibility: hidden; margin-left: -5px;"></button>
+          ';
+        }
 
         $agoformrply = time_elapsed_string($replypostdate_);
         $data_old_reply = sanitizeData($row2["data"]);
@@ -143,25 +163,26 @@
     $cl = getAllLikes('video_status_likes', 'status', $statusid, $conn);
 
     // Count the replies
-    $crply = countReplies($u, $statusid, $vi, $conn, 'video_status', 'vidid');
+    if (!$isIndex) {
+      $crply = countReplies($u, $statusid, $vi, $conn, 'video_status', 'vidid');
+    } else {
+      $crply = countReplies($u, $statusid, $vi, $conn, 'video_status', 'vidid', true);
+    }
 
     $showmore = genShowMore($crply, $statusid);    
     $statusLog = genLog($_SESSION['username'], $statusid, $likeButton, $likeText, true,
       $shareButton);
 
     // If file is used on index.php add 'status post' text
-    if ($row["type"] != "b") {
-      $statusLog .= addIndexText($isIndex,
-        '/video_zoom/'.$vi.'/#status_'.$statusid, 'Video post');
-    } else {
-      $statusLog .= addIndexText($isIndex,
-        '/video_zoom/'.$vi.'/#reply_'.$statusid, 'Video reply');
-    }
+    $statusLog .= addIndexText($isIndex,
+      '/video_zoom/'.$vi.'/#status_'.$statusid, 'Video post');
 
     $statvidl .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
       $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);
     
-    $statvidl .= genReplyInput($isFriend, $log_username, $u, $statusid,
-      '/php_parsers/video_status_parser.php');
+    if ($isFriend || $log_username == $u || $author == $log_username) {
+      $statvidl .= genReplyInput($isFriend, $log_username, $u, $statusid,
+        '/php_parsers/video_status_parser.php');
+    }
   }
 ?>

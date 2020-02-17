@@ -1,5 +1,7 @@
 <?php
 	include_once("../php_includes/check_login_statues.php");
+  require_once '../php_includes/ind.php';
+
 	if($user_ok != true || $log_username == "") {
 		exit();
 	}
@@ -7,7 +9,7 @@
     $p = "";
 	if(isset($_POST["phot"]) && $_POST["phot"] != ""){
 	    $p = mysqli_real_escape_string($conn, $_POST["phot"]);
-	}else{
+	}else if(isset($_SESSION['photo']) && !empty($_SESSION['photo'])){
 	    $p = $_SESSION["photo"];
 	}
 
@@ -181,6 +183,11 @@ if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
 	$osid = preg_replace('#[^0-9]#', '', $_POST['sid']);
 	$account_name = mysqli_real_escape_string($conn, $_POST["user"]);
 	$data = htmlentities($_POST['data']);
+
+  if ($p == "") {
+    $p = indexId($conn, $osid, "photos_status", "photo");
+  }
+
 	// We just have an image
 	if($data == "||na||" && $image != "na"){
 		$data = '<img src="/permUploads/'.$image.'" /><br>';
@@ -355,6 +362,11 @@ if (isset($_POST['action']) && $_POST['action'] == "delete_reply"){
 			exit();
 		}
 		$id = preg_replace('#[^0-9]#', '', $_POST['id']);
+
+    if ($p == "") {
+      $p = indexId($conn, $id, "photos_status", "photo");
+    }
+
 		if($id == ""){
 			mysqli_close($conn);
 			echo "fail";

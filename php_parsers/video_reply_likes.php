@@ -12,7 +12,7 @@
 	$vi = "";
     if(isset($_POST["vi"]) && $_POST["vi"] != ""){
         $vi = mysqli_real_escape_string($conn, $_POST["vi"]);
-    }else{
+    }else if(isset($_SESSION["id"]) && !empty($_SESSION["id"])){
         $vi = $_SESSION["id"];
 	    $vi = base64url_decode($vi, $hshkey);
     }
@@ -20,6 +20,18 @@
 <?php
 	if(isset($_POST['type']) && isset($_POST['id'])){
 		$id = preg_replace('#[^0-9]#i', '', $_POST['id']);
+
+    if ($vi == "") {
+      // Fired from index.php like so get the photo file name from status id
+      $sql = "SELECT vidid FROM video_status WHERE id=? LIMIT 1";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("i",$id);
+      $stmt->execute();
+      $stmt->bind_result($vi);
+      $stmt->fetch();
+      $stmt->close();
+    }
+
 		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
 		$stmt = $conn->prepare($sql);
 		$stmt->bind_param("ss",$log_username,$one);

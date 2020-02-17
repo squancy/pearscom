@@ -18,44 +18,45 @@ function showError() {
   _(t).innerHTML = "Try again later";
 }
 
-function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_system_art.php') {
+function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_system_art.php',
+  sType = 'status') {
   var toSend = "type=" + e + "&id=" + o;
   if (isGr) {
     toSend += '&group=' + isGr; 
   }
-  console.log(toSend);
+
   var result = ajaxObj("POST", serverSide);
   result.onreadystatechange = function() {
     if (ajaxReturn(result)) {
       if ("like_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
-            onmousedown="toggleLike('unlike', '${o}','likeBtn_${o}', '${isGr}',
-            '${serverSide}');">
+            onmousedown="toggleLike('unlike', '${o}','likeBtn${sType}_${o}', '${isGr}',
+            '${serverSide}', '${sType}');">
             <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike">
           </a>
           <span style="vertical-align: middle; margin-left: 5px;">Dislike</span>
         `;
 
         // Replace parentheses and words from the like count
-        let e = _("ipanf_" + o).innerText.replace("(", "")
+        let e = _("ipanf" + sType + "_" + o).innerText.replace("(", "")
           .replace(")", "").replace("likes", "").replace(" ", "");
         e = Number(e) + 1;
-        _("ipanf_" + o).innerText = e + " likes";
+        _("ipanf" + sType  +  "_" + o).innerText = e + " likes";
       } else {
         if ("unlike_success" == result.responseText) {
           _(t).innerHTML = `
             <a href="#" onclick="return false;"
-              onmousedown="toggleLike('like', '${o}', 'likeBtn_${o}', '${isGr}',
-              '${serverSide}')">
+              onmousedown="toggleLike('like', '${o}', 'likeBtn${sType}_${o}', '${isGr}',
+              '${serverSide}', '${sType}')">
               <img src="/images/nf.png" width="18" height="18" class="like_unlike">
             </a>
             <span style="vertical-align: middle; margin-left: 5px;">Like</span>
           `;
-          let e = _("ipanf_" + o).innerText.replace("(", "").replace(")", "")
+          let e = _("ipanf" + sType  +  "_" + o).innerText.replace("(", "").replace(")", "")
             .replace("likes", "").replace(" ", "");
             e = Number(e) - 1;
-            _("ipanf_" + o).innerText = e + " likes";
+            _("ipanf" + sType  +  "_" + o).innerText = e + " likes";
         } else {
           prepareDialog();
           showError();
@@ -67,7 +68,7 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
 }
 
 function toggleLike_reply(e, o, t, isGr = false,
-  serverSide = '/php_parsers/like_reply_system_art.php') {
+  serverSide = '/php_parsers/like_reply_system_art.php', sType = 'status') {
   var toSend = "type=" + e + "&id=" + o;
   if (isGr) {
     toSend += '&group=' + isGr; 
@@ -79,32 +80,31 @@ function toggleLike_reply(e, o, t, isGr = false,
       if ("like_reply_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
-            onmousedown="toggleLike_reply('unlike', '${o}', 'likeBtn_reply_${o}', '${isGr}',
-            '${serverSide}')">
+            onmousedown="toggleLike_reply('unlike', '${o}', 'likeBtn${sType}_reply_${o}',
+            '${isGr}', '${serverSide}', '${sType}')">
             <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike">
           </a>
           <span style="vertical-align: middle; margin-left: 5px;">Dislike</span>
         `;
-        let e = _("ipanr_" + o).innerText.replace("(", "")
+        let e = _("ipanr" + sType  +  "_" + o).innerText.replace("(", "")
           .replace(")", "").replace("likes", "").replace(" ", "");
         e = Number(e) + 1;
-        _("ipanr_" + o).innerText = e + " likes";
+        _("ipanr" + sType  +  "_" + o).innerText = e + " likes";
       } else {
         if ("unlike_reply_success" == result.responseText) {
           _(t).innerHTML = `
             <a href="#" onclick="return false;"
-              onmousedown="toggleLike_reply('like', '${o}', 'likeBtn_reply_${o}', '${isGr}',
-              '${serverSide}')">
+              onmousedown="toggleLike_reply('like', '${o}', 'likeBtn${sType}_reply_${o}',
+              '${isGr}', '${serverSide}', '${sType}')">
               <img src="/images/nf.png" width="18" height="18" class="like_unlike">
             </a>
             <span style="vertical-align: middle; margin-left: 5px;">Like</span>
           `;
-          let e = _("ipanr_" + o).innerText.replace("(", "").replace(")", "")
+          let e = _("ipanr" + sType  +  "_" + o).innerText.replace("(", "").replace(")", "")
             .replace("likes", "").replace(" ", "");
           e = Number(e) - 1;
-          _("ipanr_" + o).innerText = e + " likes";
+          _("ipanr" + sType  + "_" + o).innerText = e + " likes";
         } else {
-          console.log(result.responseText);
           prepareDialog();
           showError();
         }

@@ -12,8 +12,8 @@ function openEmojiBox(box = 'emojiBox_art') {
   }
 }
 
-function openEmojiBox_reply(name) {
-  var box = _("emojiBox_reply_" + name);
+function openEmojiBox_reply(name, sType) {
+  var box = _("emojiBox_reply_" + sType + "_" + name);
   if (box.style.display == "block") {
     box.style.display = "none";
   } else {

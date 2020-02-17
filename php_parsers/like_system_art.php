@@ -1,6 +1,8 @@
 <?php
-	include_once("../php_includes/check_login_statues.php");
+	require_once "../php_includes/check_login_statues.php";
 	require_once '../safe_encrypt.php';
+	require_once '../php_includes/conn.php';
+
 	if($user_ok != true || $log_username == "") {
 		exit();
 	}
@@ -9,13 +11,25 @@
 	$parid = "";
 	if(isset($_POST["arid"]) && $_POST["arid"] != ""){
 	    $parid = mysqli_real_escape_string($conn, $_POST["arid"]);
-	}else{
+	}else if(isset($_SESSION['id']) && !empty($_SESSION['id'])){
 	    $parid = $_SESSION["id"];
 	}
 ?>
 <?php
 	if(isset($_POST['type']) && isset($_POST['id'])){
 		$id = preg_replace('#[^0-9]#i', '', $_POST['id']);
+
+    if ($parid == "") {
+      // Fired from index.php like so get the photo file name from status id
+      $sql = "SELECT artid FROM article_status WHERE id=? LIMIT 1";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("i",$id);
+      $stmt->execute();
+      $stmt->bind_result($parid);
+      $stmt->fetch();
+      $stmt->close();
+    } 
+
 		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
 		$stmt = $conn->prepare($sql);
 		$stmt->bind_param("ss",$log_username,$one);

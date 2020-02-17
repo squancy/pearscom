@@ -152,8 +152,11 @@
     return '';
   }
 
+  
+  // Unique id is needed in each status category since they are later displayed on index.php
   function genStatLikeBtn($isLike, $statusid, $isStatus = true, $extraArg = false,
     $serverSide = '/php_parsers/like_system_art.php') {
+    global $sType;
     if($isStatus) {
       $postfix = '';
     } else {
@@ -168,7 +171,9 @@
     if($isLike == true){
       $likeButton = '
         <a href="#" onclick="return false;" 
-          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\', \''.$extraArg.'\', \''.$serverSide.'\')">
+          onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',
+          \'likeBtn'.$sType.$postfix.'_'.$statusid.'\', \''.$extraArg.'\',
+          \''.$serverSide.'\', \''.$sType.'\')">
           <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
@@ -176,7 +181,9 @@
     }else{
       $likeButton = '
         <a href="#" onclick="return false;"
-          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',\'likeBtn'.$postfix.'_'.$statusid.'\', \''.$extraArg.'\', \''.$serverSide.'\')">
+          onmousedown="toggleLike'.$postfix.'(\'like\',\''.$statusid.'\',
+          \'likeBtn'.$sType.$postfix.'_'.$statusid.'\', \''.$extraArg.'\',
+          \''.$serverSide.'\', \''.$sType.'\')">
           <img src="/images/nf.png" width="18" height="18" class="like_unlike"
           style="vertical-align: middle;">
         </a>';
@@ -237,7 +244,9 @@
     return $likecount;
   }
 
+  // Unique id (type) is needed for index display to avoid potential clashes on the client side 
   function genLog($u, $statusid, $likeButton, $likeText, $isStatus = true, $shareButton = '') {
+    global $sType;
     if($isStatus) {
       $postfix = '';
       $more = '
@@ -253,7 +262,7 @@
 
     if($u != ""){
       return '
-        <span id="likeBtn'.$postfix.'_'.$statusid.'" class="likeBtn">'
+        <span id="likeBtn'.$sType.$postfix.'_'.$statusid.'" class="likeBtn">'
           .$likeButton.'
           <span style="vertical-align: middle;">'.$likeText.'</span>
         </span>' . $more;
@@ -261,12 +270,21 @@
     return '';
   }
 
-  function countReplies($u, $statusid, $ar, $conn, $db = 'article_status', $plus = 'artid') {
+  function countReplies($u, $statusid, $ar, $conn, $db = 'article_status', $plus = 'artid',
+    $ind = false) {
+    $accountName = 'AND account_name = ?';
+    if ($ind) {
+      $accountName = '';
+    }
     $b = 'b';
-    $sql = "SELECT COUNT(id) FROM ".$db." WHERE type = ? AND account_name = ?
-          AND osid = ? AND ".$plus." = ?";
+    $sql = "SELECT COUNT(id) FROM ".$db." WHERE type = ? ".$accountName."
+      AND osid = ? AND ".$plus." = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssii", $b, $u, $statusid, $ar);
+    if ($ind) {
+      $stmt->bind_param("sii", $b, $statusid, $ar);
+    } else {
+      $stmt->bind_param("ssii", $b, $u, $statusid, $ar);
+    }
     $stmt->execute();
     $stmt->bind_result($countrply);
     $stmt->fetch();
@@ -275,10 +293,12 @@
   }
 
   function genShowMore($crply, $statusid) {
+    global $sType;
     if($crply > 0){
       return '
         <div class="showrply">
-          <a id="showreply_'.$statusid.'" onclick="showReply('.$statusid.','.$crply.')">
+          <a id="showreply_'.$sType.'_'.$statusid.'"
+            onclick="showReply('.$statusid.', '.$crply.', \''.$sType.'\')">
             Show replies ('.$crply.')
           </a>
         </div>';
@@ -313,6 +333,7 @@
 
   function genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
     $agoformrply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl) {
+    global $sType;
     return '
       <div id="reply_'.$statusreplyid.'" class="reply_boxes">
         <div>
@@ -335,7 +356,7 @@
         <hr class="dim">
         '.$replyLog.'
         <div style="float: left; padding: 0px 10px 0px 10px;">
-          <b class="ispan" id="ipanr_' . $statusreplyid . '">' . $rpycl . ' likes</b>
+          <b class="ispan" id="ipanr'.$sType.'_' . $statusreplyid . '">' . $rpycl . ' likes</b>
         </div>
         <div class="clear"></div>
       </div>
@@ -344,8 +365,9 @@
 
   function genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform, $user_image,
     $data, $data_old, $statusLog, $cl, $showmore, $status_replies) {
+    global $sType;
     return '
-      <div id="status_'.$statusid.'" class="status_boxes">
+      <div id="status_'.$sType.'_'.$statusid.'" class="status_boxes">
         <div>'.$statusDeleteButton.'
           <p id="status_date">
             <b class="status_title">Post: </b>
@@ -367,55 +389,58 @@
         <hr class="dim">
         '.$statusLog.'
         <div style="float: left; padding: 0px 10px 0px 10px;">
-          <b class="ispan" id="ipanf_' . $statusid . '">
+          <b class="ispan" id="ipanf'.$sType.'_' . $statusid . '">
             ' . $cl . ' likes
           </b>
         </div>
         <div class="clear"></div>
       </div>
       '.$showmore.'
-      <span id="allrply_'.$statusid.'" class="hiderply">'.$status_replies.'</span>
+      <span id="allrply_'.$sType.'_'.$statusid.'" class="hiderply">'.$status_replies.'</span>
     </div>';
   }
 
   function genReplyInput($isFriend, $log_username, $u, $statusid, $parser, $g = false) {
+    global $sType;
     if ($parser == '/php_parsers/group_parser2.php') {
-      $param = "'{$statusid}', false, 'replytext_{$statusid}', false, '{$g}',
-        '/php_parsers/group_parser2.php'";
+      $param = "'{$statusid}', false, 'replytext_{$sType}_{$statusid}', false, '{$g}',
+        '/php_parsers/group_parser2.php', '{$sType}'";
     } else {
-      $param = "'{$statusid}', '{$u}', 'replytext_{$statusid}', this, false, '{$parser}'";
+      $param = "'{$statusid}', '{$u}', 'replytext_{$sType}_{$statusid}', this, false,
+        '{$parser}', '{$sType}'";
     }
-    if($isFriend == true || $log_username == $u){
-      $statuslist = '
-        <textarea id="replytext_'.$statusid.'" class="replytext"
-          onfocus="showBtnDiv_reply(\''.$statusid.'\')"
-          placeholder="Write a comment"></textarea>
-        <div id="uploadDisplay_SP_reply_'.$statusid.'"></div>
-        <div id="btns_SP_reply_'.$statusid.'" class="hiddenStuff rply_joiner">
-        <span id="swithidbr_'.$statusid.'">
-          <button id="replyBtn_'.$statusid.'" class="btn_rply"
-            onclick="replyToStatus('.$param.')">Reply</button>
-        </span>
-        <img src="/images/camera.png" id="triggerBtn_SP_reply" class="triggerBtnreply"
-          onclick="triggerUpload_reply(event, \'fu_SP_reply\')" width="22" height="22"
-          title="Upload A Photo" />
-        <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
-          title="Send emoticons" id="emoji" onclick="openEmojiBox_reply('.$statusid.')">
-        <div class="clear"></div>
-      ';
-      $statuslist .= generateEList($statusid, 'emojiBox_reply_' . $statusid,
-        'replytext_'.$statusid);
-      $statuslist .= '</div>';
-      $statuslist .= '
-        <div id="standardUpload_reply" class="hiddenStuff">
-          <form id="image_SP_reply" enctype="multipart/form-data" method="post">
-            <input type="file" name="FileUpload" id="fu_SP_reply"
-              onchange="doUpload_reply(\'fu_SP_reply\', \''.$statusid.'\')" accept="image/*"/>
-          </form>
-        </div>
-      ';
-      return $statuslist;
-    }
-    return '';
+    $statuslist = '
+      <textarea id="replytext_'.$sType.'_'.$statusid.'" class="replytext"
+        onfocus="showBtnDiv_reply(\''.$statusid.'\', \''.$sType.'\')"
+        placeholder="Write a comment"></textarea>
+      <div id="uploadDisplay_SP_reply_'.$sType.'_'.$statusid.'"></div>
+      <div id="btns_SP_reply_'.$sType.'_'.$statusid.'" class="hiddenStuff rply_joiner">
+      <span id="swithidbr_'.$sType.'_'.$statusid.'">
+        <button id="replyBtn_'.$sType.'_'.$statusid.'" class="btn_rply"
+          onclick="replyToStatus('.$param.')">Reply</button>
+      </span>
+      <img src="/images/camera.png" id="triggerBtn_SP_reply_'.$sType.'_'.$statusid.'"
+        class="triggerBtnreply" onclick="triggerUpload_reply(event,
+        \'fu_SP_reply_'.$sType.'_'.$statusid.'\')"
+        width="22" height="22" title="Upload A Photo" />
+      <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
+        title="Send emoticons" id="emoji" onclick="openEmojiBox_reply(\''.$statusid.'\',
+        \''.$sType.'\')">
+      <div class="clear"></div>
+    ';
+    $statuslist .= generateEList($statusid, 'emojiBox_reply_'.$sType.'_'.$statusid,
+      'replytext_'.$sType.'_'.$statusid);
+    $statuslist .= '</div>';
+    $statuslist .= '
+      <div id="standardUpload_reply" class="hiddenStuff">
+        <form id="image_SP_reply_'.$sType.'_'.$statusid.'" enctype="multipart/form-data"
+          method="post">
+          <input type="file" name="FileUpload" id="fu_SP_reply_'.$sType.'_'.$statusid.'"
+            onchange="doUpload_reply(\'fu_SP_reply_'.$sType.'_'.$statusid.'\',
+            \''.$statusid.'\')" accept="image/*"/>
+        </form>
+      </div>
+    ';
+    return $statuslist;
   }
 ?>

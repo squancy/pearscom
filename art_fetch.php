@@ -1,7 +1,8 @@
 <?php
   while ($row = $result->fetch_assoc()) {
     if ($isIndex) {
-      $p_en = base64url_encode($row["postdate"], $hshkey);
+      $_SESSION['id'] = '';
+      $ar = $row['aid'];
     }
     $statusid = $row["id"];
     $account_name = $row["account_name"];
@@ -52,7 +53,14 @@
     $statusDeleteButton = '';
 
     // Status delete button
-    $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid); 
+    if (!$isIndex) {
+      $statusDeleteButton = genDelBtn($author, $log_username, $account_name, $statusid); 
+    } else {
+      // ugly button to position user avatar
+      $statusDeleteButton = '
+        <button style="visibility: hidden; margin-left: -5px;"></button>
+      ';
+    }
 
     // Add share button
     $shareButton = genShareBtn($log_username, $author, $statusid);  
@@ -105,8 +113,18 @@
         $replypostdate_ = $row2["postdate"];
         $replypostdate = strftime("%R, %b %d, %Y", strtotime($replypostdate_));
         $agoform_reply = time_elapsed_string($replypostdate_);
-        $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
-          $statusreplyid, false);
+
+        // Reply del btn
+        if (!$isIndex) {
+          $replyDeleteButton = genDelBtn($replyauthor, $log_username, $account_name,
+            $statusreplyid, false);
+        } else {
+          // ugly button to position user avatar
+          $replyDeleteButton = '
+            <button style="visibility: hidden; margin-left: -5px"></button>
+          ';
+        }
+
 
         $data_old_reply = $row2["data"];
         $data_old_reply = sanitizeData($data_old_reply);
@@ -137,8 +155,11 @@
     }
 
     // Count the replies
-    $crply = countReplies($u, $statusid, $ar, $conn);
-
+    if (!$isIndex) {
+      $crply = countReplies($u, $statusid, $ar, $conn);
+    } else {
+      $crply = countReplies($u, $statusid, $ar, $conn, 'article_status', 'artid', true);
+    }
     $showmore = genShowMore($crply, $statusid);
 
     // Count likes
@@ -160,7 +181,9 @@
     $statartl .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
       $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);
 
-    $statartl .= genReplyInput($isFriend, $log_username, $u, $statusid,
-      '/php_parsers/article_status_system.php'); 
+    if ($isFriend || $log_username == $u || $author == $log_username) {
+      $statartl .= genReplyInput($isFriend, $log_username, $u, $statusid,
+        '/php_parsers/article_status_system.php'); 
+    }
   }
 ?>

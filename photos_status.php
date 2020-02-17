@@ -14,6 +14,7 @@
   list($lat, $lon) = getLatLon($conn, $log_username);
     
   $status_ui = "";
+  $sType = 'photo';
   $statuslist = "";
   $a = "a";
   $b = "b";

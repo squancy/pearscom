@@ -2,6 +2,8 @@
 	// Check to see if the user is not logged in
 	include_once("../php_includes/check_login_statues.php");
 	require_once '../safe_encrypt.php';
+  require_once '../php_includes/ind.php';
+
 	if($user_ok != true || $log_username == "") {
 		exit();
 	}
@@ -9,7 +11,7 @@
     $ar = "";
     if(isset($_POST["arid"]) && $_POST["arid"] != ""){
         $ar = $_POST["arid"];
-    }else{
+    }else if(isset($_SESSION["id"]) && !empty($_SESSION["id"])){
         $ar = $_SESSION["id"];
     }
 ?>
@@ -211,6 +213,11 @@
 		$osid = preg_replace('#[^0-9]#', '', $_POST['sid']);
 		$account_name = mysqli_real_escape_string($conn, $_POST["user"]);
 		$data = htmlentities($_POST['data']);
+
+    if ($ar == "") {
+      $ar = indexId($conn, $osid, "article_status", "artid");
+    }
+
 		// We just have an image
 		if($data == "||na||" && $image != "na"){
 			$data = '<img src="/permUploads/'.$image.'" /><br>';
@@ -234,6 +241,7 @@
 		}
 		// Insert the status reply post into the database now
 		$stmt->close();
+
 		$b = 'b';
 		$sql = "INSERT INTO article_status(osid,account_name,author,type,data,artid,postdate) VALUES(?,?,?,?,?,?,NOW())";
 		$stmt = $conn->prepare($sql);
@@ -413,6 +421,11 @@
 			echo "fail";
 			exit();
 		}
+
+    if ($ar == "") {
+      $ar = indexId($conn, $id, "article_status", "artid");
+    }
+
 		$sql = "SELECT author, data FROM article_status WHERE id=? LIMIT 1";
 		$stmt = $conn->prepare($sql);
 		$stmt->bind_param("i",$id);

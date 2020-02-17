@@ -5,7 +5,7 @@
 
 function doUpload(data) {
   var opts = _(data).files[0];
-  if ("" == opts.name) {
+  if (opts.name == "") {
     return false;
   }
 
@@ -67,7 +67,7 @@ function abortHandler(canCreateDiscussions) {
 
 function doUpload_reply(body, sharpCos) {
   var opts = _(body).files[0];
-  if ("" == opts.name) {
+  if (opts.name == "") {
     return false;
   }
 

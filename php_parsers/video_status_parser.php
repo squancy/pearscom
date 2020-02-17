@@ -1,6 +1,8 @@
 <?php
 	include_once("../php_includes/check_login_statues.php");
 	require_once '../safe_encrypt.php';
+	require_once '../php_includes/ind.php';
+
 	if($user_ok != true || $log_username == "") {
 		exit();
 	}
@@ -12,7 +14,7 @@
     $vi = "";
     if(isset($_POST["vid"]) && $_POST["vid"] != ""){
         $vi = mysqli_real_escape_string($conn, $_POST["vid"]);
-    }else{
+    }else if(isset($_SESSION['id']) && !empty($_SESSION['id'])){
     	$vi = $_SESSION["id"];
     	$vi = base64url_decode($vi,$hshkey);
     }
@@ -159,7 +161,6 @@
 		exit();
 	}
 ?><?php 
-	//action=status_reply&osid="+osid+"&user="+user+"&data="+data
 	if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
 		// Make sure data is not empty
 		if(strlen($_POST['data']) < 1 && $_POST['image'] == "na"){
@@ -188,6 +189,11 @@
 
 		// Clean the posted variables
 		$osid = preg_replace('#[^0-9]#', '', $_POST['sid']);
+
+    if ($vi == "") {
+      $vi = indexId($conn, $osid, "video_status", "vidid");
+    }
+
 		$account_name = mysqli_real_escape_string($conn, $_POST["user"]);
 		// We just have an image
 		if($data == "||na||" && $image != "na"){
@@ -359,6 +365,18 @@
 			echo "fail";
 			exit();
 		}
+
+    if ($vi == "") {
+      // Fired from index.php like so get the photo file name from status id
+      $sql = "SELECT vidid FROM video_status WHERE id=? LIMIT 1";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("i",$id);
+      $stmt->execute();
+      $stmt->bind_result($vi);
+      $stmt->fetch();
+      $stmt->close();
+    }
+
 		$sql = "SELECT author, data FROM video_status WHERE id=? AND vidid = ? LIMIT 1";
 		$stmt = $conn->prepare($sql);
 		$stmt->bind_param("ii",$id,$vi);

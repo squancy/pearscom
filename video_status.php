@@ -19,6 +19,7 @@
 	$c = "c";
 
 	$vi = $_SESSION["id"];
+  $sType = "video";
 
 	$isOwner = isOwner($u, $log_username, $user_ok); 
 	

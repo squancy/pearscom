@@ -114,7 +114,7 @@ function postToStatus(cond, thencommands, pollProfileId, userId, isGr = false,
 }
 
 function replyToStatus(id, supr, o, dizhi, isGr = false,
-  serverSide = "/php_parsers/article_status_system.php") {
+  serverSide = "/php_parsers/article_status_system.php", sType) {
   var c = _(o).value;
   if (isEmptyPost(c, hasImage)) return; 
   var line = "";
@@ -123,36 +123,36 @@ function replyToStatus(id, supr, o, dizhi, isGr = false,
   [line, hasImage] = attachImage(c, hasImage);
 
   // Loading gif
-  let beforeSpan = _("swithidbr_" + id).innerHTML;
-  _("swithidbr_" + id).innerHTML = `<img src="/images/rolling.gif" width="30" height="30"
-    style="float: left;">`;
+  let beforeSpan = _("swithidbr_" + sType + "_" + id).innerHTML;
+  _("swithidbr_" + sType + "_" + id).innerHTML = `<img src="/images/rolling.gif" width="30"
+    height="30" style="float: left;">`;
 
+  
+  var trigBtn = 'triggerBtn_SP_reply_' + sType + "_" + id;
   if (!isGr) {
     var toSend = "action=status_reply&sid=" + id + "&user=" + supr + "&data=" + c + "&image="
       + hasImage;
-    var trigBtn = 'triggerBtn_SP_reply_';
   } else {
     var toSend = "action=post_reply&sid=" + id + "&data=" + c + "&g=" + isGr + "&image="
       + hasImage;
-    var trigBtn = 'triggerBtn_SP_reply';
   }
 
   // Send to server to process the request
   var xhr = ajaxObj("POST", serverSide);
   xhr.onreadystatechange = function() {
-    if (1 == ajaxReturn(xhr)) {
+    if (ajaxReturn(xhr)) {
       var actionsLengthsArray = xhr.responseText.split("|");
       if ("reply_ok" == actionsLengthsArray[0]) {
         var l = actionsLengthsArray[1];
         c = c.replace(/</g, "<").replace(/>/g, ">")
           .replace(/\n/g, "<br />").replace(/\r/g, "<br />");
-        _("status_" + id).innerHTML += `
-          <div id="reply_${l}" class="reply_boxes">
+        _("status_" + sType + "_" + id).innerHTML += `
+          <div id="reply_${sType}_${l}" class="reply_boxes">
             <div>
               <b>Reply by you just now:</b>
               <span id="srdb_${l}">
                 <button onclick="return false;" class="delete_s"
-                  onmousedown="deleteReply('${l}', 'reply_${l}', '${serverSide}');"
+                  onmousedown="deleteReply('${l}', 'reply_${sType}_${l}', '${serverSide}');"
                   title="Delete Comment">X</button>
               </span>
               <br />
@@ -161,14 +161,15 @@ function replyToStatus(id, supr, o, dizhi, isGr = false,
           </div>
         `;
 
-        _("swithidbr_" + id).innerHTML = beforeSpan;
+        _("swithidbr_" + sType + "_" + id).innerHTML = beforeSpan;
         _(o).value = "";
         _(trigBtn).style.display = "block";
-        _("btns_SP_reply_" + id).style.display = "none";
-        _("uploadDisplay_SP_reply_" + id).innerHTML = "";
-        _("fu_SP_reply").value = "";
+        _("btns_SP_reply_" + sType + "_" + id).style.display = "none";
+        _("uploadDisplay_SP_reply_" + sType + "_" + id).innerHTML = "";
+        _("fu_SP_reply_" + sType + "_" + id).value = "";
         hasImage = "";
       } else {
+        console.log(xhr.responseText);
         prepareDialog();
         showError();
       }
