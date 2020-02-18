@@ -1,9 +1,4 @@
 <?php
-  /*
-    TODO: return to index.php when all pages are done and use the functions defined in
-    other files
-  */
-
   require_once 'php_includes/check_login_statues.php';
   require_once 'php_includes/gr_common.php';
   require_once 'php_includes/perform_checks.php';
@@ -30,7 +25,21 @@
     $htmlTitle = "Home";
     $isIndex = true;
     $newsfeed = "";
+    $limitStat = 'LIMIT 6';
     $u = $log_username;
+
+    $ajaxArray = array();
+
+    // Function for getting the vars posted by the AJAX req
+    function checkLimits($conn, $limitStat) {
+      if (isset($_POST['limit_min'])) {
+        $limit_min = (string) mysqli_real_escape_string($conn, $_POST['limit_min']);
+        $limitStat = 'LIMIT ' . $limit_min . ', 6';
+        $isAJAX = true;
+        return [$limitStat, $isAJAX];
+      }
+      return [$limitStat, false];
+    }
 
     // Set feedcheck in users table
     updateFeedcheck($conn, $u);
@@ -85,55 +94,64 @@
       Select posts from friends and followings + also include nearby users
     */
 
-    if($friendsCSV != ""){
-      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM status AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE s.author IN ('$friendsCSV') OR ((u.lat BETWEEN ? AND ?) AND
-              (u.lon BETWEEN ? AND ?)) AND s.author NOT IN ('$bUsers')
-              AND (s.type=? OR s.type = ?) AND s.author != ?
-              ORDER BY s.postdate DESC LIMIT 6";
-    }else if($cnt_near > 0){
-      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM status AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE (u.lat BETWEEN ? AND ?) AND (u.lon BETWEEN ? AND ?) AND
-              (s.type=? OR s.type = ?) AND s.author != ?
-              AND s.author NOT IN ('$bUsers')
-              ORDER BY s.postdate DESC LIMIT 6";
-    }else{
-      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-              FROM status AS s
-              LEFT JOIN users AS u ON u.username = s.author
-              WHERE u.country = ? AND (s.type=? OR s.type = ?) AND
-              s.author != ?
-              AND s.author NOT IN ('$bUsers')
-              GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
+    // Also call this bunch of code when reached bottom of page; AJAX req
+    if (isset($_POST['limit_min']) || $isIndex) {
+      $isAJAX = false;
+      list($limitStat, $isAJAX) = checkLimits($conn, $limitStat);
+
+      if($friendsCSV != ""){
+        $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+                FROM status AS s
+                LEFT JOIN users AS u ON u.username = s.author
+                WHERE s.author IN ('$friendsCSV') OR ((u.lat BETWEEN ? AND ?) AND
+                (u.lon BETWEEN ? AND ?)) AND s.author NOT IN ('$bUsers')
+                AND (s.type=? OR s.type = ?) AND s.author != ?
+                ORDER BY s.postdate DESC $limitStat";
+      }else if($cnt_near > 0){
+        $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+                FROM status AS s
+                LEFT JOIN users AS u ON u.username = s.author
+                WHERE (u.lat BETWEEN ? AND ?) AND (u.lon BETWEEN ? AND ?) AND
+                (s.type=? OR s.type = ?) AND s.author != ?
+                AND s.author NOT IN ('$bUsers')
+                ORDER BY s.postdate DESC $limitStat";
+      }else{
+        $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+                FROM status AS s
+                LEFT JOIN users AS u ON u.username = s.author
+                WHERE u.country = ? AND (s.type=? OR s.type = ?) AND
+                s.author != ?
+                AND s.author NOT IN ('$bUsers')
+                GROUP BY s.author ORDER BY s.postdate DESC $limitStat";
+      }
+
+      $stmt = $conn->prepare($sql);
+      if($friendsCSV != ""){
+        $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+          $log_username);
+      }else if($cnt_near > 0){
+        $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+          $log_username);
+      }else{
+        $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
+      }
+
+      $stmt->execute();
+      $result = $stmt->get_result();
+
+      $statuslist = '';
+      $sType = 'status';
+      require_once 'template_fetch.php';
+
+      if (!empty($statuslist)) {
+        $statuslist .= "<hr class='dim'>";
+      }
+
+      $stmt->close();
+      if ($isAJAX) {
+        array_push($ajaxArray, $statuslist);
+      }
     }
-
-    $stmt = $conn->prepare($sql);
-    if($friendsCSV != ""){
-      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-        $log_username);
-    }else if($cnt_near > 0){
-      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-        $log_username);
-    }else{
-      $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $mainStatSQL = $sql;
-    $mainStatSQLParams = $params;
-
-    $statuslist = '--start status--';
-    $sType = 'status';
-    require_once 'template_fetch.php';
-    $statuslist .= "--end status --<hr class='dim'>";
-
-    $stmt->close();
 
     // Get photos from friends & nearby users
     $gallery_list = "";
@@ -191,72 +209,73 @@
   }
 
   // Get photo posts
-  $sql = "SELECT COUNT(id) FROM photos_status
-          WHERE author IN ('$friendsCSV')
-          AND author NOT IN ('$bUsers')
-          AND (type=? OR type=?)";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param("ss", $a, $c);
-  $stmt->execute();
-  $stmt->bind_result($photorcnt);
-  $stmt->fetch();
-  $stmt->close();
-  $statphol = "";
-  if($friendsCSV != ""){
-    $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM photos_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
-            BETWEEN ? AND ?
-            AND s.author NOT IN ('$bUsers')
-            AND (s.type=? OR s.type = ?) AND s.author != ?
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else if($cnt_near > 0){
-    $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM photos_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
-            (s.type=? OR s.type = ?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else{
-    $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM photos_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
+  if (isset($_POST['limit_min']) || $isIndex) {
+    $isAJAX = false;
+    list($limitStat, $isAJAX) = checkLimits($conn, $limitStat);
+
+    $sql = "SELECT COUNT(id) FROM photos_status
+            WHERE author IN ('$friendsCSV')
+            AND author NOT IN ('$bUsers')
+            AND (type=? OR type=?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $a, $c);
+    $stmt->execute();
+    $stmt->bind_result($photorcnt);
+    $stmt->fetch();
+    $stmt->close();
+    $statphol = "";
+    if($friendsCSV != ""){
+      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM photos_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
+              BETWEEN ? AND ?
+              AND s.author NOT IN ('$bUsers')
+              AND (s.type=? OR s.type = ?) AND s.author != ?
+              ORDER BY s.postdate DESC $limitStat";
+    }else if($cnt_near > 0){
+      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM photos_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
+              (s.type=? OR s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              ORDER BY s.postdate DESC $limitStat";
+    }else{
+      $sql = "SELECT s.*, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM photos_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              GROUP BY s.author ORDER BY s.postdate DESC $limitStat";
+    }
+    $stmt = $conn->prepare($sql);
+    if($friendsCSV != ""){
+      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+        $log_username);
+    }else if($cnt_near > 0){
+      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+        $log_username);
+    }else{
+      $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+      $statphol = '';
+      $sType = 'photo';
+      require_once 'photo_fetch.php';
+    }
+
+    if (!empty($statphol)) {
+      $statphol .= '<hr class="dim">';
+    }
+    $stmt->close();
+
+    if ($isAJAX) {
+      array_push($ajaxArray, $statphol);
+    }
    }
-  $stmt = $conn->prepare($sql);
-  if($friendsCSV != ""){
-    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-      $log_username);
-  }else if($cnt_near > 0){
-    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-      $log_username);
-  }else{
-    $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
-  }
-  $stmt->execute();
-  $result = $stmt->get_result();
-  if ($result->num_rows > 0) {
-    $statphol = '--start photo stat--';
-    $sType = 'photo';
-    require_once 'photo_fetch.php';
-    $statphol .= '--end photo stat--';
-  } else {
-    $statphol = "
-      <p>
-        Recommended photo posts from your friends & followings
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not posted or replied anything recently.
-        Check your <a href='/friend_suggestions'>friend suggestions</a> to get new
-        friends or encourage them to post & reply more!
-      </p>";
-  }
-  $statphol .= '<hr class="dim">';
-  $stmt->close();
 
   $imgs = "";
   $inc = 0;
@@ -366,87 +385,78 @@
       </div>
       ';
     }
-  }else{
-    $sugglist = "
-      <p>
-        Recommended articles from your friends & followings
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not written any articles recently.
-        Encourage them to write more, share their knowledge and entertain other people!
-      </p>";
   }
   $stmt->close();
 
   // Get article posts
-  $sql = "SELECT COUNT(id)
-          FROM article_status
-          WHERE author IN ('$friendsCSV')
-          AND author NOT IN ('$bUsers')
-          AND (type=? OR type=?)";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param("ss", $a, $c);
-  $stmt->execute();
-  $stmt->bind_result($artrcnt);
-  $stmt->fetch();
-  $stmt->close();
-  $statartl = "";
-  if($friendsCSV != ""){
-    $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM article_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
-            BETWEEN ? AND ? 
-            AND s.author NOT IN ('$bUsers')
-            AND (s.type=? OR s.type = ?) AND s.author != ?
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else if ($cnt_near > 0){
-    $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM article_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
-            s.author NOT IN ('$bUsers') AND
-            (s.type=? OR s.type = ?) AND s.author != ?
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else{
-    $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM article_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
+  if (isset($_POST['limit_min']) || $isIndex) {
+    $isAJAX = false;
+    list($limitStat, $isAJAX) = checkLimits($conn, $limitStat);
+
+    $sql = "SELECT COUNT(id)
+            FROM article_status
+            WHERE author IN ('$friendsCSV')
+            AND author NOT IN ('$bUsers')
+            AND (type=? OR type=?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $a, $c);
+    $stmt->execute();
+    $stmt->bind_result($artrcnt);
+    $stmt->fetch();
+    $stmt->close();
+    $statartl = "";
+    if($friendsCSV != ""){
+      $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM article_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon
+              BETWEEN ? AND ? 
+              AND s.author NOT IN ('$bUsers')
+              AND (s.type=? OR s.type = ?) AND s.author != ?
+              ORDER BY s.postdate DESC $limitStat";
+    }else if ($cnt_near > 0){
+      $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM article_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND
+              s.author NOT IN ('$bUsers') AND
+              (s.type=? OR s.type = ?) AND s.author != ?
+              ORDER BY s.postdate DESC $limitStat";
+    }else{
+      $sql = "SELECT s.*, s.artid AS aid, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM article_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.country = ? AND (s.type=? OR s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              GROUP BY s.author ORDER BY s.postdate DESC $limitStat";
+    }
+    $stmt = $conn->prepare($sql);
+    if($friendsCSV != ""){
+      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+        $log_username);
+    }else if($cnt_near > 0){
+      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+        $log_username);
+    }else{
+      $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+      $statartl = '';
+      $sType = 'art';
+      require_once 'art_fetch.php';
+    }
+    $stmt->close();
+
+    if (!empty($statartl)) {
+      $statartl .= '<hr class="dim">';
+    }
+
+    if ($isAJAX) {
+      array_push($ajaxArray, $statartl);
+    }
   }
-  $stmt = $conn->prepare($sql);
-  if($friendsCSV != ""){
-    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-      $log_username);
-  }else if($cnt_near > 0){
-    $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-      $log_username);
-  }else{
-    $stmt->bind_param("ssss", $ucountry, $a, $c, $log_username);
-  }
-  $stmt->execute();
-  $result = $stmt->get_result();
-  if ($result->num_rows > 0) {
-    $statartl = '--start art stat--';
-    $sType = 'art';
-    require_once 'art_fetch.php';
-    $statartl .= '--end art stat--';
-  } else {
-    $statartl = "
-      <p>
-        Recommended article posts from your friends & followings
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not posted or replied anything recently.
-        Check your <a href='/friend_suggestions'>friend suggestions</a> to get new friends
-        or encourage them to post & reply more!
-      </p>
-    ";
-  }
-  $stmt->close();
-  $statartl .= '<hr class="dim">';
 
   // Give friend suggestions
   $moMoFriends = "";
@@ -457,17 +467,6 @@
   $limit = 'LIMIT 3';
   
   require_once 'friendsugg_fetch.php';
-
-  if($moMoFriends == ""){
-    $moMoFriends = "
-      <p>
-        Friend suggestions & people who may like
-      </p>
-      <p style='font-size: 14px;'>
-        Unfortunately, there are no available friend suggestions. Come back later.
-      </p>
-    ";
-  }
 
   // Get videos for news feed
   $relvids = "";
@@ -537,133 +536,133 @@
         </a>
       ";
     }
-  }else{
-    $relvids = "
-      <p>
-        Recommended videos from ".$part."
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not uploaded any videos yet.
-        Encourage them to upload videos & share their memories by sending them a private
-        message!
-      </p>
-    ";
   }
   $stmt->close();
 
   // Get video status
-  $statvidl.= "";
-  if($friendsCSV != ""){
-    $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM video_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
-            AND ?
-            AND s.author NOT IN ('$bUsers')
-            AND (s.type=? OR s.type = ?) AND s.author != ?
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else if($cnt_near > 0){
-    $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM video_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=?
-            OR s.type = ?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            ORDER BY s.postdate DESC LIMIT 6";
-  }else{
-    $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM video_status AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.country = ? AND (s.type=? OR s.type=?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            GROUP BY s.author ORDER BY s.postdate DESC LIMIT 6";
+  if (isset($_POST['limit_min']) || $isIndex) {
+    $isAJAX = false;
+    list($limitStat, $isAJAX) = checkLimits($conn, $limitStat);
+
+    if($friendsCSV != ""){
+      $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM video_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
+              AND ?
+              AND s.author NOT IN ('$bUsers')
+              AND (s.type=? OR s.type = ?) AND s.author != ?
+              ORDER BY s.postdate DESC $limitStat";
+    }else if($cnt_near > 0){
+      $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM video_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=?
+              OR s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              ORDER BY s.postdate DESC $limitStat";
+    }else{
+      $sql = "SELECT s.*, s.vidid AS video_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM video_status AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.country = ? AND (s.type=? OR s.type=?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              GROUP BY s.author ORDER BY s.postdate DESC $limitStat";
+    }
+    $stmt = $conn->prepare($sql);
+    if($friendsCSV != ""){
+        $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+          $log_username);
+    }else if($cnt_near > 0){
+        $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
+          $log_username);
+    }else{
+        $stmt->bind_param("sss", $ucountry, $a, $c, $log_username);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0){
+      $statvidl = '';
+      $sType = 'video';
+      require_once 'video_fetch.php';
+    }
+
+    if (!empty($statvidl)) {
+      $statvidl .= '<hr class="dim">';
+    }
+    $stmt->close();
+
+    if ($isAJAX) {
+      array_push($ajaxArray, $statvidl);
+    }
   }
-  $stmt = $conn->prepare($sql);
-  if($friendsCSV != ""){
-      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-        $log_username);
-  }else if($cnt_near > 0){
-      $stmt->bind_param("sssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $a, $c,
-        $log_username);
-  }else{
-      $stmt->bind_param("sss", $ucountry, $a, $c, $log_username);
-  }
-  $stmt->execute();
-  $result = $stmt->get_result();
-	if($result->num_rows > 0){
-    $statvidl = '---video stat start---';
-    $sType = 'video';
-    require_once 'video_fetch.php';
-    $statvidl .= '---video stat end---';
-  } else {
-    $statvidl = "
-      <p>
-        Recommended video posts from your friends & followings
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not posted or replied anything recently.
-        Check your <a href='/friend_suggestions'>friend suggestions</a> to get new friends
-        or encourage them to post & reply more!
-      </p>
-    ";
-  }
-  $statvidl .= '<hr class="dim">';
-  $stmt->close();
   
   // Get group posts for news feed
-  $mainPosts = "";
-  if($friendsCSV != ""){
-    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM grouppost AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
-            AND ? AND (s.type = ?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            ORDER BY s.pdate DESC LIMIT 6";
-  }else if($cnt_near > 0){
-    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM grouppost AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=?)
-            AND s.author NOT IN ('$bUsers')
-            AND s.author != ? ORDER BY s.pdate DESC LIMIT 6";
-  }else{
-    $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
-            FROM grouppost AS s
-            LEFT JOIN users AS u ON u.username = s.author
-            WHERE u.country = ? AND (s.type=?) AND s.author != ?
-            AND s.author NOT IN ('$bUsers')
-            GROUP BY s.author ORDER BY s.pdate DESC LIMIT 6";
-  }
-  $stmt = $conn->prepare($sql);
-  if($friendsCSV != ""){
-    $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero,
-      $log_username);
-  }else if($cnt_near > 0){
-    $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero,
-      $log_username);
-  }else{
-    $stmt->bind_param("sss", $ucountry, $zero, $log_username);
+  if (isset($_POST['limit_min']) || $isIndex) {
+    $isAJAX = false;
+    list($limitStat, $isAJAX) = checkLimits($conn, $limitStat);
+
+    if($friendsCSV != ""){
+      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM grouppost AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE s.author IN ('$friendsCSV') OR u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
+              AND ? AND (s.type = ?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              ORDER BY s.pdate DESC $limitStat";
+    }else if($cnt_near > 0){
+      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM grouppost AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.lat BETWEEN ? AND ? AND u.lon BETWEEN ? AND ? AND (s.type=?)
+              AND s.author NOT IN ('$bUsers')
+              AND s.author != ? ORDER BY s.pdate DESC $limitStat";
+    }else{
+      $sql = "SELECT s.*, s.id AS grouppost_id, u.avatar, u.online, u.country, u.lat, u.lon
+              FROM grouppost AS s
+              LEFT JOIN users AS u ON u.username = s.author
+              WHERE u.country = ? AND (s.type=?) AND s.author != ?
+              AND s.author NOT IN ('$bUsers')
+              GROUP BY s.author ORDER BY s.pdate DESC $limitStat";
+    }
+    $stmt = $conn->prepare($sql);
+    if($friendsCSV != ""){
+      $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero,
+        $log_username);
+    }else if($cnt_near > 0){
+      $stmt->bind_param("ssssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $zero,
+        $log_username);
+    }else{
+      $stmt->bind_param("sss", $ucountry, $zero, $log_username);
+    }
+
+    $stmt->execute();
+    $result_new = $stmt->get_result();
+    if ($result_new->num_rows > 0){
+      $mainPosts = '';  
+      $sType = 'group';
+      require_once 'group_fetch.php';
+    }
+
+    if (!empty($mainPosts)) {
+      $mainPosts .= '<hr class="dim">';  
+    }
+    $stmt->close();
+
+    if ($isAJAX) {
+      array_push($ajaxArray, $mainPosts);
+    }
   }
 
-  $stmt->execute();
-  $result_new = $stmt->get_result();
-  if ($result_new->num_rows > 0){
-    $mainPosts = '--start gr post--';  
-    $sType = 'group';
-    require_once 'group_fetch.php';
-    $mainPosts .= '--end gr post--';  
-  }else{
-    $mainPosts = "
-      <p>
-        Recommended group posts from your friends & followings
-      </p>
-      <p style='font-size: 14px;'>
-        Your friends have not posted or replied anything yet recently.
-        Check your <a href='/friend_suggestions'>friend suggestions</a> to get new friends
-        or encourage them to post & reply more!
-      </p>
-    ";
+  // If an AJAX req is made to index.php output the posts in a random order
+  if ($isAJAX) {
+    shuffle($ajaxArray);
+    foreach ($ajaxArray as $post) {
+      echo $post;
+    }
+    unset($ajaxArray);
+    $ajaxArray = array();
+    exit();
   }
 ?>
 <!DOCTYPE html>
@@ -779,7 +778,7 @@
           <div id="rel" class="ppForm"><?php echo $relvids; ?></div>
           <div class="clear"></div><hr class="dim">
           <div id="svid"><?php echo $statvidl; ?></div>
-          <div id="mp"><?php echo $mainPosts; ?></div><hr class="dim">
+          <div id="mp"><?php echo $mainPosts; ?></div>
           <p style="display: none;" id="mr"></p>
         </div>
         <div id="pcload"></div>

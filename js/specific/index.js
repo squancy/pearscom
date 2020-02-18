@@ -7,21 +7,37 @@
   the limits in the SQL query on the server side by 6 at every fetch
 */
 let lowerLimit = 6;
-let upperLimit = 12;
 
+// Check for new feed load in every 0.5 sec
 if (isf) {
   var CheckIfScrollBottom = debouncer(function() {
     if(getDocHeight() < (getScrollXY()[1] + window.innerHeight + 100)) {
       if(isn) {
         _("pcload").innerHTML = `<img src="/images/rolling.gif" width="30" height="30"
           style='display: block; margin: 0 auto; margin-top: 5px; margin-bottom: 5px;'>`;
-
+    
+        // Make AJAX req to server
         request = new ajaxObj("POST", "index.php");
         request.onreadystatechange = function() {
-          if(ajaxReturn(n)) {
+          if (ajaxReturn(request)) {
+            if (request.responseText != "") {
+              _("newsfeed").innerHTML += request.responseText;
+              startLazy(true);
+              lowerLimit += 6;
+            } else {
+              _("newsfeed").innerHTML += `
+                <p style="font-size: 16px; color: #999; text-align: center;">
+                  This is the end of your news feed. Come back later.
+                </p>
+              `;
+              _("pcload").innerHTML = '';
+              
+              // Do not make superflous requests
+              document.removeEventListener('scroll', CheckIfScrollBottom);
+            }
           }
         }
-        n.send("limit_min=" + lowerLimit + "&limit_max=" + upperLimit);
+        request.send("limit_min=" + lowerLimit);
       }
     }
   }, 500);
@@ -33,6 +49,7 @@ if (isf) {
   TODO: deobfuscate the following 3 JS functions
 */
 
+// Implement constant checking of page scrolled down
 function debouncer(a, b, c) {
   var d;
   return function() {
@@ -46,6 +63,7 @@ function debouncer(a, b, c) {
   }
 }
 
+// Get scroll pos
 function getScrollXY() {
   var a = 0,
       b = 0;
@@ -57,6 +75,7 @@ function getScrollXY() {
     a = document.documentElement.scrollLeft), [a, b]
 }
 
+// Get document height; used in calculations of checking page end
 function getDocHeight() {
   var a = document;
   return Math.max(a.body.scrollHeight, a.documentElement.scrollHeight, a.body.offsetHeight,
@@ -69,27 +88,45 @@ if (isf) {
     var inc = 0,
         num = 0,
         isn = !0;
-    1 == isn && $(window).scroll(function() {
+    if (isn) {
+      /*
+      $(window).scroll(function() {
 
-    }), window.innerWidth > 808 && (_("cp").style.width = "300px", _("cp").style.right = "0px"), 0 == mobilecheck && (_("cp").addEventListener("mouseover", function() {
-        _("cp").style.overflowY = "auto", document.body.style.overflowY = "auto"
-    }), _("cp").addEventListener("mouseout", function() {
-        _("cp").style.overflowY = "hidden", document.body.style.overflowY = "auto"
-    }));
-    var w = window,
-        d = document,
-        e = d.documentElement,
-        g = d.getElementsByTagName("body")[0],
-        x = w.innerWidth || e.clientWidth || g.clientWidth,
-        y = w.innerHeight || e.clientHeight || g.clientHeight;
-    _("pageMiddle_index").style.overflow = "auto";
-    for (var cut = 0, is = "<?php echo $imgs; ?>", isa = is.split("|"), j = (inc = 0, 0); j < isa.length - 1; j++) {
-        ++inc, cut = "" != isa[j] ? 90 : 400;
-        var t = _("pcs_" + inc).innerText;
-        if (t.length > 90) {
-            var xt = t.substr(0, cut);
-            _("pcs_" + inc).innerText = xt + " ..."
-        }
+      });*/
+      if (window.innerWidth > 808) {
+        _("cp").style.width = "300px";
+        _("cp").style.right = "0px";
+      }
+      if(!mobilecheck) {
+        _("cp").addEventListener("mouseover", function() {
+          _("cp").style.overflowY = "auto";
+          document.body.style.overflowY = "auto";
+        });
+
+        _("cp").addEventListener("mouseout", function() {
+          _("cp").style.overflowY = "hidden";
+          document.body.style.overflowY = "auto";
+        });
+      }
+
+      var w = window,
+          d = document,
+          e = d.documentElement,
+          g = d.getElementsByTagName("body")[0],
+          x = w.innerWidth || e.clientWidth || g.clientWidth,
+          y = w.innerHeight || e.clientHeight || g.clientHeight;
+      _("pageMiddle_index").style.overflow = "auto";
+      /*
+      for (var cut = 0, is = "<?php echo $imgs; ?>", isa = is.split("|"), j = (inc = 0, 0);
+        j < isa.length - 1; j++) {
+          ++inc, cut = "" != isa[j] ? 90 : 400;
+          var t = _("pcs_" + inc).innerText;
+          if (t.length > 90) {
+              var xt = t.substr(0, cut);
+              _("pcs_" + inc).innerText = xt + " ..."
+          }
+      }
+      */
     }
 }
 
