@@ -18,11 +18,20 @@
   }
 
   function pagination($conn, $sql, $params1, $url_n) {
-    if ($url_n == '/article_suggestions') {
+    $postfix = '';
+
+    // If we are doing pagination on friend requests append 'f' -> '?pnf'
+    if ($url_n == '/notifications' && $params1 == 'si') {
+      $postfix = 'f';
+    }
+
+    // Append the appropriate query symbol to URL
+    if ($url_n == '/article_suggestions' || $url_n == '/notifications') {
       $url_n .= '?';
     } else {
       $url_n .= '&';
     }
+
     $stmt = $conn->prepare($sql);
     $bindParam = new BindParam;
 
@@ -63,25 +72,25 @@
     if($last != 1){
       if($pagenum > 1) {
         $previous = $pagenum - 1;
-        $paginationCtrls .= '<a href="'.$url_n.'pn='.$previous.'">Previous</a>
+        $paginationCtrls .= '<a href="'.$url_n.'pn'.$postfix.'='.$previous.'">Previous</a>
             &nbsp;&nbsp;';
 
         for($i = $pagenum - 4; $i < $pagenum; $i++){
           if($i > 0){
-            $paginationCtrls .= '<a href="'.$url_n.'pn='.$i.'">'.$i.'</a> &nbsp;';
+            $paginationCtrls .= '<a href="'.$url_n.'pn'.$postfix.'='.$i.'">'.$i.'</a> &nbsp;';
           }
         }
       }
       $paginationCtrls .= ''.$pagenum.' &nbsp; ';
       for($i = $pagenum + 1; $i <= $last; $i++){
-        $paginationCtrls .= '<a href="'.$url_n.'pn='.$i.'">'.$i.'</a> &nbsp;';
+        $paginationCtrls .= '<a href="'.$url_n.'pn'.$postfix.'='.$i.'">'.$i.'</a> &nbsp;';
         if($i >= $pagenum + 4){
           break;
         }
       }
       if($pagenum != $last) {
         $next = $pagenum + 1;
-        $paginationCtrls .= '&nbsp;&nbsp;<a href="'.$url_n.'pn='.$next.'">Next</a>';
+        $paginationCtrls .= '&nbsp;&nbsp;<a href="'.$url_n.'pn'.$postfix.'='.$next.'">Next</a>';
       }
     }
     return [$paginationCtrls, $limit];

@@ -3,6 +3,13 @@
     Perform authorization and authentication of users. Required on most pages.
   */
 
+  function isLoggedIn($user_ok, $log_username) {
+    if($user_ok != true || $log_username == ""){
+      header('Location: /index');
+      exit();
+    }
+  }
+
   function checkU($get_u, $conn) {
     if(isset($get_u)){
       $u = mysqli_real_escape_string($conn, $get_u);
