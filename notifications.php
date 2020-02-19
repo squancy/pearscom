@@ -1,13 +1,13 @@
 <?php
-	require_once 'php_includes/check_login_statues.php';
-	require_once 'php_includes/perform_checks.php';
-	require_once 'php_includes/wrapText.php';
-	require_once 'php_includes/status_common.php';
-	require_once 'php_includes/pagination.php';
-	require_once 'timeelapsedstring.php';
-	require_once 'headers.php';
+  require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/perform_checks.php';
+  require_once 'php_includes/wrapText.php';
+  require_once 'php_includes/status_common.php';
+  require_once 'php_includes/pagination.php';
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
 
-	// If the page requestor is not logged in header them away
+  // If the page requestor is not logged in header them away
   isLoggedIn($user_ok, $log_username);
 
   $u = $_SESSION['username'];
@@ -21,7 +21,7 @@
   list($paginationCtrls, $limit) = pagination($conn, $sql_s, 's', $url_n, $log_username); 
 
   // Handle friend requests pagination
-	$zero = "0";
+  $zero = "0";
   $sql_s = "SELECT COUNT(id) FROM friends WHERE user2=? AND accepted=?";
   $url_n = "/notifications";
   list($paginationCtrls_f, $limit_f) = pagination($conn, $sql_s, 'si', $url_n, $log_username,
@@ -127,58 +127,58 @@
     return $count_reps;
   }
 
-	$notification_list = "";
-	$sql = "SELECT * FROM notifications WHERE username LIKE BINARY ? ORDER BY date_time DESC
+  $notification_list = "";
+  $sql = "SELECT * FROM notifications WHERE username LIKE BINARY ? ORDER BY date_time DESC
     $limit";
-	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("s", $log_username);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	if($result->num_rows < 1){
-		$notification_list = "<p>You do not have any notifications at the moment</p>";
-		$stmt->close();
-	} else {
-		while ($row = $result->fetch_assoc()) {
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $log_username);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if($result->num_rows < 1){
+    $notification_list = "<p>You do not have any notifications at the moment</p>";
+    $stmt->close();
+  } else {
+    while ($row = $result->fetch_assoc()) {
       $notification_list .= genNotifBox($row, $conn);
-		}
-	}
-	$sql = "UPDATE users SET notescheck=NOW() WHERE username=? LIMIT 1";
-	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("s",$log_username);
-	$stmt->execute();
-	$stmt->close();
+    }
+  }
+  $sql = "UPDATE users SET notescheck=NOW() WHERE username=? LIMIT 1";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s",$log_username);
+  $stmt->execute();
+  $stmt->close();
 
   // Handle friend requests
-	$friend_requests = "";
-	$sql = "SELECT * FROM friends WHERE user2=? AND accepted=? ORDER BY datemade ASC $limit";
-	$stmt = $conn->prepare($sql);
-	$stmt->bind_param("ss",$log_username,$zero);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	if($result->num_rows < 1){
-		$friend_requests = '
+  $friend_requests = "";
+  $sql = "SELECT * FROM friends WHERE user2=? AND accepted=? ORDER BY datemade ASC $limit";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("ss",$log_username,$zero);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if($result->num_rows < 1){
+    $friend_requests = '
       <p style="font-size: 14px;">
         You have no friend requests at the moment
       </p>
     ';
-	} else {
-		while ($row = $result->fetch_assoc()) {
-	    $friend_requests .= genReqBox($row, $conn);	
-		}
-	}
+  } else {
+    while ($row = $result->fetch_assoc()) {
+      $friend_requests .= genReqBox($row, $conn);  
+    }
+  }
 
   $count_nots = countNotifs($log_username, $conn);
-  $count_reps = countReqs($log_username, $zero, $conn);	
+  $count_reps = countReqs($log_username, $zero, $conn);  
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<title><?php echo $log_username; ?> - Notifications and Friend Requests</title>
-	<meta charset="utf-8">
-	<link rel="stylesheet" type="text/css" href="/style/style.css">
-	<link rel="icon" type="icon/x-icon" href="/images/newfav.png">
-	<script src="/js/main.js" async></script>
-	<script src="/js/ajax.js" async></script>
+  <title><?php echo $log_username; ?> - Notifications and Friend Requests</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <link rel="icon" type="icon/x-icon" href="/images/newfav.png">
+  <script src="/js/main.js" async></script>
+  <script src="/js/ajax.js" async></script>
   <link rel="manifest" href="/manifest.json">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -189,27 +189,27 @@
   <script src="/js/specific/notif.js"></script>
 </head>
 <body>
-	<?php require_once 'template_pageTop.php'; ?>
-	<div id="pageMiddle_2">
-		<div id="data_holder">
-			<div>
-				<div><span><?php echo $count_nots; ?></span> notifications</div>
-				<div><span><?php echo $count_reqs; ?></span> friend requests</div>
-			</div>
-		</div>
-		<div id="notesBox" class="notsBoxes" style="margin-right: 10px;">
-			<p style="font-size: 20px; margin-top: 0px;">Notifications</p>
-			<p><?php echo $notification_list; ?></p>
-			<div id="paginationCtrls"><?php echo $paginationCtrls; ?></div>
-		</div>
+  <?php require_once 'template_pageTop.php'; ?>
+  <div id="pageMiddle_2">
+    <div id="data_holder">
+      <div>
+        <div><span><?php echo $count_nots; ?></span> notifications</div>
+        <div><span><?php echo $count_reqs; ?></span> friend requests</div>
+      </div>
+    </div>
+    <div id="notesBox" class="notsBoxes" style="margin-right: 10px;">
+      <p style="font-size: 20px; margin-top: 0px;">Notifications</p>
+      <p><?php echo $notification_list; ?></p>
+      <div id="paginationCtrls"><?php echo $paginationCtrls; ?></div>
+    </div>
 
-		<div id="friendReqBox" class="notsBoxes">
-			<p style="font-size: 20px; margin-top: 0px;">Friend Requests</p>
-			<p><?php echo $friend_requests; ?></p>
-			<div id="paginationCtrls_f"><?php echo $paginationCtrls_f; ?></div>
-		</div>
-		<div class="clear"></div>
-	</div>
-	<?php require_once 'template_pageBottom.php'; ?>
+    <div id="friendReqBox" class="notsBoxes">
+      <p style="font-size: 20px; margin-top: 0px;">Friend Requests</p>
+      <p><?php echo $friend_requests; ?></p>
+      <div id="paginationCtrls_f"><?php echo $paginationCtrls_f; ?></div>
+    </div>
+    <div class="clear"></div>
+  </div>
+  <?php require_once 'template_pageBottom.php'; ?>
 </body>
 </html>
