@@ -18,15 +18,22 @@
   }
 
   function pagination($conn, $sql, $params1, $url_n) {
+    if ($url_n == '/article_suggestions') {
+      $url_n .= '?';
+    } else {
+      $url_n .= '&';
+    }
     $stmt = $conn->prepare($sql);
     $bindParam = new BindParam;
 
     // Dynamic params after the 4th argument
     $values = array_slice(func_get_args(), 4);
-    for($i = 0; $i < count($values); $i++) {
-      $bindParam->add($params1[$i], $values[$i]);
+    if ($values) {
+      for($i = 0; $i < count($values); $i++) {
+        $bindParam->add($params1[$i], $values[$i]);
+      }
+      call_user_func_array(array($stmt, 'bind_param'), $bindParam->get());
     }
-    call_user_func_array(array($stmt, 'bind_param'), $bindParam->get());
     $stmt->execute();
     $stmt->bind_result($rows);
     $stmt->fetch();
@@ -56,25 +63,25 @@
     if($last != 1){
       if($pagenum > 1) {
         $previous = $pagenum - 1;
-        $paginationCtrls .= '<a href="'.$url_n.'&pn='.$previous.'">Previous</a>
+        $paginationCtrls .= '<a href="'.$url_n.'pn='.$previous.'">Previous</a>
             &nbsp;&nbsp;';
 
         for($i = $pagenum - 4; $i < $pagenum; $i++){
           if($i > 0){
-            $paginationCtrls .= '<a href="'.$url_n.'&pn='.$i.'">'.$i.'</a> &nbsp;';
+            $paginationCtrls .= '<a href="'.$url_n.'pn='.$i.'">'.$i.'</a> &nbsp;';
           }
         }
       }
       $paginationCtrls .= ''.$pagenum.' &nbsp; ';
       for($i = $pagenum + 1; $i <= $last; $i++){
-        $paginationCtrls .= '<a href="'.$url_n.'&pn='.$i.'">'.$i.'</a> &nbsp;';
+        $paginationCtrls .= '<a href="'.$url_n.'pn='.$i.'">'.$i.'</a> &nbsp;';
         if($i >= $pagenum + 4){
           break;
         }
       }
       if($pagenum != $last) {
         $next = $pagenum + 1;
-        $paginationCtrls .= '&nbsp;&nbsp;<a href="'.$url_n.'&pn='.$next.'">Next</a>';
+        $paginationCtrls .= '&nbsp;&nbsp;<a href="'.$url_n.'pn='.$next.'">Next</a>';
       }
     }
     return [$paginationCtrls, $limit];
