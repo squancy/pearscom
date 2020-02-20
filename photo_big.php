@@ -314,7 +314,7 @@
     $minep = '
       <p style="font-size: 14px; color: #999; text-align: center;">
         Unfortunately, you have no other listable photos uploaded. Come back later and upload
-        new photos to your gallery
+        new photos to your gallery.
       </p>
     ';
     $temp = true;

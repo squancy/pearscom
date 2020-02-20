@@ -1,5 +1,5 @@
 <?php
-    include_once("php_includes/check_login_statues.php");
+    require_once "php_includes/check_login_statues.php";
     require_once 'timeelapsedstring.php';
     require_once 'safe_encrypt.php';
     require_once 'headers.php';
