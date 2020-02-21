@@ -36,4 +36,15 @@
       </a>
     ";
   }
+
+  function countUserPhots($conn, $u) {
+    $sql = "SELECT COUNT(id) FROM photos WHERE user=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s",$u);
+    $stmt->execute();
+    $stmt->bind_result($count_all);
+    $stmt->fetch();
+    $stmt->close();
+    return $count_all;
+  }
 ?>

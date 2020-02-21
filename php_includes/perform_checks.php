@@ -165,4 +165,15 @@
     $stmt->close();
     return $all_count;
   }
+
+  function cntLikesNew($conn, $param, $db, $field) {
+    $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$field." = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $param);
+    $stmt->execute();
+    $stmt->bind_result($out_likes);
+    $stmt->fetch();
+    $stmt->close();
+    return $out_likes;
+  }
 ?>

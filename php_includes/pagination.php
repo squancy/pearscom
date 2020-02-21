@@ -19,6 +19,12 @@
 
   function pagination($conn, $sql, $params1, $url_n) {
     $postfix = '';
+    $pnum = 21;
+
+    // If we are on photos page set page rows to 40
+    if (substr($url_n, 0, 7) == '/photos') {
+      $pnum = 40;
+    }
 
     // If we are doing pagination on friend requests append 'f' -> '?pnf'
     if ($url_n == '/notifications' && $params1 == 'si') {
@@ -48,7 +54,7 @@
     $stmt->fetch();
     $stmt->close();
 
-    $page_rows = 21;
+    $page_rows = $pnum;
     $last = ceil($rows / $page_rows);
     if($last < 1){
       $last = 1;
