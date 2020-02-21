@@ -1,322 +1,322 @@
 <?php
-    require_once 'php_includes/check_login_statues.php';
-    require_once 'php_includes/perform_checks.php';
-    require_once 'php_includes/wrapText.php';
-    require_once 'php_includes/pm_common.php';
-    require_once 'php_includes/status_common.php';
-    require_once 'php_includes/pagination.php';
-    require_once 'timeelapsedstring.php';
-    require_once 'headers.php';
-    require_once 'elist.php';
+  require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/perform_checks.php';
+  require_once 'php_includes/wrapText.php';
+  require_once 'php_includes/pm_common.php';
+  require_once 'php_includes/status_common.php';
+  require_once 'php_includes/pagination.php';
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
+  require_once 'elist.php';
 
-    // Initialize any variables that the page might echo
-    $u = "";
-    $mail = "";
-    $one = "1";
-    $x = "x";
-    $zero = "0";
+  // Initialize any variables that the page might echo
+  $u = "";
+  $mail = "";
+  $one = "1";
+  $x = "x";
+  $zero = "0";
 
-    // Make sure the _GET username is set, and sanitize it
-    $u = checkU($_GET['u'], $conn);
+  // Make sure the _GET username is set, and sanitize it
+  $u = checkU($_GET['u'], $conn);
 
-    // Check to see if the viewer is the account owner
-    $isOwner = isOwner($u, $log_username, $user_ok);
-    
-    // If the user does not fit any of these criterias header them to index.php
-    if(!isset($_SESSION["username"]) || $user_ok != true || $log_username == "" ||
-      $u != $log_username || $_SESSION["username"] == "" || $isOwner != "Yes"){
-      header('location: /index');
-      exit();
-    }
-    
-    $otype = "";
+  // Check to see if the viewer is the account owner
+  $isOwner = isOwner($u, $log_username, $user_ok);
+  
+  // If the user does not fit any of these criterias header them to index.php
+  if(!isset($_SESSION["username"]) || $user_ok != true || $log_username == "" ||
+    $u != $log_username || $_SESSION["username"] == "" || $isOwner != "Yes"){
+    header('location: /index');
+    exit();
+  }
+  
+  $otype = "";
+  if(isset($_GET["otype"])){
+    $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
+  }else{
+    $otype = "nto";
+  }
+
+  // Select the member from the users table
+  userExists($conn, $u);
+  
+  // Update the last read property in the db
+  updateDate($conn, $log_username);
+
+  // Handle pagination
+  $sql_s = "SELECT COUNT(id) FROM pm WHERE (receiver=? OR sender=?) AND parent=? AND
+    rdelete = ? AND sdelete = ?";
+  $url_n = "/private_messages/{$u}";
+  list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'sssss', $url_n,
+    $log_username, $log_username, $x, $zero, $zero); 
+  
+  $countMsgs = 0;
+  $clause = "ORDER BY senttime DESC";
+
+  // Also call this code when changing sorting type
+  if(isset($_GET["otype"]) || $clause != ""){
     if(isset($_GET["otype"])){
       $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
-    }else{
-      $otype = "nto";
     }
 
-    // Select the member from the users table
-    userExists($conn, $u);
-    
-    // Update the last read property in the db
-    updateDate($conn, $log_username);
+    // Set the proper sql query for the sorting type
+    $clause = selectClause($otype); 
 
-    // Handle pagination
-    $sql_s = "SELECT COUNT(id) FROM pm WHERE (receiver=? OR sender=?) AND parent=? AND
-      rdelete = ? AND sdelete = ?";
-    $url_n = "/private_messages/{$u}";
-    list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'sssss', $url_n,
-      $log_username, $log_username, $x, $zero, $zero); 
-    
-    $countMsgs = 0;
-    $clause = "ORDER BY senttime DESC";
+    // Get the conversation
+    $sql = "SELECT * FROM pm WHERE (receiver=? OR sender=?) AND parent=? AND rdelete = ?
+      AND sdelete = ? $clause $limit";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssss", $log_username, $log_username, $x, $zero, $zero);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    // Also call this code when changing sorting type
-    if(isset($_GET["otype"]) || $clause != ""){
-      if(isset($_GET["otype"])){
-        $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
-      }
+    // Gather data about parent pm's
+    if($result->num_rows > 0){
+      while ($row = $result->fetch_assoc()){
+        $pmid = $row["id"];
+        $pmid2 = 'pm_'.$pmid;
+        $wrap = 'pm_wrap_'.$pmid;
+        $btid2 = 'bt_'.$pmid;
+        $rt = 'replytext_'.$pmid;
+        $rb = 'replyBtn_'.$pmid;
+        $receiver = $row["receiver"];
+        $sender = $row["sender"];
+        $subject = $row["subject"];
+        $message = $row["message"];
+        $time_ = $row["senttime"];
+        $rread = $row["rread"];
+        $sread = $row["sread"];
+        $mread = $row["mread"];
+        $read_string = "";
 
-      // Set the proper sql query for the sorting type
-      $clause = selectClause($otype); 
+        // If pm is marked as read change its style
+        if($mread){
+          $read_string = 'style="border: 2px solid red;"';
+        }
 
-      // Get the conversation
-      $sql = "SELECT * FROM pm WHERE (receiver=? OR sender=?) AND parent=? AND rdelete = ?
-        AND sdelete = ? $clause $limit";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("sssss", $log_username, $log_username, $x, $zero, $zero);
-      $stmt->execute();
-      $result = $stmt->get_result();
+        $time = strftime("%R, %b %d, %Y", strtotime($time_));
+        $subject_new = $subject;
 
-      // Gather data about parent pm's
-      if($result->num_rows > 0){
-        while ($row = $result->fetch_assoc()){
-          $pmid = $row["id"];
-          $pmid2 = 'pm_'.$pmid;
-          $wrap = 'pm_wrap_'.$pmid;
-          $btid2 = 'bt_'.$pmid;
-          $rt = 'replytext_'.$pmid;
-          $rb = 'replyBtn_'.$pmid;
-          $receiver = $row["receiver"];
-          $sender = $row["sender"];
-          $subject = $row["subject"];
-          $message = $row["message"];
-          $time_ = $row["senttime"];
-          $rread = $row["rread"];
-          $sread = $row["sread"];
-          $mread = $row["mread"];
-          $read_string = "";
+        $subject = wrapText($subject, 22);
+        $message_old = sanitizeData($row["message"]);
 
-          // If pm is marked as read change its style
-          if($mread){
-            $read_string = 'style="border: 2px solid red;"';
-          }
+        // Wrap pm text if longer than 1,000 chars
+        list($message, $message_old) = seeHideWrap($message, $message_old, $pmid, false,
+          false);
+        $message = sanitizeData($message);
+        
+        // Get user avatar
+        $pcurlk = getUserAvatar($conn, $sender);
+        
+        $style = $stylef = 'background-repeat: no-repeat; background-position: center;
+          background-size: cover; width: 50px; height: 50px; border-radius: 50%;';
+        $stylef .= 'float: left;';
+        
+        $sourceURL = "";
+        $sourceURLFrom = "";
 
-          $time = strftime("%R, %b %d, %Y", strtotime($time_));
-          $subject_new = $subject;
-
-          $subject = wrapText($subject, 22);
-          $message_old = sanitizeData($row["message"]);
-
-          // Wrap pm text if longer than 1,000 chars
-          list($message, $message_old) = seeHideWrap($message, $message_old, $pmid, false,
-            false);
-          $message = sanitizeData($message);
-          
-          // Get user avatar
-          $pcurlk = getUserAvatar($conn, $sender);
-          
-          $style = $stylef = 'background-repeat: no-repeat; background-position: center;
-            background-size: cover; width: 50px; height: 50px; border-radius: 50%;';
-          $stylef .= 'float: left;';
-          
-          $sourceURL = "";
-          $sourceURLFrom = "";
-
-          if($otype == 'nto'){
-            $sourceURL = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$style."'";
-            $sourceURLFrom = "data-src=\"" . $pcurlk . "\" class='lazy-bg'
-              style='".$stylef."'";
-          }else{
-            $sourceURL = "style='background-image: url(\"$pcurlk\"); ".$style."'";
-            $sourceURLFrom = "style='background-image: url(\"$pcurlk\"); ".$stylek."'";
-          }
-          
-          $senderpic = "<a href='/user/".$sender."/'><div ".$sourceURL."></div></a>";
-          $senderpic_from = "<a href='/user/".$sender."'><div ".$sourceURLFrom."></div>
-            </a>";
-
-          $pmids = strval($pmid);
-
-          // Select the last message sent
-          list($lastMsg, $lastSender, $lastTime) = lastMessage($conn, $pmids);
-
-          $lastTime = strftime("%R, %b %d", strtotime($lastTime));
-
-          if($lastMsg == ""){
-            $lastMsg = $message;
-          }
-
-          if($lastTime == "01:00, Jan 01"){
-            $lastTime = strftime("%R, %b %d", strtotime($time_));
-          }
-
-          if(preg_match("/<img.+>/i", $lastMsg)){
-            $lastMsg = "A photo was sent";
-          }
-
-          $lastImg = wrapText($lastImage, 200);
-
-          // Start to build our list of parent pm's
-          $mail .= '
-            <div class="showMessage" '.$read_string.'>
-              <div id="show_in_div"><b>Subject: </b>'.$subject.'</div>
-                <div class="show_pic_div">'.$senderpic.'</div>
-                  <button id="show_'.$pmid.'" class="fixRed main_btn_fill"
-                    style="margin-top: 5px; float: left; font-size: 12px;"
-                    onclick="showMessage(\''.$pmid.'\')">Show message</button>
-                <div class="sendtime">
-                  <div class="innerSend">'.$lastMsg.'</div>
-                  <span class="keepDate">'.$lastTime.'</span>
-                </div>
-                <div class="clear"></div>
-              </div>
-              <div id="pm_wrap_'.$pmid.'" class="pm_wrap">
-                <div class="pm_header">
-          ';
-
-          // Add button for mark as read
-          $mail .= '
-            <span style="display: block; text-align: center;">
-              <button onclick="markRead(\''.$pmid.'\',\''.$sender.'\')" id="mark_as_read"
-                class="fixRed main_btn_fill">Important</button>';
-
-          // Add delete button
-          $mail .= '
-            <button id="'.$btid2.'" onclick="deletePm(\''.$pmid.'\',\''.$sender.'\',
-              \''.$log_username.'\')" class="delete_pm fixRed main_btn_fill">
-              Delete
-            </button>
-          ';
-
-          // Add quick link
-          $mail .= '
-                <a href="#pmtexta_'.$pmid.'" id="godown" class="main_btn_fill fixRed"
-                  style="color: white; font-size: 12px; margin-left: 10px;">
-                  Jump to bottom
-                </a>
-              </span>
-            </div>
-            <div id="'.$pmid2.'">
-            <div class="pm_post">
-              <b class="pm_time">'.$time.'</b>
-              <a href="/user/'.$sender.'">'.$senderpic_from.'</a>
-              <p class="vmit">
-                <b class="sdata" id="hide_'.$pmid.'">'.$message.''.$message_old.'</b>
-              </p>
-            </div>
-            <div class="clear">
-          </div>
-          <hr class="dim">
-          ';
-
-          $stmt->close();
-          
-          // Gather up any replies to the parent pm's
-          $sql2 = "SELECT * FROM pm WHERE parent=? ORDER BY senttime ASC";
-          $stmt = $conn->prepare($sql2);
-          $stmt->bind_param("i", $pmid);
-          $stmt->execute();
-          $result2 = $stmt->get_result();
-          if($result2->num_rows > 0){
-            while ($row2 = $result2->fetch_assoc()) {
-              $countMsgs++;
-              $rplyid = $row2["id"];
-              $rsender = $row2["sender"];
-              $reply = $row2["message"];
-              $time2_ = $row2["senttime"];
-              $time2 = strftime("%R, %b %d, %Y", strtotime($time2_));
-              
-              // Get reply user's avatar
-              $pcurlkk = getUserAvatar($conn, $rsender);
-              
-              $style_r = 'background-repeat: no-repeat; background-position: center;
-                background-size: cover; width: 50px; height: 50px; float: left;
-                border-radius: 50%;';
-              
-              $sourceURL_r = "";
-              if($otype == 'nto'){
-                $sourceURL_r = "data-src=\"" . $pcurlkk . "\" class='lazy-bg'
-                  style='".$style_r."'";
-              }else{
-                $sourceURL_r = "style='background-image: url(\"$pcurlkk\");
-                  ".$style_r."'";
-              }
-              
-              $senderpic_from_reply = "
-                <a href='/user/".$rsender."'>
-                  <div ".$sourceURL_r."></div>
-                </a>
-              ";
-
-              $reply_old = sanitizeData($row2["message"]);
-             
-              // Wrap reply text if longer than 1,000 chars
-              list($reply, $reply_old) = seeHideWrap($reply, $reply_old, $rplyid, false,
-                false, false);
-              $reply = sanitizeData($reply);
-
-              // If user is the sender add a delete button
-              if($log_username == $rsender){
-                $deletebutton = '
-                  <button onclick="deleteMessage(\''.$rplyid.'\',\''.$rsender.'\',
-                    \''.$time2_.'\')" class="delete_s" title="Delete message">X</button>';
-              }else{
-                  $deletebutton = "";
-              }
-
-              // Append replies to main thread
-              $mail .= '
-                <div class="pm_post" id="whole_'.$rplyid.'">
-                  <b class="pm_time">'.$deletebutton.''.$time2.'</b>
-                  <a href="/user/'.$rsender.'">'.$senderpic_from_reply.'</a>
-                  <p class="vmit">
-                    <b class="sdata" id="hide_reply_'.$rplyid.'">
-                      '.$reply.$reply_old.'</b>
-                    </p>
-                </div>
-                <div class="clear">
-              </div>
-              <hr class="dim" id="wholle_'.$rplyid.'">';
-
-              $stmt->close();
-            }
-          }
-
-          // Each parent and child is now listed
-          $mail .= '</div>';
-
-          // Add reply textbox
-          $mail .= '
-            <textarea id="pmtexta_'.$pmid.'" class="pmtexta"
-              onfocus="showBtnDiv_pm(\''.$pmid.'\')"
-              placeholder="What&#39;s in your mind '.$log_username.'?"
-              onkeyup="statusMax(this,65000)"></textarea>
-            <div id="uploadDisplay_SP_msg_'.$pmid.'"></div>
-              <div id="btns_SP_'.$pmid.'" class="hiddenStuff" style="width: auto;">
-                <span id="swithidbr_msg_'.$pmid.'">
-                  <button id="pmsendBtn" class="btn_rply"
-                    onclick="postPmMsg(\'pm_reply\',\''.$u.'\',\'pmtexta_'.$pmid.'\',
-                      \''.$sender.'\',\''.$pmid.'\', \''.$time2_.'\')">Post</button>
-                </span>
-                <img src="/images/camera.png" id="triggerBtn_SP_'.$pmid.'"
-                  class="triggerBtnreply" onclick="triggerUpload(event, \'fu_SP_'.$pmid.'\')"
-                  width="22" height="22" title="Upload A Photo" />
-                <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
-                  title="Send emoticons" id="emoji"
-                  onclick="openEmojiBox(\'emojiBox_pm_'.$pmid.'\')">
-                <div class="clear"></div>
-          ';
-          $mail .= generateEList($pmid, 'emojiBox_pm_'.$pmid, 'pmtexta_'.$pmid.'');
-          $mail .= '</div>';
-          $mail .= '</div>';
-          $mail .= '
-            <div id="standardUpload" class="hiddenStuff">
-              <form id="image_SP_reply_'.$pmid.'" enctype="multipart/form-data" method="POST">
-                <input type="file" name="FileUpload" id="fu_SP_'.$pmid.'"
-                  onchange="doUpload(\''.$pmid.'\',\'fu_SP_'.$pmid.'\')">
-              </form>
-            </div>
-            <div class="clear"></div>
-          ';
+        if($otype == 'nto'){
+          $sourceURL = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$style."'";
+          $sourceURLFrom = "data-src=\"" . $pcurlk . "\" class='lazy-bg'
+            style='".$stylef."'";
+        }else{
+          $sourceURL = "style='background-image: url(\"$pcurlk\"); ".$style."'";
+          $sourceURLFrom = "style='background-image: url(\"$pcurlk\"); ".$stylek."'";
         }
         
-        // Produce output
-        if(isset($_GET["otype"])){
-          echo $mail;
-          exit();
+        $senderpic = "<a href='/user/".$sender."/'><div ".$sourceURL."></div></a>";
+        $senderpic_from = "<a href='/user/".$sender."'><div ".$sourceURLFrom."></div>
+          </a>";
+
+        $pmids = strval($pmid);
+
+        // Select the last message sent
+        list($lastMsg, $lastSender, $lastTime) = lastMessage($conn, $pmids);
+
+        $lastTime = strftime("%R, %b %d", strtotime($lastTime));
+
+        if($lastMsg == ""){
+          $lastMsg = $message;
         }
+
+        if($lastTime == "01:00, Jan 01"){
+          $lastTime = strftime("%R, %b %d", strtotime($time_));
+        }
+
+        if(preg_match("/<img.+>/i", $lastMsg)){
+          $lastMsg = "A photo was sent";
+        }
+
+        $lastImg = wrapText($lastImage, 200);
+
+        // Start to build our list of parent pm's
+        $mail .= '
+          <div class="showMessage" '.$read_string.'>
+            <div id="show_in_div"><b>Subject: </b>'.$subject.'</div>
+              <div class="show_pic_div">'.$senderpic.'</div>
+                <button id="show_'.$pmid.'" class="fixRed main_btn_fill"
+                  style="margin-top: 5px; float: left; font-size: 12px;"
+                  onclick="showMessage(\''.$pmid.'\')">Show message</button>
+              <div class="sendtime">
+                <div class="innerSend">'.$lastMsg.'</div>
+                <span class="keepDate">'.$lastTime.'</span>
+              </div>
+              <div class="clear"></div>
+            </div>
+            <div id="pm_wrap_'.$pmid.'" class="pm_wrap">
+              <div class="pm_header">
+        ';
+
+        // Add button for mark as read
+        $mail .= '
+          <span style="display: block; text-align: center;">
+            <button onclick="markRead(\''.$pmid.'\',\''.$sender.'\')" id="mark_as_read"
+              class="fixRed main_btn_fill">Important</button>';
+
+        // Add delete button
+        $mail .= '
+          <button id="'.$btid2.'" onclick="deletePm(\''.$pmid.'\',\''.$sender.'\',
+            \''.$log_username.'\')" class="delete_pm fixRed main_btn_fill">
+            Delete
+          </button>
+        ';
+
+        // Add quick link
+        $mail .= '
+              <a href="#pmtexta_'.$pmid.'" id="godown" class="main_btn_fill fixRed"
+                style="color: white; font-size: 12px; margin-left: 10px;">
+                Jump to bottom
+              </a>
+            </span>
+          </div>
+          <div id="'.$pmid2.'">
+          <div class="pm_post">
+            <b class="pm_time">'.$time.'</b>
+            <a href="/user/'.$sender.'">'.$senderpic_from.'</a>
+            <p class="vmit">
+              <b class="sdata" id="hide_'.$pmid.'">'.$message.''.$message_old.'</b>
+            </p>
+          </div>
+          <div class="clear">
+        </div>
+        <hr class="dim">
+        ';
+
+        $stmt->close();
+        
+        // Gather up any replies to the parent pm's
+        $sql2 = "SELECT * FROM pm WHERE parent=? ORDER BY senttime ASC";
+        $stmt = $conn->prepare($sql2);
+        $stmt->bind_param("i", $pmid);
+        $stmt->execute();
+        $result2 = $stmt->get_result();
+        if($result2->num_rows > 0){
+          while ($row2 = $result2->fetch_assoc()) {
+            $countMsgs++;
+            $rplyid = $row2["id"];
+            $rsender = $row2["sender"];
+            $reply = $row2["message"];
+            $time2_ = $row2["senttime"];
+            $time2 = strftime("%R, %b %d, %Y", strtotime($time2_));
+            
+            // Get reply user's avatar
+            $pcurlkk = getUserAvatar($conn, $rsender);
+            
+            $style_r = 'background-repeat: no-repeat; background-position: center;
+              background-size: cover; width: 50px; height: 50px; float: left;
+              border-radius: 50%;';
+            
+            $sourceURL_r = "";
+            if($otype == 'nto'){
+              $sourceURL_r = "data-src=\"" . $pcurlkk . "\" class='lazy-bg'
+                style='".$style_r."'";
+            }else{
+              $sourceURL_r = "style='background-image: url(\"$pcurlkk\");
+                ".$style_r."'";
+            }
+            
+            $senderpic_from_reply = "
+              <a href='/user/".$rsender."'>
+                <div ".$sourceURL_r."></div>
+              </a>
+            ";
+
+            $reply_old = sanitizeData($row2["message"]);
+           
+            // Wrap reply text if longer than 1,000 chars
+            list($reply, $reply_old) = seeHideWrap($reply, $reply_old, $rplyid, false,
+              false, false);
+            $reply = sanitizeData($reply);
+
+            // If user is the sender add a delete button
+            if($log_username == $rsender){
+              $deletebutton = '
+                <button onclick="deleteMessage(\''.$rplyid.'\',\''.$rsender.'\',
+                  \''.$time2_.'\')" class="delete_s" title="Delete message">X</button>';
+            }else{
+                $deletebutton = "";
+            }
+
+            // Append replies to main thread
+            $mail .= '
+              <div class="pm_post" id="whole_'.$rplyid.'">
+                <b class="pm_time">'.$deletebutton.''.$time2.'</b>
+                <a href="/user/'.$rsender.'">'.$senderpic_from_reply.'</a>
+                <p class="vmit">
+                  <b class="sdata" id="hide_reply_'.$rplyid.'">
+                    '.$reply.$reply_old.'</b>
+                  </p>
+              </div>
+              <div class="clear">
+            </div>
+            <hr class="dim" id="wholle_'.$rplyid.'">';
+
+            $stmt->close();
+          }
+        }
+
+        // Each parent and child is now listed
+        $mail .= '</div>';
+
+        // Add reply textbox
+        $mail .= '
+          <textarea id="pmtexta_'.$pmid.'" class="pmtexta"
+            onfocus="showBtnDiv_pm(\''.$pmid.'\')"
+            placeholder="What&#39;s in your mind '.$log_username.'?"
+            onkeyup="statusMax(this,65000)"></textarea>
+          <div id="uploadDisplay_SP_msg_'.$pmid.'"></div>
+            <div id="btns_SP_'.$pmid.'" class="hiddenStuff" style="width: auto;">
+              <span id="swithidbr_msg_'.$pmid.'">
+                <button id="pmsendBtn" class="btn_rply"
+                  onclick="postPmMsg(\'pm_reply\',\''.$u.'\',\'pmtexta_'.$pmid.'\',
+                    \''.$sender.'\',\''.$pmid.'\', \''.$time2_.'\')">Post</button>
+              </span>
+              <img src="/images/camera.png" id="triggerBtn_SP_'.$pmid.'"
+                class="triggerBtnreply" onclick="triggerUpload(event, \'fu_SP_'.$pmid.'\')"
+                width="22" height="22" title="Upload A Photo" />
+              <img src="/images/emoji.png" class="triggerBtn" width="22" height="22"
+                title="Send emoticons" id="emoji"
+                onclick="openEmojiBox(\'emojiBox_pm_'.$pmid.'\')">
+              <div class="clear"></div>
+        ';
+        $mail .= generateEList($pmid, 'emojiBox_pm_'.$pmid, 'pmtexta_'.$pmid.'');
+        $mail .= '</div>';
+        $mail .= '</div>';
+        $mail .= '
+          <div id="standardUpload" class="hiddenStuff">
+            <form id="image_SP_reply_'.$pmid.'" enctype="multipart/form-data" method="POST">
+              <input type="file" name="FileUpload" id="fu_SP_'.$pmid.'"
+                onchange="doUpload(\''.$pmid.'\',\'fu_SP_'.$pmid.'\')">
+            </form>
+          </div>
+          <div class="clear"></div>
+        ';
+      }
+      
+      // Produce output
+      if(isset($_GET["otype"])){
+        echo $mail;
+        exit();
+      }
 
     }else{
       $mail = '
