@@ -13,6 +13,7 @@ function doUpload(data) {
   if ("image/jpeg" != opts.type && "image/gif" != opts.type && "image/png" != opts.type &&
     "image/jpg" != opts.type) {
     genDialogBox(); 
+    return false;
   }
 
   _("uploadDisplay_SP").innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
