@@ -13,6 +13,16 @@
   $count = 0;
   $one = "1";
 
+  // If user is not logged in no search is allowed
+  if(!isset($_SESSION["username"]) || $_SESSION["username"] == ""){
+    $output = '
+      <p style="font-size: 14px; margin: 0px;">
+        You are not logged in therefore you cannot search!
+      </p>
+    ';
+    exit();
+  }
+
   // AJAX calls this code
   if(isset($_GET['search'])){
     $u = mysqli_real_escape_string($conn, $_GET["search"]);  
