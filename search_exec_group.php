@@ -18,7 +18,7 @@
     $g_search = "$g%";
     $sql = "SELECT * FROM groups 
             WHERE name LIKE ?
-        ORDER BY name ASC";
+            ORDER BY name ASC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $g_search);
     $stmt->execute();
