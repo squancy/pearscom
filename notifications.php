@@ -124,7 +124,7 @@
     $stmt->bind_result($count_reqs);
     $stmt->fetch();
     $stmt->close();
-    return $count_reps;
+    return $count_reqs;
   }
 
   $notification_list = "";
@@ -168,7 +168,7 @@
   }
 
   $count_nots = countNotifs($log_username, $conn);
-  $count_reps = countReqs($log_username, $zero, $conn);  
+  $count_reqs = countReqs($log_username, $zero, $conn);  
 ?>
 <!DOCTYPE html>
 <html>
