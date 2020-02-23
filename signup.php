@@ -3,26 +3,26 @@
     TODO: notification insert function & p_nohash replace func
   */
 
-	require_once 'sec_session_start.php';
-	require_once 'c_array.php';
-	require_once 'headers.php';
-	require_once 'php_includes/conn.php';
-	require_once 'php_includes/settings_common.php';
+  require_once 'sec_session_start.php';
+  require_once 'c_array.php';
+  require_once 'headers.php';
+  require_once 'php_includes/conn.php';
+  require_once 'php_includes/settings_common.php';
 
-	if(!isset($_SESSION)) { 
+  if(!isset($_SESSION)) { 
     sec_session_start();
   } 
 
-	// If user is logged in, header them away
-	if(isset($_SESSION["username"])){
-		header("location: /index");
+  // If user is logged in, header them away
+  if(isset($_SESSION["username"])){
+    header("location: /index");
     exit();
-	}
+  }
 
   // Check username with client side feedback
-	if(isset($_POST["usernamecheck"])){
-		$backs = "'\'";
-		$username = mysqli_real_escape_string($conn, $_POST["usernamecheck"]);
+  if(isset($_POST["usernamecheck"])){
+    $backs = "'\'";
+    $username = mysqli_real_escape_string($conn, $_POST["usernamecheck"]);
 
     // Check if username is taken
     $uname_check = takenUname($conn, $username);
@@ -30,64 +30,64 @@
   }
 
   // Check email
-	if(isset($_POST["emailcheck"])){
-		$email = $_POST['emailcheck'];
+  if(isset($_POST["emailcheck"])){
+    $email = $_POST['emailcheck'];
 
     // Check if email addr is already in db
     $email_check = emailRows($conn, $email);
     checkEmail($email_check, $email, false);
-	}
+  }
 
   // Check password
-	if(isset($_POST["passwordcheck"])){
-		$password = $_POST['passwordcheck'];
+  if(isset($_POST["passwordcheck"])){
+    $password = $_POST['passwordcheck'];
 
     // Check if password contains at least 1 lowercase, 1 uppercase char and 1 num
     list($uc, $lc, $nm) = atLeastChars($password);
     checkPass($uc, $lc, $nm, $password, NULL, NULL, NULL, false);
-	}
+  }
 
   // Check password confirmation
-	if(isset($_POST["confrimcheck"]) && isset($_POST["password_original"])){
-		$password2 = $_POST['confrimcheck'];
-		$password_original = $_POST['password_original'];
+  if(isset($_POST["confrimcheck"]) && isset($_POST["password_original"])){
+    $password2 = $_POST['confrimcheck'];
+    $password_original = $_POST['password_original'];
     passFieldMatch($password2, $password_original, false);
-	}
+  }
 
   // Check gender
-	if(isset($_POST["gendercheck"])){
-		$gender_original = $_POST['gendercheck'];
+  if(isset($_POST["gendercheck"])){
+    $gender_original = $_POST['gendercheck'];
     validateGender($gender_original, false); 
-	}
+  }
 
   // Check country
-	if(isset($_POST["countrycheck"])){
-		$country_original = $_POST['countrycheck'];
-	  validateCountry($country_original, false); 
-	}
+  if(isset($_POST["countrycheck"])){
+    $country_original = $_POST['countrycheck'];
+    validateCountry($country_original, false); 
+  }
 
   // Check birthday
-	if(isset($_POST["checkbd"])){
-		$bd = $_POST['checkbd'];
-		$bd = mysqli_real_escape_string($conn, $bd);
-	  validateBd($bd, false); 
-	}
+  if(isset($_POST["checkbd"])){
+    $bd = $_POST['checkbd'];
+    $bd = mysqli_real_escape_string($conn, $bd);
+    validateBd($bd, false); 
+  }
 
   // Check timezone
-	if(isset($_POST["tzcheck"])){
-		$tz = $_POST['tzcheck'];
-		$tz = mysqli_real_escape_string($conn, $tz);
+  if(isset($_POST["tzcheck"])){
+    $tz = $_POST['tzcheck'];
+    $tz = mysqli_real_escape_string($conn, $tz);
     validateTz($tz, false);
-	}
+  }
 
   // Now check everything on the server side and registrate user
-	if(isset($_POST["u"])){
+  if(isset($_POST["u"])){
     // Escape posted vars
-		$u = mysqli_real_escape_string($conn, $_POST['u']);
-		$e = mysqli_real_escape_string($conn, $_POST['e']);
-		$p = $_POST['p'];
-		$g = preg_replace('#[^a-z]#', '', $_POST['g']);
-		$c = mysqli_real_escape_string($conn, $_POST["c"]);
+    $u = mysqli_real_escape_string($conn, $_POST['u']);
+    $e = mysqli_real_escape_string($conn, $_POST['e']);
+    $p = $_POST['p'];
+    $g = preg_replace('#[^a-z]#', '', $_POST['g']);
+    $c = mysqli_real_escape_string($conn, $_POST["c"]);
     list($uc, $lc, $nm) = atLeastChars($p);
 
     // Get user IP addr
@@ -245,32 +245,32 @@
            </body>
         </html>
       ';
-			$headers = "From: $from\n";
+      $headers = "From: $from\n";
       $headers .= "MIME-Version: 1.0\n";
       $headers .= "Content-type: text/html; charset=iso-8859-1\n";
-	        
-			mail($to, $subject, $message, $headers);
-			echo "signup_success";
-			exit();
-		}
+          
+      mail($to, $subject, $message, $headers);
+      echo "signup_success";
+      exit();
+    }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Sign Up to Pearscom</title>
-	<meta charset="utf-8">
-	<meta lang="en">
-	<meta name="description" content="Join to Pearscom now and be part of an amazing community!">
+  <title>Sign Up to Pearscom</title>
+  <meta charset="utf-8">
+  <meta lang="en">
+  <meta name="description" content="Join to Pearscom now and be part of an amazing community!">
   <meta name="keywords" content="pearscom sign up, signup, pearscom signup, register,
     pearscom register, create account pearscom">
   <script src="/js/jjs.js"></script>
   <meta name="author" content="Pearscom">
-	<link rel="icon" type="image/x-icon" href="/images/newfav.png">
-	<link rel="stylesheet" type="text/css" href="/style/style.css">
-	<script src="/js/main.js"></script>
-	<script src="/js/specific/settings.js"></script>
-	<script src="/js/specific/signup.js"></script>
-	<script src="/js/ajax.js" async></script>
+  <link rel="icon" type="image/x-icon" href="/images/newfav.png">
+  <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <script src="/js/main.js"></script>
+  <script src="/js/specific/settings.js"></script>
+  <script src="/js/specific/signup.js"></script>
+  <script src="/js/ajax.js" async></script>
   <link rel="manifest" href="/manifest.json">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -278,12 +278,12 @@
   <meta name="apple-mobile-web-app-title" content="Pearscom">
   <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
   <meta name="theme-color" content="#282828" />
-	<script type="text/javascript">
+  <script type="text/javascript">
   </script>
 </head>
 <body style="background-color: #fafafa;">
-	<?php require_once 'template_pageTop.php'; ?>
-	<div id="pageMiddle_2" style="background: transparent;">
+  <?php require_once 'template_pageTop.php'; ?>
+  <div id="pageMiddle_2" style="background: transparent;">
     <form name="signupform" id="loginform" class="mwAlign" onsubmit="return false;">
       <p style="font-size: 28px; text-align: left;">Sign up</p>
       <input id="username" type="text" onblur="clientFbOne('unamestatus',
@@ -366,11 +366,11 @@
       </p>
     </form>
   </div>
-	<?php include_once("template_pageBottom.php"); ?>
-	<script type="text/javascript">
+  <?php include_once("template_pageBottom.php"); ?>
+  <script type="text/javascript">
     _("acc_geo").addEventListener("click", function showmap(){
       getLocation();
     });
-	</script>
+  </script>
 </body>
 </html>
