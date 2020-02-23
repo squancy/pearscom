@@ -1,4 +1,6 @@
 <?php
+	require_once 'c_array.php';
+
   function getUserInfo($conn, $log_username) {
     $one = '1';
     $sql = "SELECT email, password, country FROM users WHERE username=? AND activated=?
@@ -31,6 +33,13 @@
       echo "";
       exit();
     }
+  }
+
+  function atLeastChars($np) {
+    $uc = preg_match('@[A-Z]@', $np);
+    $lc = preg_match('@[a-z]@', $np);
+    $nm = preg_match('@[0-9]@', $np);
+    return [$uc, $lc, $nm];
   }
 
   function checkPass($uc, $lc, $nm, $np, $log_username, $email, $cp, $isSimple,
@@ -135,11 +144,17 @@
     }
   }
 
-  function validateBd($bd, $isSimple, $isElse) {
+	function validateDate($date, $format = 'Y-m-d') {
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
+  }
+
+  function validateBd($bd, $isSimple, $isElse = true) {
+    $check = validateDate($bd);
     if($bd == ""){
       genErrMsg('Fill in all fields', $isSimple);
 			exit();
-		}else if($bd > date("Y-m-d") || $bd < date("1900-01-01")){
+		}else if($bd > date("Y-m-d") || $bd < date("1900-01-01") || !$check){
       genErrMsg('Give a valid birthday', $isSimple);
 			exit();
 		}else if($isElse){
@@ -160,10 +175,16 @@
   }
 
   function validateUname($un, $taken, $isSimple, $isElse = true) {
-    if($un == ""){
+    if(strpos($un, '?') !== false || strpos($un, '#') !== false ||
+      strpos($un, '&') !== false || strpos($un, '+') !== false ||
+      strpos($un, '/') !== false || strpos($un, '\\') !== false){
+      genErrMsg('The current username contains at least one of the forbidden characters
+        (?; #; &; +; /; \)', $isSimple);
+      exit();
+    } else if($un == ""){
       genErrMsg('Fill in all fields', $isSimple);
 			exit();
-		}else if(strlen($un) < 3 || strlen($un) > 100){
+		}else if(strlen($un) < 6 || strlen($un) > 100){
       genErrMsg('Username must be between 6 and 100 characters', $isSimple);
 			exit();
 		}else if(is_numeric($un[0])){
@@ -202,5 +223,33 @@
         rename($file_ori, $wto);
       }
     }
+  }
+
+  // The following functions are used on the signup page for validation and error checking
+  function validateGender($gender_original, $isSimple, $isElse = true) {
+    if ($gender_original == "") {
+      genErrMsg('Please choose your gender!', $isSimple);
+      exit();
+    }else if($gender_original != "m" && $gender_original != "f"){
+      genErrMsg('Please give a valid gender!', $isSimple);
+      exit();
+    }else if($isElse){
+      echo "";
+      exit();
+    }
+  }
+
+  function validateCountry($country_original, $isSimple, $isElse = true) {
+    global $countries;
+    if ($country_original == "") {
+      genErrMsg('Please choose your country!', $isSimple);
+      exit();
+    }else if(!in_array($country_original, $countries)){
+      genErrMsg('Please give a valid country!', $isSimple);
+      exit();
+    }else if($isElse){
+      echo "";
+      exit();
+    } 
   }
 ?>

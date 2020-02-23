@@ -121,22 +121,22 @@
   </style>
 </head>
 <body style="background: #fafafa;">
-  <div id="pageMiddle_2">
+  <div id="pageMiddle_2" style='margin-top: 20px;'>
     <?php if($error != "Activation success") { ?>
       <p class='wrong'>Oops, something went wrong ...</p>
     <?php } else { ?>
       <p class='wrong'>Congratulations! You have successfully activated your account!</p>
     <?php } ?>
 
-    <div id="divf1">
+    <div id="divf1" style="margin: 0 auto; max-width: 400px;">
       <?php if($error == "Activation success"){ ?>
-        <img src="/images/checked.png">
+        <img src="/images/checked.png" style="width: 100%;">
       <?php }else{ ?>
-        <img src="/images/error.png">
+        <img src="/images/error.png" style="width: 100%;">
       <?php } ?>
     </div>
-    <div id="divf2">
-      <p>
+    <div id="divf2" style='text-align: center;'>
+      <p style='font-weight: bold;'>
         <?php echo $error; ?>
       </p>
 
@@ -151,7 +151,8 @@
         </p>
       <?php }else{ ?>
         <p>
-          Sorry.. Unfortunately an error has occured during your signing up and returned: 
+          We're sorry...
+          Unfortunately an error has occured during your signing up and returned: 
           <?php echo $error; ?>
         </p>
         <p>

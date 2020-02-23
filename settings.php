@@ -36,9 +36,7 @@
     $cp = $_POST["cp"];
 
     // Check if password contains at least 1 uppercase, 1 lowercase char and 1 number
-    $uc = preg_match('@[A-Z]@', $np);
-    $lc = preg_match('@[a-z]@', $np);
-    $nm = preg_match('@[0-9]@', $np);
+    list($uc, $lc, $nm) = atLeastChars($np);
 
     // Error checking
     checkPass($uc, $lc, $nm, $np, $log_username, $email, $cp, false);
@@ -56,9 +54,7 @@
     $curp = $_POST["curp"];
     $newp = $_POST["newp"];
     $cnewp = $_POST["cnewp"];
-    $uc = preg_match('@[A-Z]@', $newp);
-    $lc = preg_match('@[a-z]@', $newp);
-    $nm = preg_match('@[0-9]@', $newp);
+    list($uc, $lc, $nm) = atLeastChars($newp);
 
     // Validate and check password as before but now on the server side
     validatePass($curp, $password, true, false);

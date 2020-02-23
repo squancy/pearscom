@@ -2,10 +2,10 @@ function emptyElement(e) {
     _(e).innerHTML = ""
 }
 
-function clientFbOne(e, n, sText) {
+function clientFbOne(e, n, sText, serverSide = 'settings.php') {
   var a = _(n).value;
   if (a != "") {
-    var t = ajaxObj("POST", "settings.php");
+    var t = ajaxObj("POST", serverSide);
     t.onreadystatechange = function () {
       if (ajaxReturn(t)) {
         _(e).innerHTML = t.responseText;
@@ -15,11 +15,11 @@ function clientFbOne(e, n, sText) {
   }
 }
 
-function checkFbTwo(input1, input2, stat, send1, send2) {
+function checkFbTwo(input1, input2, stat, send1, send2, serverSide = 'settings.php') {
   var e = _(input1).value,
       n = _(input2).value;
   if (e != "") {
-    var a = ajaxObj("POST", "settings.php");
+    var a = ajaxObj("POST", serverSide);
     a.onreadystatechange = function () {
       if (ajaxReturn(a)) {
         _(stat).innerHTML = a.responseText;
