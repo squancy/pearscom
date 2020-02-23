@@ -176,4 +176,18 @@
     $stmt->close();
     return $out_likes;
   }
+
+  function getFollowings($conn, $curar, $u, &$all_friends) {
+    $sql = "SELECT following FROM follow WHERE follower = ? AND following NOT IN('$curar')";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $u);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+      if ($row["following"] != $u){
+        array_push($all_friends, $row["following"]);
+      }
+    }
+    $stmt->close();
+  }
 ?>
