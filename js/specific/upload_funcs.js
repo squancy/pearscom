@@ -3,7 +3,8 @@
   TODO: merge doUpload() for post and reply & add more logic
 */
 
-function doUpload(data) {
+function doUpload(data, box = 'uploadDisplay_SP', btn = 'triggerBtn_SP', picName = 'stPic',
+  msg = 'upload_complete') {
   var opts = _(data).files[0];
   if (opts.name == "") {
     return false;
@@ -16,22 +17,28 @@ function doUpload(data) {
     return false;
   }
 
-  _("uploadDisplay_SP").innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
+  _(box).innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
   _("pbc").style.display = "block";
 
   // Create a form data and attach img
   var fd = new FormData;
-  fd.append("stPic", opts);
+  fd.append(picName, opts);
   var request = new XMLHttpRequest;
 
   // Register handlers for progress bar & 3 possible outcomes
   request.upload.addEventListener("progress", progressHandler, false);
-  request.addEventListener("load", completeHandler, false);
-  request.addEventListener("error", errorHandler, false);
-  request.addEventListener("abort", abortHandler, false);
+  request.addEventListener("load", function completeWrapper(event) {
+    completeHandler(event, box, btn, msg);
+  }, false);
+  request.addEventListener("error", function errorWrapper(event) {
+    errorHandler(event, box, btn);
+  }, false);
+  request.addEventListener("abort", function abortWrapper(event) {
+    abortHandler(event, box, btn);
+  }, false);
   request.open("POST", "/php_parsers/photo_system.php");
   request.send(fd);
-  }
+}
 
 // Update progress bar
 function progressHandler(event) {
@@ -42,28 +49,28 @@ function progressHandler(event) {
 }
 
 // Fired on successful img upload
-function completeHandler(event) {
+function completeHandler(event, box, btn, msg) {
   var formattedDirections = event.target.responseText.split("|");
   _("progressBar").style.width = "0%";
   _("pbc").style.display = "none";
-  if ("upload_complete" == formattedDirections[0]) {
+  if (msg == formattedDirections[0]) {
     hasImage = formattedDirections[1];
-    _("uploadDisplay_SP").innerHTML = `
+    _(box).innerHTML = `
       <img src="/tempUploads/${formattedDirections[1]}" class="statusImage" />`;
   } else {
-    _("uploadDisplay_SP").innerHTML = formattedDirections[0];
-    _("triggerBtn_SP").style.display = "block";
+    _(box).innerHTML = formattedDirections[0];
+    _(btn).style.display = "block";
   }
 }
 
-function errorHandler(callback) {
-  _("uploadDisplay_SP").innerHTML = "Upload Failed";
-  _("triggerBtn_SP").style.display = "block";
+function errorHandler(event, box, btn) {
+  _(box).innerHTML = "Upload Failed";
+  _(btn).style.display = "block";
 }
 
-function abortHandler(canCreateDiscussions) {
-  _("uploadDisplay_SP").innerHTML = "Upload Aborted";
-  _("triggerBtn_SP").style.display = "block";
+function abortHandler(event, box, btn) {
+  _(box).innerHTML = "Upload Aborted";
+  _(btn).style.display = "block";
 }
 
 function doUpload_reply(body, sharpCos) {

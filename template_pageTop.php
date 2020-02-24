@@ -343,7 +343,7 @@
         <div id="memSearch">
           <div id="memSearchInput">
             <input id="searchUsername" type="text" onkeyup="getNames(this.value)"
-              placeholder="Search for friends" value="">
+              placeholder="Search for friends" value="" autocomplete="off">
           </div>
           <div id="memSearchResults"></div>
         </div>
