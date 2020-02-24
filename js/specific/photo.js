@@ -22,8 +22,9 @@ function sharePhoto(o) {
 }
 
 function openImgBig(o) {
+  prepareDialog();
   _("dialogbox").innerHTML = `
-    <img src=${o}">
+    <img src="${o}">
     <button id="vupload" style="float: right; margin: 3px;" onclick="closeDialog()">
       Close
     </button>

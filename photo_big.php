@@ -14,7 +14,6 @@
   $c = "c";
   $one = "1";
   $vdelete_btn = "";
-  $gallery_u = "";
   $description_u = "";
   $uploaddate_u = "";
   $u = '';
@@ -158,6 +157,7 @@
       $uder = $row["user"];
       $gallery = $row["gallery"];
       $description = $row["description"];
+      $desTitle = wrapText($description, 20);
       if($description == NULL){
         $description = "No description given";
       }
@@ -325,7 +325,7 @@
 <head>
   <meta charset="UTF-8">
   <meta lang="en">
-  <title><?php echo $u; ?> - <?php echo $gallery_u; ?></title>
+  <title><?php echo $gallery; ?> - <?php echo $desTitle; ?></title>
   <link rel="icon" href="/images/newfav.png" type="image/x-icon">
   <script src="/js/main.js" async></script>
   <script src="/js/ajax.js" async></script>
@@ -340,12 +340,15 @@
   <meta name="description" content="Check <?php echo $u; ?>'s photo, comment & share your
     opinion and watch several other related photos as well, all on Pearscom.">
   <meta name="keywords" content="pearscom photos, pearscom gallery, pearscom galleries,
-    pearscom photo, pearscom <?php echo $u; ?>, pearscom <?php  echo $gallery_u; ?>,
-    photo big view pearscom, big, view, big view">
+    pearscom photo, pearscom <?php echo $u; ?>, pearscom photo big view pearscom, big, view,
+    big view">
   <meta name="author" content="Pearscom">
   <script src="/js/specific/p_dialog.js"></script>
   <script src="/js/specific/dd.js"></script>
   <script src="/js/specific/error_dialog.js"></script>
+  <script type="text/javascript">
+    var iso = '';
+  </script>
   <script src="/js/specific/photo.js"></script>
 </head>
 <body style="overflow-x: hidden;">
