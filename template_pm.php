@@ -49,7 +49,7 @@
     $npm .= '</div>';
     $npm .= '
       <div id="standardUpload" class="hiddenStuff">
-        <form id="image_SP" enctype="multipart/form-data" method="POST">
+        <form id="image_SP_pm" enctype="multipart/form-data" method="POST">
           <input type="file" name="FileUpload_pm[]" id="fu_SP_pm" multiple="multiple"
             onchange="doUpload(\'fu_SP_pm\', \'uploadDisplay_SP_pm\', \'triggerBtn_SP\',
             \'stPic_pm\', \'upload_complete_pm\')"/>
@@ -64,70 +64,9 @@
 <script src="/js/specific/status_max.js"></script>
 <script src="/js/specific/post_reply.js"></script>
 <script src="/js/specific/error_dialog.js"></script>
+<script src="/js/specific/pm.js"></script>
 <script type="text/javascript">
   var hasImage = "";
-  window.onbeforeunload = function() {
-    if ("" != hasImage) {
-      return "You have not posted your image";
-    }
-  };
-  var w = window;
-  var d = document;
-  var e = d.documentElement;
-  var g = d.getElementsByTagName("body")[0];
-  var x = w.innerWidth || e.clientWidth || g.clientWidth;
-  var y = w.innerHeight || e.clientHeight || g.clientHeight;
-
-  function postPm(cover_photo_to_crop, coords, event, a) {
-    var c = _(event).value;
-    var mask = _(a).value;
-    var keyword = _(event).value;
-
-    if (isEmptyPost(c, hasImage)) return;
-    let line = '';
-    [line, hasImage] = attachImage(c, hasImage);
-
-    if (mask == "" || keyword == "") {
-      prepareDialog();
-      _("dialogbox").innerHTML = `
-        <p style="font-size: 18px; margin: 0px;">Fill in all fields</p>
-        <p>In order to send your message you have to fill in all fields.</p>
-        <br />
-        <button id="vupload" style="position: absolute; right: 3px; bottom: 3px;" 
-          onclick="closeDialog()">Close</button>`;
-      return false;
-    }
-
-    _("pmBtn").style.display = "none";
-    var xhr = ajaxObj("POST", "/php_parsers/ph_system.php");
-    xhr.onreadystatechange = function() {
-      if (ajaxReturn(xhr)) {
-        if (xhr.responseText = "pm_sent") {
-          prepareDialog();
-          _("dialogbox").innerHTML = `
-            <p style="font-size: 18px; margin: 0px;">Successfully sent</p>
-            <p>Your message has been successfully sent.</p>
-            <br />
-            <button id="vupload" style="position: absolute;  right: 3px; bottom: 3px;"
-              onclick="closeDialog()">Close</button>`;
-          _(a).value = "";
-          _(event).value = "";
-          _("pmBtn").style.display = "block";
-          _("triggerBtn_SP_pm").style.display = "block";
-          _("uploadDisplay_SP_pm").innerHTML = "";
-          _("pmtext").style.height = "40px";
-          _("fu_SP_pm").value = "";
-          _("emojiBox_pm").style.display = "none";
-          _("pmform").style.display = "none";
-          hasImage = "";
-        } else {
-          genErrorDialog();
-        }
-      }
-    }
-    xhr.send("action=new_pm&fuser=" + coords + "&tuser=" + cover_photo_to_crop + "&data=" +
-      mask + "&data2=" + keyword + "&image=" + hasImage);
-  }
 </script>
 
 <?php echo $pm_ui; ?>
