@@ -260,7 +260,6 @@
 <head>
   <link rel="stylesheet" type="text/css" href="/style/style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="/fontawesome-all.min.js" async></script>
   <script src="/js/main.js"></script>
   <script src="/js/ajax.js" async></script>
   <script src="/js/jjs.js"></script>
