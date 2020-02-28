@@ -1,682 +1,682 @@
 <?php
-    require_once 'php_includes/check_login_statues.php';
-    require_once 'php_includes/perform_checks.php';
-    require_once 'php_includes/user_common.php';
-    require_once 'php_includes/friends_common.php';
-    require_once 'php_includes/gr_common.php';
-    require_once 'php_includes/art_common.php';
-    require_once 'php_includes/status_common.php';
-    require_once 'php_includes/gen_work.php';
-    require_once 'php_includes/gen_month.php';
-    require_once 'php_includes/photo_common.php';
-    require_once 'template_day_list.php';
-    require_once 'php_includes/wrapText.php';
-    require_once 'php_includes/isfriend.php';
-    require_once 'timeelapsedstring.php';
-    require_once 'safe_encrypt.php';
-    require_once 'durc.php';
-    require_once 'phpmobc.php';
-    require_once 'headers.php';
-    require_once 'ccov.php';
-    require_once 'php_includes/dist.php';    
-   
-    $ismobile = mobc();
+  require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/perform_checks.php';
+  require_once 'php_includes/user_common.php';
+  require_once 'php_includes/friends_common.php';
+  require_once 'php_includes/gr_common.php';
+  require_once 'php_includes/art_common.php';
+  require_once 'php_includes/status_common.php';
+  require_once 'php_includes/gen_work.php';
+  require_once 'php_includes/gen_month.php';
+  require_once 'php_includes/photo_common.php';
+  require_once 'template_day_list.php';
+  require_once 'php_includes/wrapText.php';
+  require_once 'php_includes/isfriend.php';
+  require_once 'timeelapsedstring.php';
+  require_once 'safe_encrypt.php';
+  require_once 'durc.php';
+  require_once 'phpmobc.php';
+  require_once 'headers.php';
+  require_once 'ccov.php';
+  require_once 'php_includes/dist.php';    
+ 
+  $ismobile = mobc();
 
-    // Initialize any variables that the page might echo
-    $u = "";
-    $sex = "Male";
-    $profile_pic_btn = "";
-    $background_form = "";
-    $one = "1";
-    $c = "c";
-    $a = "a";
-    $b = "b";
-    $max = 14;
+  // Initialize any variables that the page might echo
+  $u = "";
+  $sex = "Male";
+  $profile_pic_btn = "";
+  $background_form = "";
+  $one = "1";
+  $c = "c";
+  $a = "a";
+  $b = "b";
+  $max = 14;
 
-    // Make sure the $_GET username is set and sanitize it
-    $u = checkU($_GET['u'], $conn);
-   
-    // Check if user wants to write an article (redirection)
-    $wart = checkGETParams($_GET['wart'], $conn, '<script>writeArticle();</script>', 'yes');
-    
-    // Check if pm form should be showed
-    $pmw = checkGETParams($_GET['pm'], $conn, '<script>showForm();</script>', 'write');
+  // Make sure the $_GET username is set and sanitize it
+  $u = checkU($_GET['u'], $conn);
+ 
+  // Check if user wants to write an article (redirection)
+  $wart = checkGETParams($_GET['wart'], $conn, '<script>writeArticle();</script>', 'yes');
+  
+  // Check if pm form should be showed
+  $pmw = checkGETParams($_GET['pm'], $conn, '<script>showForm();</script>', 'write');
 
-    // Check if the user exists in db
-    userExists($conn, $u);
+  // Check if the user exists in db
+  userExists($conn, $u);
 
-    // Check if user has been blocked
-    $isBlock = isBlocked($conn, $log_username, $u);
+  // Check if user has been blocked
+  $isBlock = isBlocked($conn, $log_username, $u);
 
-    // Check to see if the viewer is the account owner
-    $isOwner = "No";
-    if($u == $log_username && $user_ok == true){
-      $isOwner = "Yes";
-      $profile_pic_btn = '
-        <span id="blackbb">
-          <img src="/images/cac.png" onclick="return false;" id="ca"
-            onmousedown="toggleElement(\'avatar_form\')" width="20" height="20">
-        </span>
-        <form id="avatar_form" enctype="multipart/form-data" method="post"
-          action="/php_parsers/photo_system.php">
-          <div id="add_marg_mob">
-            <input type="file" name="avatar" id="file" class="inputfile ppChoose"
-              required accept="image/*">
-            <label for="file" style="font-size: 12px;">Choose a file</label>
-              <p>
-                <input type="submit" value="Upload" class="main_btn_fill fixRed"
-                  style="font-size: 12px;">
-              </p>
-          </div>
-        </form>
-      ';
+  // Check to see if the viewer is the account owner
+  $isOwner = "No";
+  if($u == $log_username && $user_ok == true){
+    $isOwner = "Yes";
+    $profile_pic_btn = '
+      <span id="blackbb">
+        <img src="/images/cac.png" onclick="return false;" id="ca"
+          onmousedown="toggleElement(\'avatar_form\')" width="20" height="20">
+      </span>
+      <form id="avatar_form" enctype="multipart/form-data" method="post"
+        action="/php_parsers/photo_system.php">
+        <div id="add_marg_mob">
+          <input type="file" name="avatar" id="file" class="inputfile ppChoose"
+            required accept="image/*">
+          <label for="file" style="font-size: 12px;">Choose a file</label>
+            <p>
+              <input type="submit" value="Upload" class="main_btn_fill fixRed"
+                style="font-size: 12px;">
+            </p>
+        </div>
+      </form>
+    ';
 
-      // Background form
-      $background_form  = '
-        <form id="background_form" style="text-align: center;"
-          enctype="multipart/form-data" method="post"
-          action="/php_parsers/photo_system.php">
-          <input type="file" name="background" id="bfile" class="inputfile"
-            onchange="showfile()" required accept="image/*">
-          <label for="bfile" style="margin-right: 10px;">Choose a file</label>
-          <input type="submit" class="main_btn_fill fixRed" value="Upload Background"
-            id="fixFlow">
-          <span id="sel_f"></span>
-          <p style="color: #999; font-size: 14px;" class="txtc">
-            <b>Note: </b>
-            the allowed file extensions are: jpeg, jpg, png and gif and the maximum file
-            size limit is 5MB
-          </p>
-        </form>
-      ';
-    }
+    // Background form
+    $background_form  = '
+      <form id="background_form" style="text-align: center;"
+        enctype="multipart/form-data" method="post"
+        action="/php_parsers/photo_system.php">
+        <input type="file" name="background" id="bfile" class="inputfile"
+          onchange="showfile()" required accept="image/*">
+        <label for="bfile" style="margin-right: 10px;">Choose a file</label>
+        <input type="submit" class="main_btn_fill fixRed" value="Upload Background"
+          id="fixFlow">
+        <span id="sel_f"></span>
+        <p style="color: #999; font-size: 14px;" class="txtc">
+          <b>Note: </b>
+          the allowed file extensions are: jpeg, jpg, png and gif and the maximum file
+          size limit is 5MB
+        </p>
+      </form>
+    ';
+  }
 
-    // Fetch user information 
-    $sql = "SELECT * FROM users WHERE username=? AND activated=? LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $u, $one);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-      $profile_id = $row["id"];
-      $gender = $row["gender"];
-      $country = $row["country"];
-      $userlevel = $row["userlevel"];
-      $signup = $row["signup"];
-      $avatar = $row["avatar"];
-      $lastlogin = $row["lastlogin"];
-      $lastsession = strftime("%b %d, %Y", strtotime($lastlogin));
+  // Fetch user information 
+  $sql = "SELECT * FROM users WHERE username=? AND activated=? LIMIT 1";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("ss", $u, $one);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if ($row = $result->fetch_assoc()) {
+    $profile_id = $row["id"];
+    $gender = $row["gender"];
+    $country = $row["country"];
+    $userlevel = $row["userlevel"];
+    $signup = $row["signup"];
+    $avatar = $row["avatar"];
+    $lastlogin = $row["lastlogin"];
+    $lastsession = strftime("%b %d, %Y", strtotime($lastlogin));
 
-      // Get the latlon as user A
-      $uBlatlon = $row["latlon"];
-      $bdor = $row["bday"];
-      $bdate = mb_substr($row["bday"], 5, 9, "utf-8");
-      $birthday_ = $row["bday"];
-      $birthday = strftime("%b %d, %Y", strtotime($birthday_));
-      $birthday_year = mb_substr($row["bday"], 0, 4, "utf-8");
-      $onlineornot = $row["online"];
-      $joindate = strftime("%b %d, %Y", strtotime($signup));
-      $memberfor = time_elapsed_string($signup);
-    }
+    // Get the latlon as user A
+    $uBlatlon = $row["latlon"];
+    $bdor = $row["bday"];
+    $bdate = mb_substr($row["bday"], 5, 9, "utf-8");
+    $birthday_ = $row["bday"];
+    $birthday = strftime("%b %d, %Y", strtotime($birthday_));
+    $birthday_year = mb_substr($row["bday"], 0, 4, "utf-8");
+    $onlineornot = $row["online"];
+    $joindate = strftime("%b %d, %Y", strtotime($signup));
+    $memberfor = time_elapsed_string($signup);
+  }
 
-    $is_birthday = "no";
-    $today_is = date('m-d');
-    if($today_is == $bdate){
-      $is_birthday = "yes";
-    }
+  $is_birthday = "no";
+  $today_is = date('m-d');
+  if($today_is == $bdate){
+    $is_birthday = "yes";
+  }
 
-    /*
-      If user was born in a leap year and this year is not a leap year celebreate their
-      birthday on 02-28
-    */
+  /*
+    If user was born in a leap year and this year is not a leap year celebreate their
+    birthday on 02-28
+  */
 
-    $leap = date("L");
-    if($leap == '0' && $today_is == "02-28" && $bdate == '02-29'){
-      $is_birthday = "yes";
-    }
+  $leap = date("L");
+  if($leap == '0' && $today_is == "02-28" && $bdate == '02-29'){
+    $is_birthday = "yes";
+  }
+
+  if($gender == "f"){
+    $sex = "Female";
+  }
+
+  $profile_pic = '/user/'.$u.'/'.$avatar;
+
+  if($avatar == NULL){
+    $profile_pic = '/images/avdef.png';
+  }
+  
+  // Get logged in user's geolocation
+  list($lat, $lon) = getLatLon($conn, $log_username);
+  
+  // Get profile page user's geolocation
+  list($blat, $blon) = getLatLon($conn, $u);
+  
+  // Calculate the distance between them
+  $distBetween = vincentyGreatCircleDistance($lat, $lon, $blat, $blon);
+
+  // Check if the current user is an adult or still underage
+  list($agestring, $age) = genAgeString($bdor);
+
+  // Check if user has verified themselves or not
+  $userlevel = checkUserLevel($userlevel);
+  
+  $grbtn = "";
+  if($isOwner == "Yes"){
+    $grbtn = '
+      <button onclick="hreftogr()" id="vupload">
+        View Groups <img src="/images/vgr.png" class="notfimg"
+          style="margin-bottom: -2px;">
+      </button>
+    ';
+  }
+
+  // Check if logged in user and profile user are friends
+  $isFriend = isFriend($u, $log_username, $user_ok, $conn);
+  if($u != $log_username && $user_ok == true){
+    $ownerBlockViewer = checkBlockings($conn, $u, $log_username);
+    $viewerBlockOwner = checkBlockings($conn, $log_username, $u);
+  }
+
+  $friend_button = '
+    <button style="opacity: 0.6; cursor: not-allowed;" class="main_btn_fill fixRed">
+      Request as friend
+    </button>
+  ';
+
+  $block_button = '
+    <button style="opacity: 0.6; cursor: not-allowed;" class="main_btn_fill fixRed">
+      Block User
+    </button>
+  ';
+
+  // Logic for displaying friend button
+  if($isFriend){
+    $fAction = 'unfriend';
+    $fButtonText = 'Unfriend';
+  } else if ($user_ok == true && $u != $log_username && !$ownerBlockViewer){
+    $fAction = 'friend';
+    $fButtonText = 'Request as friend';
+  }
+
+  if (!$ownerBlockViewer) {
+    $friend_button = '
+      <button onclick="friendToggle(\''.$fAction.'\',\''.$u.'\',\'friendBtn\')"
+        class="main_btn_fill fixRed">'.$fButtonText.'</button>
+    ';
+  }
+
+  $zeroone = isAccepted($conn, $log_username, $u);
+  if($zeroone == "0"){
+    $friend_button = '
+      <p style="font-size: 14px; color: #999; margin: 0;">
+        Friend request is waiting for approval
+      </p>
+    ';
+  }
+
+  // Logic for displaying block button
+  if($viewerBlockOwner == true){
+    $bAction = 'unblock';
+    $bButtonText = 'Unblock';
+  } else if($user_ok == true && $u != $log_username){
+    $bAction = 'block';
+    $bButtonText = 'Block';
+  }
+
+  $block_button = '
+    <button onclick="blockToggle(\''.$bAction.'\',\''.$u.'\',\'blockBtn\')"
+      class="main_btn_fill fixRed">'.$bButtonText.' user</button>
+  ';
+
+  $isFollow = isFollow($conn, $log_username, $u);
+
+  $isFollowOrNot = "";
+  $gs = "him";
+
+  // Logic for displaying follow button
+  if($isFollow){
+    $fAction = 'unfollow';
+    $fButtonText = 'Unfollow';
 
     if($gender == "f"){
-      $sex = "Female";
+      $gs = "her";
     }
 
-    $profile_pic = '/user/'.$u.'/'.$avatar;
+    $isFollowOrNot = "<p style='color: #999;' id='isFol'>You're following ".$gs."</p>";
+  }else{
+    $fAction = 'follow';
+    $fButtonText = 'Follow';
+  }
 
-    if($avatar == NULL){
-      $profile_pic = '/images/avdef.png';
-    }
-    
-    // Get logged in user's geolocation
-    list($lat, $lon) = getLatLon($conn, $log_username);
-    
-    // Get profile page user's geolocation
-    list($blat, $blon) = getLatLon($conn, $u);
-    
-    // Calculate the distance between them
-    $distBetween = vincentyGreatCircleDistance($lat, $lon, $blat, $blon);
+  $follow_button = '
+    <button class="main_btn_fill fixRed"
+      onclick="followToggle(\''.$fAction.'\',\''.$u.'\',\'followBtn\', \'isFol\')">
+      '.$fButtonText.'
+    </button>
+  ';
 
-    // Check if the current user is an adult or still underage
-    list($agestring, $age) = genAgeString($bdor);
+  $friendsHTML = '';
+  $friends_view_all_link = '';
+  $bdfusres = "";
+  $all_friends = array();
 
-    // Check if user has verified themselves or not
-    $userlevel = checkUserLevel($userlevel);
-    
-    $grbtn = "";
+  // Count num of friends
+  $friend_count = numOfFriends($conn, $u);
+
+  // Count online friends
+  $yes = "yes";
+  $sql = "SELECT COUNT(f.id) FROM friends AS f LEFT JOIN users AS u ON u.username = f.user1
+    WHERE (f.user1=? AND f.accepted=?) OR (f.user2=? AND f.accepted=?) AND u.online = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("sssss", $u, $one, $u, $one, $yes);
+  $stmt->execute();
+  $stmt->bind_result($online_count);
+  $stmt->fetch();
+  $stmt->close();
+
+  if($friend_count < 1){
     if($isOwner == "Yes"){
-      $grbtn = '
-        <button onclick="hreftogr()" id="vupload">
-          View Groups <img src="/images/vgr.png" class="notfimg"
-            style="margin-bottom: -2px;">
-        </button>
-      ';
-    }
-
-    // Check if logged in user and profile user are friends
-    $isFriend = isFriend($u, $log_username, $user_ok, $conn);
-    if($u != $log_username && $user_ok == true){
-      $ownerBlockViewer = checkBlockings($conn, $u, $log_username);
-      $viewerBlockOwner = checkBlockings($conn, $log_username, $u);
-    }
-
-    $friend_button = '
-      <button style="opacity: 0.6; cursor: not-allowed;" class="main_btn_fill fixRed">
-        Request as friend
-      </button>
-    ';
-
-    $block_button = '
-      <button style="opacity: 0.6; cursor: not-allowed;" class="main_btn_fill fixRed">
-        Block User
-      </button>
-    ';
-
-    // Logic for displaying friend button
-    if($isFriend){
-      $fAction = 'unfriend';
-      $fButtonText = 'Unfriend';
-    } else if ($user_ok == true && $u != $log_username && !$ownerBlockViewer){
-      $fAction = 'friend';
-      $fButtonText = 'Request as friend';
-    }
-
-    if (!$ownerBlockViewer) {
-      $friend_button = '
-        <button onclick="friendToggle(\''.$fAction.'\',\''.$u.'\',\'friendBtn\')"
-          class="main_btn_fill fixRed">'.$fButtonText.'</button>
-      ';
-    }
-
-    $zeroone = isAccepted($conn, $log_username, $u);
-    if($zeroone == "0"){
-      $friend_button = '
-        <p style="font-size: 14px; color: #999; margin: 0;">
-          Friend request is waiting for approval
-        </p>
-      ';
-    }
-
-    // Logic for displaying block button
-    if($viewerBlockOwner == true){
-      $bAction = 'unblock';
-      $bButtonText = 'Unblock';
-    } else if($user_ok == true && $u != $log_username){
-      $bAction = 'block';
-      $bButtonText = 'Block';
-    }
-
-    $block_button = '
-      <button onclick="blockToggle(\''.$bAction.'\',\''.$u.'\',\'blockBtn\')"
-        class="main_btn_fill fixRed">'.$bButtonText.' user</button>
-    ';
-
-    $isFollow = isFollow($conn, $log_username, $u);
-
-    $isFollowOrNot = "";
-    $gs = "him";
-
-    // Logic for displaying follow button
-    if($isFollow){
-      $fAction = 'unfollow';
-      $fButtonText = 'Unfollow';
-
-      if($gender == "f"){
-        $gs = "her";
-      }
-
-      $isFollowOrNot = "<p style='color: #999;' id='isFol'>You're following ".$gs."</p>";
+      $friendsHTML = '<p style="color: #999;" class="txtc">You have no friends yet</p>';
     }else{
-      $fAction = 'follow';
-      $fButtonText = 'Follow';
+      $friendsHTML = '<p style="color: #999;" class="txtc">'.$u.' has no friends yet</p>';
+    }
+  } else {
+    // Get user's all friends and display some of them
+    $all_friends = getUsersFriends($conn, $u, $log_username);
+    shuffle($all_friends);
+    $fCSV = implode("','", $all_friends);
+
+    $friendArrayCount = count($all_friends);
+    if($friendArrayCount > $max){
+      array_splice($all_friends, $max);
     }
 
-    $follow_button = '
-      <button class="main_btn_fill fixRed"
-        onclick="followToggle(\''.$fAction.'\',\''.$u.'\',\'followBtn\', \'isFol\')">
-        '.$fButtonText.'
-      </button>
-    ';
+    if($friend_count > $max){
+      $friends_view_all_link = '<a href="/view_friends/'.$u.'">View all</a>';
+    }
 
-    $friendsHTML = '';
-    $friends_view_all_link = '';
-    $bdfusres = "";
-    $all_friends = array();
-
-    // Count num of friends
-    $friend_count = numOfFriends($conn, $u);
-
-    // Count online friends
-    $yes = "yes";
-    $sql = "SELECT COUNT(f.id) FROM friends AS f LEFT JOIN users AS u ON u.username = f.user1
-      WHERE (f.user1=? AND f.accepted=?) OR (f.user2=? AND f.accepted=?) AND u.online = ?";
+    $sql = "SELECT * FROM users WHERE username IN ('$fCSV')";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssss", $u, $one, $u, $one, $yes);
     $stmt->execute();
-    $stmt->bind_result($online_count);
-    $stmt->fetch();
+    $result3 = $stmt->get_result();
+    while($row = $result3->fetch_assoc()) {
+      $friendsHTML .= genRightBox($row, $conn);
+    }
     $stmt->close();
+  }
 
-    if($friend_count < 1){
-      if($isOwner == "Yes"){
-        $friendsHTML = '<p style="color: #999;" class="txtc">You have no friends yet</p>';
-      }else{
-        $friendsHTML = '<p style="color: #999;" class="txtc">'.$u.' has no friends yet</p>';
-      }
-    } else {
-      // Get user's all friends and display some of them
-      $all_friends = getUsersFriends($conn, $u, $log_username);
-      shuffle($all_friends);
-      $fCSV = implode("','", $all_friends);
+  // Followers count
+  $followersHTML = "";
+  $follower_count = countFols($conn, $u, 'following');
+  if($follower_count < 1){
+    $followersHTML = '<b>'.$u." has no followers yet.</b>";
+  }
 
-      $friendArrayCount = count($all_friends);
-      if($friendArrayCount > $max){
-        array_splice($all_friends, $max);
-      }
+  $following_count = countFols($conn, $u, 'follower');
 
-      if($friend_count > $max){
-        $friends_view_all_link = '<a href="/view_friends/'.$u.'">View all</a>';
-      }
-
-      $sql = "SELECT * FROM users WHERE username IN ('$fCSV')";
-      $stmt = $conn->prepare($sql);
-      $stmt->execute();
-      $result3 = $stmt->get_result();
-      while($row = $result3->fetch_assoc()) {
-        $friendsHTML .= genRightBox($row, $conn);
-      }
-      $stmt->close();
-    }
-
-    // Followers count
-    $followersHTML = "";
-    $follower_count = countFols($conn, $u, 'following');
-    if($follower_count < 1){
-      $followersHTML = '<b>'.$u." has no followers yet.</b>";
-    }
-
-    $following_count = countFols($conn, $u, 'follower');
-
-    // Followers & followings profile pic
-    $sqlParams = ['follower', 'following'];
-    $varNames = ['following_div', 'other_div'];
-    for ($i = 0; $i < 2; $i++) {
-      $sql = "SELECT u.*, f.follower
-              FROM users AS u
-              LEFT JOIN follow AS f ON u.username = f.".$sqlParams[0]."
-              WHERE f.".$sqlParams[1]." = ? ORDER BY RAND() LIMIT 15";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s", $u);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      while($row = $result->fetch_assoc()){
-        ${$varNames[$i]} .= genRightBox($row, $conn);
-      }
-    
-      $stmt->close();
-
-      // Swap values in array
-      $tmp = $sqlParams[0];
-      $sqlParams[0] = $sqlParams[1];
-      $sqlParams[1] = $tmp;
-    }
-    
-    // Create the photos button
-    $photos_btn = "
-      <button onclick='window.location = '/photos/<?php echo $u; ?>View Photos</button>
-    ";
-        
-    // Gather more information about user
-    $sql = "SELECT * FROM edit WHERE username=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $u);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if($result->num_rows > 0){
-      while($row = $result->fetch_assoc()){
-        $job = $row["job"];
-        $about = $row["about"];
-        $profession = $row["profession"];
-        $state = $row["state"];
-        $city = $row["city"];
-        $mobile = $row["mobile"];
-        $hometown = $row["hometown"];
-        $fmusic = $row["fav_music"];
-        $fmovie = $row["fav_movie"];
-        $pstatus = $row["par_status"];
-        $elemen = $row["elemen"];
-        $high = $row["high"];
-        $uni = $row["uni"];
-        $politics = $row["politics"];
-        $religion = $row["religion"];
-        $nd_day = $row["nd_day"];
-        $nd_month = $row["nd_month"];
-        $ndtonum = strftime("%m", strtotime($nd_month));
-        $ndtogether = "2018-".$ndtonum."-".$nd_day;
-        $interest = $row["interest"];
-        $notemail = $row["notemail"];
-        $website = $row["website"];
-        $language = $row["language"];
-        $address = $row["address"];
-        $degree = $row["degree"];
-        $quotes = $row["quotes"];
-        $cleanqu = $quotes;
-        $cleanqu = str_replace("”",'',$cleanqu);
-       
-        // Prefix website link with http://
-        if(!(substr($website, 0, 7) === "http://") && $website){
-            $website = "http://".$website;
-        }
-        
-        // Prefix for email
-        $emailURL = $notemail;
-        if(!(substr($notemail, 0, 7) === "mailto:")){
-            $emailURL = "mailto:".$notemail;
-        }
-      }
-
-      if($profession == "w"){
-          $works = "Working";
-      }else if($profession == "r"){
-          $works = "Retired";
-      }else if($profession == "u"){
-          $works = "Unemployed";
-      }else if($profession == "o"){
-          $works = "Other";
-      }else{
-          $works = "Student";
-      }
-
-      $stmt->close();
-    }
-
-    // Add article button
-    $article = "";
-    if($log_username != "" && $user_ok && $isOwner == "Yes"){
-      $article = '
-        <button class="main_btn_fill fixRed" onclick="hgoArt()">Write article</button>
-      ';
-    }
-
-    // Echo articles
-    $echo_articles = "";
-    $numnum = 0;
-    $sql = "SELECT * FROM articles WHERE written_by=? ORDER BY RAND() LIMIT 6";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $u);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if($result->num_rows > 0){
-      while($row = $result->fetch_assoc()){
-        $echo_articles .= genFullBox($row);
-      }
-    }
-
-    // Get background
-    $attribute = "";
-    $sql = "SELECT background FROM useroptions WHERE username=? LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $u);
-    $stmt->execute();
-    $stmt->bind_result($bg);
-    $stmt->fetch();
-    $stmt->close();
-
-    $attribute = '/user/'.$u.'/background/'.$bg;
-    if($bg == NULL || $bg == "original"){
-      $attribute = '/images/backgrounddefault.png';
-    }
-
-    // Get user photos
-    $numnum = 0;
-    $userallf = getUsersFriends($conn, $u, $log_username);
-    $uallf = join("','",$userallf);
-    $echo_photos = "";
-
-    // Decide how many photos we should display depending on the user platform
-    if(!$ismobile){
-      $lmit = 10;
-    }else{
-      $lmit = 6;
-    }
-
-    $sql = "SELECT * FROM photos WHERE user=? ORDER BY uploaddate DESC LIMIT 12";
+  // Followers & followings profile pic
+  $sqlParams = ['follower', 'following'];
+  $varNames = ['following_div', 'other_div'];
+  for ($i = 0; $i < 2; $i++) {
+    $sql = "SELECT u.*, f.follower
+            FROM users AS u
+            LEFT JOIN follow AS f ON u.username = f.".$sqlParams[0]."
+            WHERE f.".$sqlParams[1]." = ? ORDER BY RAND() LIMIT 15";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $u);
     $stmt->execute();
     $result = $stmt->get_result();
     while($row = $result->fetch_assoc()){
-      $filename_photo = $row["filename"];
-      $gallery_photo = $row["gallery"];
-      $description = $row["description"];
-      $uploader = $row["user"];
-      $udate = strftime("%b %d, %Y", strtotime($row["uploaddate"]));;
-      $ud = time_elapsed_string($udate);
-      $description = wrapText($description, 20);
+      ${$varNames[$i]} .= genRightBox($row, $conn);
+    }
+  
+    $stmt->close();
 
-      if($description == ""){
-        $description = "No description ...";
+    // Swap values in array
+    $tmp = $sqlParams[0];
+    $sqlParams[0] = $sqlParams[1];
+    $sqlParams[1] = $tmp;
+  }
+  
+  // Create the photos button
+  $photos_btn = "
+    <button onclick='window.location = '/photos/<?php echo $u; ?>View Photos</button>
+  ";
+      
+  // Gather more information about user
+  $sql = "SELECT * FROM edit WHERE username=?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if($result->num_rows > 0){
+    while($row = $result->fetch_assoc()){
+      $job = $row["job"];
+      $about = $row["about"];
+      $profession = $row["profession"];
+      $state = $row["state"];
+      $city = $row["city"];
+      $mobile = $row["mobile"];
+      $hometown = $row["hometown"];
+      $fmusic = $row["fav_music"];
+      $fmovie = $row["fav_movie"];
+      $pstatus = $row["par_status"];
+      $elemen = $row["elemen"];
+      $high = $row["high"];
+      $uni = $row["uni"];
+      $politics = $row["politics"];
+      $religion = $row["religion"];
+      $nd_day = $row["nd_day"];
+      $nd_month = $row["nd_month"];
+      $ndtonum = strftime("%m", strtotime($nd_month));
+      $ndtogether = "2018-".$ndtonum."-".$nd_day;
+      $interest = $row["interest"];
+      $notemail = $row["notemail"];
+      $website = $row["website"];
+      $language = $row["language"];
+      $address = $row["address"];
+      $degree = $row["degree"];
+      $quotes = $row["quotes"];
+      $cleanqu = $quotes;
+      $cleanqu = str_replace("”",'',$cleanqu);
+     
+      // Prefix website link with http://
+      if(!(substr($website, 0, 7) === "http://") && $website){
+          $website = "http://".$website;
       }
-
-      // Select friends for photo
-      $sql = "SELECT author FROM photos_status WHERE photo = ? AND author IN ('$uallf')
-        LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s", $filename_photo);
-      $stmt->execute();
-      $stmt->bind_result($fwhoc);
-      $stmt->fetch();
-      $stmt->close();
-
-      if($fwhoc == ""){
-        $fwhoc = "none of your friends has posted yet";
+      
+      // Prefix for email
+      $emailURL = $notemail;
+      if(!(substr($notemail, 0, 7) === "mailto:")){
+          $emailURL = "mailto:".$notemail;
       }
+    }
 
-      $uploader = wrapText($uploader, 35);
-      $fwhoc = wrapText($fwhoc, 35);
-      $numnum++;
+    if($profession == "w"){
+        $works = "Working";
+    }else if($profession == "r"){
+        $works = "Retired";
+    }else if($profession == "u"){
+        $works = "Unemployed";
+    }else if($profession == "o"){
+        $works = "Other";
+    }else{
+        $works = "Student";
+    }
 
-      $pcurl = '/user/'.$u.'/'.$filename_photo;
-      $openURL = '/photo_zoom/'.$u.'/'.$filename_photo;
-      list($width,$height) = getimagesize('user/'.$u.'/'.$filename_photo);
+    $stmt->close();
+  }
 
-      $echo_photos .= '
-        <div class="pccanvas userPhots" onmouseover="appPho(\''.$numnum.'\')"
-          onmouseleave="disPho(\''.$numnum.'\')" onclick="openURL(\''.$openURL.'\')">
-          <div class="pcnpdiv lazy-bg" data-src=\''.$pcurl.'\'>
-            <div id="photo_heading" style="width: auto !important; margin-top: 0px;
-              position: static;">'.$width.' x '.$height.'
-            </div>
-          </div>
-          <div class="infoimgdiv" id="phonum_'.$numnum.'" style="width: auto; height: auto;">
-            <div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat;
-              background-position: center; background-size: cover; width: 120px;
-              height: 103px; float: left; border-radius: 10px;" class="lazy-bg">
-            </div>
-            <span>
-              <img src="/images/picture.png" width="12" height="12">
-              &nbsp;Gallery: '.$gallery_photo.'<br>
-              <img src="/images/desc.png" width="12" height="12">
-              &nbsp;Description: '.$description.'<br>
-              <img src="/images/nddayico.png" width="12" height="12">
-              &nbsp;Pusblished: '.$udate.' ('.$ud.' ago)<br>
-              <img src="/images/puname.png" width="12" height="12">
-              &nbsp;Uploader: '.$uploader.'<br>
-              <img src="/images/fus.png" width="12" height="12">
-              &nbsp;Friends who posted below the photo: '.$fwhoc.'
-            </span>
+  // Add article button
+  $article = "";
+  if($log_username != "" && $user_ok && $isOwner == "Yes"){
+    $article = '
+      <button class="main_btn_fill fixRed" onclick="hgoArt()">Write article</button>
+    ';
+  }
+
+  // Echo articles
+  $echo_articles = "";
+  $numnum = 0;
+  $sql = "SELECT * FROM articles WHERE written_by=? ORDER BY RAND() LIMIT 6";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if($result->num_rows > 0){
+    while($row = $result->fetch_assoc()){
+      $echo_articles .= genFullBox($row);
+    }
+  }
+
+  // Get background
+  $attribute = "";
+  $sql = "SELECT background FROM useroptions WHERE username=? LIMIT 1";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $stmt->bind_result($bg);
+  $stmt->fetch();
+  $stmt->close();
+
+  $attribute = '/user/'.$u.'/background/'.$bg;
+  if($bg == NULL || $bg == "original"){
+    $attribute = '/images/backgrounddefault.png';
+  }
+
+  // Get user photos
+  $numnum = 0;
+  $userallf = getUsersFriends($conn, $u, $log_username);
+  $uallf = join("','",$userallf);
+  $echo_photos = "";
+
+  // Decide how many photos we should display depending on the user platform
+  if(!$ismobile){
+    $lmit = 10;
+  }else{
+    $lmit = 6;
+  }
+
+  $sql = "SELECT * FROM photos WHERE user=? ORDER BY uploaddate DESC LIMIT 12";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  while($row = $result->fetch_assoc()){
+    $filename_photo = $row["filename"];
+    $gallery_photo = $row["gallery"];
+    $description = $row["description"];
+    $uploader = $row["user"];
+    $udate = strftime("%b %d, %Y", strtotime($row["uploaddate"]));;
+    $ud = time_elapsed_string($udate);
+    $description = wrapText($description, 20);
+
+    if($description == ""){
+      $description = "No description ...";
+    }
+
+    // Select friends for photo
+    $sql = "SELECT author FROM photos_status WHERE photo = ? AND author IN ('$uallf')
+      LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $filename_photo);
+    $stmt->execute();
+    $stmt->bind_result($fwhoc);
+    $stmt->fetch();
+    $stmt->close();
+
+    if($fwhoc == ""){
+      $fwhoc = "none of your friends has posted yet";
+    }
+
+    $uploader = wrapText($uploader, 35);
+    $fwhoc = wrapText($fwhoc, 35);
+    $numnum++;
+
+    $pcurl = '/user/'.$u.'/'.$filename_photo;
+    $openURL = '/photo_zoom/'.$u.'/'.$filename_photo;
+    list($width,$height) = getimagesize('user/'.$u.'/'.$filename_photo);
+
+    $echo_photos .= '
+      <div class="pccanvas userPhots" onmouseover="appPho(\''.$numnum.'\')"
+        onmouseleave="disPho(\''.$numnum.'\')" onclick="openURL(\''.$openURL.'\')">
+        <div class="pcnpdiv lazy-bg" data-src=\''.$pcurl.'\'>
+          <div id="photo_heading" style="width: auto !important; margin-top: 0px;
+            position: static;">'.$width.' x '.$height.'
           </div>
         </div>
-      ';
+        <div class="infoimgdiv" id="phonum_'.$numnum.'" style="width: auto; height: auto;">
+          <div data-src=\''.$pcurl.'\' style="background-repeat: no-repeat;
+            background-position: center; background-size: cover; width: 120px;
+            height: 103px; float: left; border-radius: 10px;" class="lazy-bg">
+          </div>
+          <span>
+            <img src="/images/picture.png" width="12" height="12">
+            &nbsp;Gallery: '.$gallery_photo.'<br>
+            <img src="/images/desc.png" width="12" height="12">
+            &nbsp;Description: '.$description.'<br>
+            <img src="/images/nddayico.png" width="12" height="12">
+            &nbsp;Pusblished: '.$udate.' ('.$ud.' ago)<br>
+            <img src="/images/puname.png" width="12" height="12">
+            &nbsp;Uploader: '.$uploader.'<br>
+            <img src="/images/fus.png" width="12" height="12">
+            &nbsp;Friends who posted below the photo: '.$fwhoc.'
+          </span>
+        </div>
+      </div>
+    ';
+  }
+
+  // Get user's videos
+  $videos = "";
+  $sql = "SELECT * FROM videos WHERE user=? ORDER BY RAND() LIMIT 3";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s",$u);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  while($row = $result->fetch_assoc()){
+    $id = $row["id"];
+    $vf = $row["video_file"];
+    $description = $row["video_description"];
+    $video_name = $row["video_name"];
+    $video_upload = $row["video_upload"];
+    $pr = $row["video_poster"];
+    $dur = $row["dur"];
+    $dur = convDur($dur);
+    $video_upload_ = strftime("%b %d, %Y", strtotime($video_upload));
+    if($video_name == ""){
+      $video_name = "Untitled";
     }
 
-    // Get user's videos
-    $videos = "";
-    $sql = "SELECT * FROM videos WHERE user=? ORDER BY RAND() LIMIT 3";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s",$u);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while($row = $result->fetch_assoc()){
-      $id = $row["id"];
-      $vf = $row["video_file"];
-      $description = $row["video_description"];
-      $video_name = $row["video_name"];
-      $video_upload = $row["video_upload"];
-      $pr = $row["video_poster"];
-      $dur = $row["dur"];
-      $dur = convDur($dur);
-      $video_upload_ = strftime("%b %d, %Y", strtotime($video_upload));
-      if($video_name == ""){
-        $video_name = "Untitled";
-      }
+    if($description == ""){
+      $description = "No description";
+    }
 
-      if($description == ""){
-        $description = "No description";
-      }
+    if($pr == ""){
+      $pr = "/images/uservid.png";
+    }else{
+      $pr = '/user/'.$u.'/videos/'.$pr;
+    }
 
-      if($pr == ""){
-        $pr = "/images/uservid.png";
-      }else{
-        $pr = '/user/'.$u.'/videos/'.$pr;
-      }
+    $description = wrapText($description, 22);
+    $video_name = wrapText($video_name, 22);
 
-      $description = wrapText($description, 22);
-      $video_name = wrapText($video_name, 22);
+    $ec = base64url_encode($id, $hshkey);
+    $videos .= "
+      <a href='/video_zoom/" . $ec . "' style='height: 150px;'>
+        <div class='nfrelv' style='width: 100%;'>
+          <div data-src=\"".$pr."\" class='lazy-bg' style='height: 150px;' id='pcgetc'></div>
+          <div class='pcjti'>" . $video_name . "</div>
+          <div class='pcjti' style='width: auto; border-radius: 3px; margin-left: 2px;
+            position: absolute; bottom: 15px;'>" . $dur . "</div>
+        </div>
+      </a>
+    ";
+  }
+  $stmt->close();
 
-      $ec = base64url_encode($id, $hshkey);
-      $videos .= "
-        <a href='/video_zoom/" . $ec . "' style='height: 150px;'>
-          <div class='nfrelv' style='width: 100%;'>
-            <div data-src=\"".$pr."\" class='lazy-bg' style='height: 150px;' id='pcgetc'></div>
-            <div class='pcjti'>" . $video_name . "</div>
-            <div class='pcjti' style='width: auto; border-radius: 3px; margin-left: 2px;
-              position: absolute; bottom: 15px;'>" . $dur . "</div>
-          </div>
-        </a>
+  if(!$videos){
+    if($isOwner == "No"){
+      $videos = "
+        <p style='color: #999;' class='txtc'>
+          It seems that ".$u." has not uploaded any videos yet
+        </p>
+      ";
+    }else{
+      $videos = "
+        <p style='color: #999;' class='txtc'>
+          It seems that you have not uploaded any videos yet
+        </p>
       ";
     }
-    $stmt->close();
+  }
+  $stmt->close();
 
-    if(!$videos){
-      if($isOwner == "No"){
-        $videos = "
-          <p style='color: #999;' class='txtc'>
-            It seems that ".$u." has not uploaded any videos yet
-          </p>
-        ";
-      }else{
-        $videos = "
-          <p style='color: #999;' class='txtc'>
-            It seems that you have not uploaded any videos yet
-          </p>
-        ";
-      }
+  $myf = getUsersFriends($conn, $u, $log_username);
+  $theirf = getUsersFriends($conn, $log_username, $u);
+
+  $incomm = array_intersect($myf, $theirf);
+  $resincomm = count($incomm);
+
+  // Get number of all photos
+  $count_all = countUserPhots($conn, $u);
+
+  // Get number of favs given for user's arts
+  $count_favs = cntLikesNew($conn, $u, 'fav_art', 'art_uname');
+
+  // Get num of videos
+  $count_vids = cntLikesNew($conn, $u, 'videos', 'user');
+
+  $sql = "SELECT COUNT(l.id) FROM video_likes AS l LEFT JOIN videos AS v ON v.id = l.video
+    WHERE l.username = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $stmt->bind_result($count_vid_likes);
+  $stmt->fetch();
+  $stmt->close();
+  
+  // Get num of likes given on user's arts
+  $count_likes = cntLikesNew($conn, $u, 'heart_likes', 'art_uname');
+
+  // Count user's arts
+  $count_arts = cntLikesNew($conn, $u, 'articles', 'written_by');
+
+  // Wish user a happy name day 
+  $try = date("Y-m-d");
+  $sql = "SELECT DATEDIFF(?,?)";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("ss", $ndtogether, $try);
+  $stmt->execute();
+  $stmt->bind_result($untilnd);
+  $stmt->fetch();
+  $stmt->close();
+
+  if($untilnd < 0){
+    $untilnd = $days + $untilnd;
+  }
+
+  $untilndday = $untilnd." days until name day";
+  if($untilndday == 0){
+    $untilndday = "happy name day!";
+  }
+
+  // Get groups
+  $echo_groups = "";
+  $sql = "SELECT gm.*, gp.*
+      FROM gmembers AS gm
+      LEFT JOIN groups AS gp ON gp.name = gm.gname
+      WHERE gm.mname = ? ORDER BY gp.creation DESC LIMIT 7";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s", $u);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  while($row = $result->fetch_assoc()){
+    $echo_groups .= genGrBox($row);
+  }
+
+  $echo_groups .= '<div class="clear"></div>';
+  $stmt->close();
+
+  if($other_div == ""){
+    if($isOwner == "Yes"){
+      $other_div = "
+        <p style='font-size: 14px; color: #999;' class='txtc'>
+          It seems that you do not follow anyone right now
+        </p>
+      ";
+    }else{
+      $other_div = "
+        <p style='font-size: 14px; color: #999;' class='txtc'>
+          It seems that ".$u." do not follow anyone right now
+        </p>
+      ";
     }
-    $stmt->close();
+  }
 
-    $myf = getUsersFriends($conn, $u, $log_username);
-    $theirf = getUsersFriends($conn, $log_username, $u);
-
-    $incomm = array_intersect($myf, $theirf);
-    $resincomm = count($incomm);
-
-    // Get number of all photos
-    $count_all = countUserPhots($conn, $u);
-
-    // Get number of favs given for user's arts
-    $count_favs = cntLikesNew($conn, $u, 'fav_art', 'art_uname');
-
-    // Get num of videos
-    $count_vids = cntLikesNew($conn, $u, 'videos', 'user');
-
-    $sql = "SELECT COUNT(l.id) FROM video_likes AS l LEFT JOIN videos AS v ON v.id = l.video
-      WHERE l.username = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $u);
-    $stmt->execute();
-    $stmt->bind_result($count_vid_likes);
-    $stmt->fetch();
-    $stmt->close();
-    
-    // Get num of likes given on user's arts
-    $count_likes = cntLikesNew($conn, $u, 'heart_likes', 'art_uname');
-
-    // Count user's arts
-    $count_arts = cntLikesNew($conn, $u, 'articles', 'written_by');
-
-    // Wish user a happy name day 
-    $try = date("Y-m-d");
-    $sql = "SELECT DATEDIFF(?,?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $ndtogether, $try);
-    $stmt->execute();
-    $stmt->bind_result($untilnd);
-    $stmt->fetch();
-    $stmt->close();
-
-    if($untilnd < 0){
-      $untilnd = $days + $untilnd;
-    }
-
-    $untilndday = $untilnd." days until name day";
-    if($untilndday == 0){
-      $untilndday = "happy name day!";
-    }
-
-    // Get groups
-    $echo_groups = "";
-    $sql = "SELECT gm.*, gp.*
-        FROM gmembers AS gm
-        LEFT JOIN groups AS gp ON gp.name = gm.gname
-        WHERE gm.mname = ? ORDER BY gp.creation DESC LIMIT 7";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $u);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while($row = $result->fetch_assoc()){
-      $echo_groups .= genGrBox($row);
-    }
-
-    $echo_groups .= '<div class="clear"></div>';
-    $stmt->close();
-
-    if($other_div == ""){
-      if($isOwner == "Yes"){
-        $other_div = "
-          <p style='font-size: 14px; color: #999;' class='txtc'>
-            It seems that you do not follow anyone right now
-          </p>
-        ";
-      }else{
-        $other_div = "
-          <p style='font-size: 14px; color: #999;' class='txtc'>
-            It seems that ".$u." do not follow anyone right now
-          </p>
-        ";
-      }
-    }
-
-    // Count user as a member and group creator
-    $member_count = cntLikesNew($conn, $u, 'gmembers', 'mname');
-    $creator_count = cntLikesNew($conn, $u, 'groups', 'creator');
+  // Count user as a member and group creator
+  $member_count = cntLikesNew($conn, $u, 'gmembers', 'mname');
+  $creator_count = cntLikesNew($conn, $u, 'groups', 'creator');
 ?>
 <!DOCTYPE html>
 <html>
