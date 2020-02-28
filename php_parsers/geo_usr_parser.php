@@ -4,7 +4,8 @@
         $ulat = preg_replace('#[^0-9.,-]#', '', $_POST["updateLat"]);
         $ulon = preg_replace('#[^0-9.,-]#', '', $_POST['updateLon']);
         if($ulat == "" || $ulon == ""){
-            echo "Longitude or latitude is missing asdsd";
+          echo "Longitude or latitude is missing";
+          exit();
         }
         $sql = "UPDATE users SET lat = ?, lon = ? WHERE username = ?";
         $stmt = $conn->prepare($sql);

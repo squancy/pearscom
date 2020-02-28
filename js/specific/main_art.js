@@ -152,7 +152,7 @@ function editArt(){
         <i class="fa fa-undo"></i>
       </a>
       <a onclick="execCmd('redo')">
-        <i class="fas fa-redo"></i>
+        <i class="fa fa-repeat"></i>
       </a>
       <a onclick="execCmd('insertUnorderedList')">
         <i class="fa fa-list-ul"></i>

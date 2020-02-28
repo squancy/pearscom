@@ -75,7 +75,13 @@
 		}else if(strlen($j) > 150 || strlen($ta) > 1000 || strlen($pro) > 150 || strlen($city) > 150 || strlen($state) > 150 || strlen($mobile) > 150 || strlen($hometown) > 150 || strlen($fmovie) > 400 || strlen($fmusic) > 400 || strlen($pstatus) > 150 || strlen($elemen) > 150 || strlen($high) > 150 || strlen($uni) > 150 || strlen($politics) > 150 || strlen($religion) > 150 || strlen($language) > 150 || strlen($interest) > 150 || strlen($notemail) > 150 || strlen($website) > 150 || strlen($address) > 150 || strlen($degree) > 150 || strlen($quotes) > 400){
 		    echo "You reached the maximum character limit";
 		    exit();
-		}else if($nd_day != 1 && $nd_day != 2 && $nd_day != 3 && $nd_day != 4 && $nd_day != 5 && $nd_day != 6 && $nd_day != 7 && $nd_day != 8 && $nd_day != 9 && $nd_day != 10 && $nd_day != 11 && $nd_day != 12 && $nd_day != 13 && $nd_day != 14 && $nd_day != 15 && $nd_day != 16 && $nd_day != 17 && $nd_day != 18 && $nd_day != 19 && $nd_day != 20 && $nd_day != 21 && $nd_day != 22 && $nd_day != 23 && $nd_day != 24 && $nd_day != 25 && $nd_day != 26 && $nd_day != 27 && $nd_day != 28 && $nd_day != 29 && $nd_day != 30 && $nd_day != 31){
+		}else if($nd_day != 1 && $nd_day != 2 && $nd_day != 3 && $nd_day != 4 && $nd_day != 5 &&
+    $nd_day != 6 && $nd_day != 7 && $nd_day != 8 && $nd_day != 9 && $nd_day != 10 && $nd_day !=
+    11 && $nd_day != 12 && $nd_day != 13 && $nd_day != 14 && $nd_day != 15 && $nd_day != 16 &&
+    $nd_day != 17 && $nd_day != 18 && $nd_day != 19 && $nd_day != 20 && $nd_day != 21 &&
+    $nd_day != 22 && $nd_day != 23 && $nd_day != 24 && $nd_day != 25 && $nd_day != 26 &&
+    $nd_day != 27 && $nd_day != 28 && $nd_day != 29 && $nd_day != 30 && $nd_day != 31 &&
+    $nd_day != ""){
 		    echo "Invalid name day";
 		    exit();
 		}else{

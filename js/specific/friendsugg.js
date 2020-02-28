@@ -5,13 +5,14 @@ function friendToggle(ftype, status, container) {
     if (ajaxReturn(request)) {
       if (request.responseText == "friend_request_sent") {
         _(container).innerHTML = `
-          <p style='color: #999; margin-right: 5px;'>
+          <p style='color: #999; margin: 0px;'>
             Friend request sent
           </p>
         `;
       } else if (request.responseText == "unfriend_ok") {
         _(container).innerHTML = `
-        <button onclick="friendToggle('friend', '${UNAME}', 'friendBtn_${status}')">
+        <button onclick="friendToggle('friend', '${UNAME}', 'friendBtn_${status}')"
+          class="main_btn_fill fixRed">
           Request As Friend
         </button>`;
       } else {

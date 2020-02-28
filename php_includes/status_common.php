@@ -114,6 +114,7 @@
 
   function genDelBtn($author, $log_username, $account_name, $statusid, $isStatus = true,
     $space = true, $serverSide = "/php_parsers/article_status_system.php") {
+    global $sType;
     if($author == $log_username || $account_name == $log_username){
       if($isStatus) {
         $id = "sdb_".$statusid; 
@@ -130,8 +131,9 @@
       return '
         <span id="'.$id.'">
           <button onclick="Confirm.render("Delete '.$what.'?","delete_post","post_1")" 
-          class="delete_s" onclick="return false;"
-          onmousedown="'.$fname.'(\''.$statusid.'\',\''.$half.''.$statusid.'\', \''.$serverSide.'\');">X</button>
+            class="delete_s" onclick="return false;"
+            onmousedown="'.$fname.'(\''.$statusid.'\',\''.$half.$sType.'_'.$statusid.'\',
+            \''.$serverSide.'\');">X</button>
         </span>
         &nbsp;&nbsp;';
     }else if ($space) {

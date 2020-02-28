@@ -82,6 +82,7 @@
   }
 
   function isBlocked($conn, $log_username, $u) {
+    global $user_ok;
     $isBlock = false;
     if($user_ok){
       $block_check = "SELECT id FROM blockedusers WHERE blockee=? AND blocker=?";
@@ -189,5 +190,34 @@
       }
     }
     $stmt->close();
+  }
+
+  function isFollow($conn, $log_username, $u) {
+    global $user_ok;
+    if($u != $log_username && $user_ok){
+      $follow_check = "SELECT id FROM follow WHERE follower=? AND following=? LIMIT 1";
+      $stmt = $conn->prepare($follow_check);
+      $stmt->bind_param("ss",$log_username, $u);
+      $stmt->execute();
+      $stmt->store_result();
+      $stmt->fetch();
+      $numrows = $stmt->num_rows;
+      $stmt->close();
+      if($numrows > 0){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function countFols($conn, $u, $db) {
+    $sql = "SELECT COUNT(id) FROM follow WHERE ".$db."=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $u);
+    $stmt->execute();
+    $stmt->bind_result($follower_count);
+    $stmt->fetch();
+    $stmt->close();
+    return $follower_count;
   }
 ?>
