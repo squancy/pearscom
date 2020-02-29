@@ -70,11 +70,11 @@
 
   $bestvids = "";
   $sql = "SELECT video, COUNT(*) AS u 
-            FROM video_likes
-            WHERE like_time >= DATE_ADD(CURDATE(), INTERVAL - $days DAY)
-            GROUP BY video
-            ORDER BY u DESC
-            LIMIT $max";
+          FROM video_likes
+          WHERE like_time >= DATE_ADD(CURDATE(), INTERVAL - $days DAY)
+          GROUP BY video
+          ORDER BY u DESC
+          LIMIT $max";
   $stmt = $conn->prepare($sql);
   $stmt->execute();
   $res = $stmt->get_result();
