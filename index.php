@@ -716,7 +716,8 @@
       }
     }
   </style>
-
+  
+  <script src="/js/mbc.js"></script>
   <script src="/js/ajax.js" defer></script>
   <script src='/js/specific/p_dialog.js' defer></script>
   <script src='/js/specific/file_dialog.js' defer></script>
@@ -736,7 +737,7 @@
 </head>
 <body style="background-color: #fafafa;">
   <?php require_once 'template_pageTop.php'; ?>
-  <?php if($isfeed == false){ ?>
+  <?php if(!$isfeed){ ?>
     <div id="pearHolder" class="seekhide"></div>
       <section id="startContent">
         <div>
@@ -755,10 +756,7 @@
         </div>
       </section>
       <div id="pearHolder" class="hideseek"></div>
-      <div id="changingWords">
-        <div class="wordsStyle">
-          <span class="wordsBg">Share your ideas</span>
-        </div>
+      <div id="changingWords"><div class="wordsStyle"><span class="wordsBg">Share your ideas</span></div>
       </div>
       <div class="clear"></div>
     <?php }else{ ?>
@@ -790,7 +788,6 @@
 
   <script type="text/javascript">
     var isf = "<?php echo $isfeed; ?>";
-
   </script>
   <script src="/js/specific/index.js"></script>
 </body>

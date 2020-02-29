@@ -37,7 +37,8 @@
   $u = checkU($_GET['u'], $conn);
  
   // Check if user wants to write an article (redirection)
-  $wart = checkGETParams($_GET['wart'], $conn, '<script>writeArticle();</script>', 'yes');
+  $wart = checkGETParams($_GET['wart'], $conn,
+    '<script type="text/javascript">writeArticle();</script>', 'yes');
   
   // Check if pm form should be showed
   $pmw = checkGETParams($_GET['pm'], $conn, '<script>showForm();</script>', 'write');
@@ -736,6 +737,34 @@
     var hasImageGen3 = "";
     var hasImageGen4 = "";
     var hasImageGen5 = "";
+
+    function writeArticle() {
+      var cancel = _("article_show");
+      var header = _("writearticle");
+      var input = _("art_btn");
+      var tmp = _("hide_it");
+      var code = _("userNavbar");
+      var t = _("slide1");
+      var line = _("slide2");
+      if ("block" == cancel.style.display) {
+        tmp.style.display = "none";
+        cancel.style.display = "block";
+        header.style.display = "block";
+        input.style.display = "block";
+        input.style.opacity = "0.9";
+        code.style.display = "block";
+        _("menuVer").style.display = "flex";
+      } else {
+        cancel.style.display = "none";
+        header.style.display = "block";
+        tmp.style.display = "none";
+        code.style.display = "none";
+        t.style.display = "none";
+        line.style.display = "none";
+        _("menuVer").style.display = "none";
+        window.scrollTo(0, 0);
+      }
+    }
   </script>
 </head>
 <body onload="enableEditMode()" style="overflow-x: hidden;">
@@ -1830,7 +1859,7 @@
           <?php require_once 'template_pm.php'; ?>
         <?php } ?>
         <hr class="dim">
-        <?php if($isBlock == false){ ?>
+        <?php if(!$isBlock){ ?>
           <?php require_once 'template_status.php'; ?>
         <?php }else{ ?>
           <p style="color: #006ad8;" class="txtc">

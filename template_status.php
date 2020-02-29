@@ -103,7 +103,7 @@
 <script src='/js/specific/share_status.js' defer></script>
 <script src='/js/specific/like_status.js' defer></script>
 <script type="text/javascript">
-var hasImage = "";
+  var hasImage = "";
   window.onbeforeunload = function() {
     if ("" != hasImage) {
       return "You have not posted your image";

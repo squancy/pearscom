@@ -87,7 +87,7 @@ function getDocHeight() {
 if (isf) {
     var inc = 0,
         num = 0,
-        isn = !0;
+        isn = true;
     if (isn) {
       /*
       $(window).scroll(function() {
@@ -155,7 +155,7 @@ if(!isf){
     newSpan.id = 'fadeSpan';
     newSpan.style.display = "none";
     contDiv.replaceChild(newDiv, contDiv.childNodes[0]);
-    $("#fadeSpan").fadeIn(500)
+    $("#fadeSpan").fadeIn(500);
     keepLoop++;
   }
 }

@@ -35,7 +35,7 @@
 
 		if(isset($_FILES["stPic_poster"]["name"]) && $_FILES["stPic_poster"]["tmp_name"] != ""){
 			$posterName = $_FILES["stPic_poster"]["name"];
-		    $posterTmp = $_FILES["stPic_poster"]["tmp_name"];
+      $posterTmp = $_FILES["stPic_poster"]["tmp_name"];
 			$posterType = $_FILES["stPic_poster"]["type"];
 			$posterSize = $_FILES["stPic_poster"]["size"];
 			$posterErr = $_FILES["stPic_poster"]["error"];
@@ -92,6 +92,7 @@
 				exit();
 			}
 		}
+    
 		if($description == "" && $videoname == "" && $poster_file == ""){
 			$sql = "INSERT INTO videos(user, video_file, video_upload, dur) VALUES (?,?,NOW(),?)";
 			$stmt = $conn->prepare($sql);
@@ -99,7 +100,8 @@
 			$stmt->execute();
 			$stmt->close();
 		}else if($description == "" && $videoname == "" && $poster_file != ""){
-			$sql = "INSERT INTO videos(user, video_poster, video_file, video_upload, dur) VALUES (?,?,NOW(),?)";
+			$sql = "INSERT INTO videos(user, video_poster, video_file, video_upload, dur) VALUES
+      (?,?,?,NOW(),?)";
 			$stmt = $conn->prepare($sql);
 			$stmt->bind_param("ssss",$log_username,$poster_file,$db_file_name,$dur);
 			$stmt->execute();

@@ -184,36 +184,6 @@ function editChanges() {
   }
 }
 
-function writeArticle() {
-  var cancel = _("article_show");
-  var header = _("writearticle");
-  var input = _("art_btn");
-  var tmp = _("hide_it");
-  var code = _("userNavbar");
-  var t = _("slide1");
-  var line = _("slide2");
-  if ("block" == cancel.style.display) {
-    tmp.style.display = "none";
-    cancel.style.display = "block";
-    header.style.display = "block";
-    input.style.display = "block";
-    input.style.opacity = "0.9";
-    code.style.display = "block";
-    _("menuVer").style.display = "flex";
-  } else {
-    cancel.style.display = "none";
-    header.style.display = "block";
-    tmp.style.display = "none";
-    code.style.display = "none";
-    t.style.display = "none";
-    line.style.display = "none";
-    _("menuVer").style.display = "none";
-    window.scrollTo(0, 0);
-  }
-}
-
-var _0xc754 = ["use strict"];
-
 function saveArticle() {
   var line = _("writearticle");
   var email = _("title").value;
@@ -422,8 +392,8 @@ if (_("hide_it").style.display == "none") {
     line.elements.myTextArea.value = window.frames.richTextField.document.body.innerHTML;
     let iframeVal = line.elements.myTextArea.value;
 
-    if (!_("title").value || !hasImageGen1 || !hasImageGen2 || !hasImageGen3 || !hasImageGen4
-      || !hasImageGen5 || !_("keywords").value || !iframeVal || !_("art_cat").value) {
+    if (_("title").value || hasImageGen1 || hasImageGen2 || hasImageGen3 || hasImageGen4
+      || hasImageGen5 || _("keywords").value || iframeVal || _("art_cat").value) {
       return "You have unsaved changes left. If you leave the page without saving your" +
         "article, it will be lost!";
     }
@@ -434,7 +404,7 @@ let pmsub = _("pmsubject");
 let pmtxt = _("pmtext");
 if ((pmsub && pmtxt) != undefined) {
   window.onbeforeunload = function() {
-    if (!_("pmsubject").value || !_("pmtext").value) {
+    if (_("pmsubject").value || _("pmtext").value) {
       return "You have unsaved changes left. If you leave the page without saving your" + 
         "private message, it will be lost!";
     }

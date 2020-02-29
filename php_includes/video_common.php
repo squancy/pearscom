@@ -1,5 +1,5 @@
 <?php
-  function genSmallVidBox($id_hsh, $prs, $vidn, $dur) {
+  function genSmallVidBox($id_hsh, $prs, $vidn, $dur, $isnewornot) {
     return "
       <a href='/video_zoom/" . $id_hsh . "'>
         <div class='nfrelv vBigDown' style='white-space: nowrap;'>
@@ -9,6 +9,7 @@
             position: absolute; bottom: 25px;'>
             " . $dur . "
           </div>
+          " . $isnewornot  . "
         </div>
       </a>
     ";
@@ -37,6 +38,26 @@
       $vidu = $row['user'];
       $dur = $row['dur'];
       $vidn = $row['video_name'];
+      $vdate_ = $row['video_upload'];
+    }
+
+    $curdate = date("Y-m-d");
+    $ud = mb_substr($vdate_, 0,10, "utf-8");
+
+    // Check if video is uploaded 1 day ago or before
+    $sql = "SELECT DATEDIFF(?,?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $curdate, $ud);
+    $stmt->execute();
+    $stmt->bind_result($isnew);
+    $stmt->fetch();
+    $stmt->close();
+    $isnewornot = "";
+    if($isnew <= 1){
+      $isnewornot = "
+        <div class='pcjti' style='width: auto; border-radius: 3px; margin-left: 45px;
+          position: absolute; bottom: 25px;'>New</div>
+      ";
     }
 
     // Select thumbnail
@@ -47,7 +68,7 @@
       $vidn = "Untitled";
     }
 
-    return genSmallVidBox($id_hsh, $prs, $vidn, $dur);
+    return genSmallVidBox($id_hsh, $prs, $vidn, $dur, $isnewornot);
   }
 
   function thumbnailImg($u, $poster) {

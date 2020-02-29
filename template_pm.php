@@ -1,7 +1,5 @@
 <?php
-  require_once 'php_includes/check_login_statues.php';
   require_once 'elist.php';
-  require_once 'headers.php';
 
   // Protect this script from direct url access
   if ((!isset($isFriend)) || (!isset($isOwner)) || !isset($log_username) ||
