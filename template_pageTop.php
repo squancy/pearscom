@@ -263,7 +263,7 @@
   <script src="/js/main.js"></script>
   <script src="/js/ajax.js" async></script>
   <script src="/js/jjs.js"></script>
-  <script src="/js/mbc.js"></script>
+  <script src="/js/mbc.js" defer></script>
   <script src="/js/lload.js"></script>
   <script src="/js/specific/p_dialog.js"></script>
   <script src="/js/specific/error_dialog.js"></script>

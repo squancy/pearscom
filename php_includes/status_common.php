@@ -170,7 +170,7 @@
 
     $likeButton = "";
     $likeText = "";
-    if($isLike == true){
+    if($isLike){
       $likeButton = '
         <a href="#" onclick="return false;" 
           onmousedown="toggleLike'.$postfix.'(\'unlike\',\''.$statusid.'\',

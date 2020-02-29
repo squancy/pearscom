@@ -25,13 +25,18 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
     toSend += '&group=' + isGr; 
   }
 
+  let pref = '';
+  if (serverSide == '/php_parsers/video_parser.php') {
+    pref = 'v';
+  }
+
   var result = ajaxObj("POST", serverSide);
   result.onreadystatechange = function() {
     if (ajaxReturn(result)) {
       if ("like_success" == result.responseText) {
         _(t).innerHTML = `
           <a href="#" onclick="return false;"
-            onmousedown="toggleLike('unlike', '${o}','likeBtn${sType}_${o}', '${isGr}',
+            onmousedown="toggleLike('unlike', '${o}','likeBtn${pref}${sType}_${o}', '${isGr}',
             '${serverSide}', '${sType}');">
             <img src="/images/fillthumb.png" width="18" height="18" class="like_unlike">
           </a>
@@ -47,7 +52,7 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
         if ("unlike_success" == result.responseText) {
           _(t).innerHTML = `
             <a href="#" onclick="return false;"
-              onmousedown="toggleLike('like', '${o}', 'likeBtn${sType}_${o}', '${isGr}',
+              onmousedown="toggleLike('like', '${o}', 'likeBtn${pref}${sType}_${o}', '${isGr}',
               '${serverSide}', '${sType}')">
               <img src="/images/nf.png" width="18" height="18" class="like_unlike">
             </a>
@@ -58,6 +63,8 @@ function toggleLike(e, o, t, isGr = false, serverSide = '/php_parsers/like_syste
             e = Number(e) - 1;
             _("ipanf" + sType  +  "_" + o).innerText = e + " likes";
         } else {
+          console.log(result.responseText);
+          console.log('a');
           prepareDialog();
           showError();
         }

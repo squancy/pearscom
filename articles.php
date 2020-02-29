@@ -306,7 +306,7 @@
 
   <script src="/js/jjs.js" async></script>
   <script src="/text_editor.js" async></script>
-  <script src="/js/main.js" async></script>
+  <script src="/js/main.js"></script>
   <script src="/js/ajax.js" async></script>
   <script src="/js/mbc.js"></script>
   <script src="/js/lload.js"></script>
