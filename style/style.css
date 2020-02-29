@@ -6840,14 +6840,26 @@ input::-moz-focus-inner {
   #contentHelp>a>div {
     width: 100%
   }
+  .tooltipVidText {
+    display: none;
+  }
   .shtrp {
     margin-bottom: 20px
+  }
+  .vidRedPad {
+    padding: 5px;
+  }
+  .vidIncMar {
+    margin-top: 10px;
+  }
+  #pcgetc {
+    height: 100px;
   }
   .greyP {
     margin-bottom: 16px
   }
   #videoContainer {
-    top: -10px;
+    top: -11px;
     left: -10px;
     width: calc(100% + 15px);
   }

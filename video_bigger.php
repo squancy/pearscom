@@ -203,7 +203,7 @@
         <div id="big_holder" class="genWhiteHolder">
           <div class="vidHolderBig" id="videoContainer">
             <video width="100%" id="my_video_'.$ec.'" class="bigvidg" 
-              id="my_video_'.$ec.'" poster="'.$poster.'">
+              id="my_video_'.$ec.'" poster="'.$poster.'" preload="metadata">
               <source src="/user/'.$u.'/videos/'. $video_file.'">
 
               <p style="font-size: 14px;" class="txtc">
@@ -427,25 +427,25 @@
   <?php require_once 'template_pageTop.php'; ?>
   <div id="pageMiddle_2">
     <?php echo $big_vid; ?>
-    <div class="genWhiteHolder" style="margin-top: 10px;">
-      <b class="vBigText">My videos</b>
-        <div id="myvids_holder" class="flexibleSol">
-          <?php echo $myvids; ?>
-        </div>
+    <div class="genWhiteHolder vidRedPad" style="margin-top: 10px;">
+      <b class="vBigText vidIncMar">My videos</b>
+      <div id="myvids_holder" class="flexibleSol">
+        <?php echo $myvids; ?>
+      </div>
     </div>
 
-    <div class="genWhiteHolder" style="margin-top: 10px;">
-      <b class="vBigText">Related videos</b>
-        <div id="relvid_holder_big" class="flexibleSol">
-          <?php echo $related_vids; ?>
-        </div>
+    <div class="genWhiteHolder vidRedPad" style="margin-top: 10px;">
+      <b class="vBigText vidIncMar">Related videos</b>
+      <div id="relvid_holder_big" class="flexibleSol">
+        <?php echo $related_vids; ?>
+      </div>
     </div>
 
-    <div class="genWhiteHolder" style="margin-top: 10px;">
-      <b class="vBigText"><?php echo $bHolder; ?></b>
-        <div id="relvid_holder_big" class="flexibleSol">
-          <?php echo $bestvids; ?>
-        </div>
+    <div class="genWhiteHolder vidRedPad" style="margin-top: 10px;">
+      <b class="vBigText vidIncMar"><?php echo $bHolder; ?></b>
+      <div id="relvid_holder_big" class="flexibleSol">
+        <?php echo $bestvids; ?>
+      </div>
     </div>
 
     <div class="clear"></div>
