@@ -1,178 +1,178 @@
 <?php
-    require_once 'php_includes/check_login_statues.php';
-    require_once 'php_includes/perform_checks.php';
-    require_once 'php_includes/pagination.php';
-    require_once 'php_includes/status_common.php';
-    require_once 'timeelapsedstring.php';
-    require_once 'headers.php';
+  require_once 'php_includes/check_login_statues.php';
+  require_once 'php_includes/perform_checks.php';
+  require_once 'php_includes/pagination.php';
+  require_once 'php_includes/status_common.php';
+  require_once 'timeelapsedstring.php';
+  require_once 'headers.php';
 
-    // Initialize any variables that the page might use
-    $one = "1";
-    $c = "c";
-    $a = "a";
-    $b = "b";
-    $one = "1";
-    $max = 14;
+  // Initialize any variables that the page might use
+  $one = "1";
+  $c = "c";
+  $a = "a";
+  $b = "b";
+  $one = "1";
+  $max = 14;
 
-    // Make sure the $_GET username is set and sanitize it
-    $u = checkU($_GET['u'], $conn);
+  // Make sure the $_GET username is set and sanitize it
+  $u = checkU($_GET['u'], $conn);
 
-    // Handle pagination
-    $sql_s = "SELECT COUNT(id) FROM friends WHERE user1 = ? OR user2 = ? AND accepted = ?";
-    $url_n = "/view_friends/{$u}";
-    list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'sss', $url_n, $u, $u, $one); 
-    
-    userExists($conn, $u);
-    
-    // Check to see if the viewer is the account owner
-    $isOwner = isOwner($u, $log_username, $user_ok);
+  // Handle pagination
+  $sql_s = "SELECT COUNT(id) FROM friends WHERE user1 = ? OR user2 = ? AND accepted = ?";
+  $url_n = "/view_friends/{$u}";
+  list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'sss', $url_n, $u, $u, $one); 
+  
+  userExists($conn, $u);
+  
+  // Check to see if the viewer is the account owner
+  $isOwner = isOwner($u, $log_username, $user_ok);
 
-    $otype = "sort_4";
-    $friendsHTML = '';
+  $otype = "sort_4";
+  $friendsHTML = '';
 
-    // Count the num of friends the user has
-    $sql = "SELECT COUNT(id) FROM friends WHERE user1=? AND accepted=? OR user2=?
-      AND accepted=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssss", $u, $one, $u, $one);
-    $stmt->execute();
-    $stmt->bind_result($friend_count);
-    $stmt->fetch();
-    $stmt->close();
-    if($friend_count < 1){
-      if($isOwner == "Yes"){
-        $friendsHTML = '
-          <p style="color: #999;" class="txtc">
-            It seems that you have no friends currently.
-            Check your <a href="/friend_suggestions">friend suggestions</a> in order to get
-            new ones.
-          </p>
+  // Count the num of friends the user has
+  $sql = "SELECT COUNT(id) FROM friends WHERE user1=? AND accepted=? OR user2=?
+    AND accepted=?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("ssss", $u, $one, $u, $one);
+  $stmt->execute();
+  $stmt->bind_result($friend_count);
+  $stmt->fetch();
+  $stmt->close();
+  if($friend_count < 1){
+    if($isOwner == "Yes"){
+      $friendsHTML = '
+        <p style="color: #999;" class="txtc">
+          It seems that you have no friends currently.
+          Check your <a href="/friend_suggestions">friend suggestions</a> in order to get
+          new ones.
+        </p>
+      ';
+    }else{
+      $friendsHTML = '<p style="color: #999;" class="txtc">'.$u.' has no friends yet</p>';
+    }
+  } else {
+    if(isset($_GET["otype"]) || $otype != ""){
+      if(isset($_GET["otype"])){
+        $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
+      }
+
+      $all_friends = getUsersFriends($conn, $u, $u);
+      $impActive = array_reverse($all_friends);
+      $imp = $impActive = join("','",$all_friends);
+
+      $isOnLine = "";
+
+      // Select the proper SQL query in regard of the URL sort param
+      if($otype == "sort_0"){
+        $isOnLine = "yes";
+        $sql = "SELECT * FROM users WHERE username IN('$imp') AND online = ? ORDER BY
+          username $limit";
+      }else if($otype == "sort_1"){
+        $isOnLine = "no";
+        $sql = "SELECT * FROM users WHERE username IN('$imp') AND online = ?
+          ORDER BY username $limit";
+      }else if($otype == "sort_2"){
+        $sql = "SELECT DISTINCT u.* FROM users AS u LEFT JOIN friends AS f
+          ON u.username = f.user1 WHERE u.username IN('$imp') ORDER BY f.datemade DESC $limit";
+      }else if($otype == "sort_3"){
+        $sql = "SELECT DISTINCT u.* FROM users AS u LEFT JOIN friends AS f
+          ON u.username = f.user1 WHERE u.username IN('$imp') ORDER BY f.datemade ASC $limit";
+      }else if($otype == "sort_4"){
+        $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY username $limit";
+      }else if($otype == "sort_5"){
+        $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY username DESC $limit";
+      }else if($otype == "sort_6"){
+        $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY country $limit";
+      }else if($otype == "sort_7"){
+        $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY country DESC $limit";
+      }
+
+      $stmt = $conn->prepare($sql);
+      if($otype == "sort_0" || $otype == "sort_1"){
+        $stmt->bind_param("s",$isOnLine);
+      }
+
+      $stmt->execute();
+      $result3 = $stmt->get_result();
+      while($row = $result3->fetch_assoc()) {
+        $friend_username = $row["username"];
+        $friend_avatar = $row["avatar"];
+        $friend_online = $row["online"];
+        $friend_country = $row["country"];
+        $bday = $row["bday"];
+        $color = "";
+        
+        $friend_pic = avatarImg($friend_username, $friend_avatar);
+        
+        if($friend_online == "yes"){
+          $color = 'color: green;';
+        }else{
+          $color = 'color: #999;';
+        }
+        
+        $echo_online = '
+          <b style="font-weight: normal; '.$color.'">
+            online <img src="/images/wgreen.png" class="notfimg" style="margin-bottom: -2px;">
+          </b>
         ';
-      }else{
-        $friendsHTML = '<p style="color: #999;" class="txtc">'.$u.' has no friends yet</p>';
-      }
-    } else {
-      if(isset($_GET["otype"]) || $otype != ""){
-        if(isset($_GET["otype"])){
-          $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
-        }
+        
+        $style = 'background-repeat: no-repeat; background-size: cover;
+          background-position: center; display: inline-block; float: left; width: 60px;
+          height: 60px; border-radius: 50px; margin-bottom: 0;';
 
-        $all_friends = getUsersFriends($conn, $u, $u);
-        $impActive = array_reverse($all_friends);
-        $imp = $impActive = join("','",$all_friends);
+        $age = floor((time() - strtotime($bday)) / 31556926);
 
-        $isOnLine = "";
-
-        // Select the proper SQL query in regard of the URL sort param
-        if($otype == "sort_0"){
-          $isOnLine = "yes";
-          $sql = "SELECT * FROM users WHERE username IN('$imp') AND online = ? ORDER BY
-            username $limit";
-        }else if($otype == "sort_1"){
-          $isOnLine = "no";
-          $sql = "SELECT * FROM users WHERE username IN('$imp') AND online = ?
-            ORDER BY username $limit";
-        }else if($otype == "sort_2"){
-          $sql = "SELECT DISTINCT u.* FROM users AS u LEFT JOIN friends AS f
-            ON u.username = f.user1 WHERE u.username IN('$imp') ORDER BY f.datemade DESC $limit";
-        }else if($otype == "sort_3"){
-          $sql = "SELECT DISTINCT u.* FROM users AS u LEFT JOIN friends AS f
-            ON u.username = f.user1 WHERE u.username IN('$imp') ORDER BY f.datemade ASC $limit";
-        }else if($otype == "sort_4"){
-          $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY username $limit";
-        }else if($otype == "sort_5"){
-          $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY username DESC $limit";
-        }else if($otype == "sort_6"){
-          $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY country $limit";
-        }else if($otype == "sort_7"){
-          $sql = "SELECT * FROM users WHERE username IN('$imp') ORDER BY country DESC $limit";
-        }
-
-        $stmt = $conn->prepare($sql);
-        if($otype == "sort_0" || $otype == "sort_1"){
-          $stmt->bind_param("s",$isOnLine);
-        }
-
-        $stmt->execute();
-        $result3 = $stmt->get_result();
-        while($row = $result3->fetch_assoc()) {
-          $friend_username = $row["username"];
-          $friend_avatar = $row["avatar"];
-          $friend_online = $row["online"];
-          $friend_country = $row["country"];
-          $bday = $row["bday"];
-          $color = "";
-          
-          $friend_pic = avatarImg($friend_username, $friend_avatar);
-          
-          if($friend_online == "yes"){
-            $color = 'color: green;';
-          }else{
-            $color = 'color: #999;';
-          }
-          
-          $echo_online = '
-            <b style="font-weight: normal; '.$color.'">
-              online <img src="/images/wgreen.png" class="notfimg" style="margin-bottom: -2px;">
-            </b>
-          ';
-          
-          $style = 'background-repeat: no-repeat; background-size: cover;
-            background-position: center; display: inline-block; float: left; width: 60px;
-            height: 60px; border-radius: 50px; margin-bottom: 0;';
-
-          $age = floor((time() - strtotime($bday)) / 31556926);
-
-          $friendsHTML .= '
-            <div>
-              <a href="/user/'.$friend_username.'/">
-                <div data-src=\''.$friend_pic.'\' class="lazy-bg friendpics"
-                  style=\''.$style.'\'>
-                </div>
-              </a>
-              <div id="contviewf" style="width: calc(100% - 80px); margin-left: 10px;">
-                <p>
-                  <span>
-                    '.$friend_username.'<br />
-                  </span>
-                  <span>
-                    '.$friend_country.'<br />
-                  </span>
-                  '.$age.' years old
-                </p>
+        $friendsHTML .= '
+          <div>
+            <a href="/user/'.$friend_username.'/">
+              <div data-src=\''.$friend_pic.'\' class="lazy-bg friendpics"
+                style=\''.$style.'\'>
               </div>
+            </a>
+            <div id="contviewf" style="width: calc(100% - 80px); margin-left: 10px;">
+              <p>
+                <span>
+                  '.$friend_username.'<br />
+                </span>
+                <span>
+                  '.$friend_country.'<br />
+                </span>
+                '.$age.' years old
+              </p>
             </div>
-          ';
-        }
-        $stmt->close();
+          </div>
+        ';
+      }
+      $stmt->close();
 
-        if(isset($_GET["otype"])){
-          echo $friendsHTML;
-          exit();
-        }
+      if(isset($_GET["otype"])){
+        echo $friendsHTML;
+        exit();
       }
     }
-    
-    $sql = "SELECT COUNT(id) FROM users WHERE username IN('$imp')";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute();
-    $stmt->bind_result($countFriends);
-    $stmt->fetch();
-    $stmt->close();
-    
-    $yes = "yes";
-    $sql = "SELECT COUNT(id) FROM users WHERE username IN('$imp') AND online = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s",$yes);
-    $stmt->execute();
-    $stmt->bind_result($countOFriends);
-    $stmt->fetch();
-    $stmt->close();
-    
-    $toggle = "no";
-    if($u == $log_username){
-      $toggle = "yes";
-    }
+  }
+  
+  $sql = "SELECT COUNT(id) FROM users WHERE username IN('$imp')";
+  $stmt = $conn->prepare($sql);
+  $stmt->execute();
+  $stmt->bind_result($countFriends);
+  $stmt->fetch();
+  $stmt->close();
+  
+  $yes = "yes";
+  $sql = "SELECT COUNT(id) FROM users WHERE username IN('$imp') AND online = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param("s",$yes);
+  $stmt->execute();
+  $stmt->bind_result($countOFriends);
+  $stmt->fetch();
+  $stmt->close();
+  
+  $toggle = "no";
+  if($u == $log_username){
+    $toggle = "yes";
+  }
 ?>
 <!DOCTYPE html>
 <html>
