@@ -109,10 +109,11 @@
     return $str;
   }
 
-  function getUsersFriends($conn, $u, $log_username) {
+  function getUsersFriends($conn, $u, $log_username,
+    $defSQL = "SELECT user1, user2 FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted=?") {
     $one = "1";
     $all_friends = array();
-    $sql = "SELECT user1, user2 FROM friends WHERE (user1 = ? OR user2 = ?) AND accepted=?";
+    $sql = $defSQL;
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sss", $u, $u, $one);
     $stmt->execute();

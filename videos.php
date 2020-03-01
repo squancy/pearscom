@@ -78,11 +78,6 @@
             </div>
           </form>
       ';
-    }else if(isset($_SESSION["username"]) && !empty($_SESSION["username"])
-      && $log_username != $u){
-      $info_vid_user = '
-        <a href="/videos/'.$log_username.'" class="txtc">Upload video on my profile</a>
-      ';
     }
 
     // Handle pagination

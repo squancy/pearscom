@@ -199,7 +199,7 @@
   // Get recent videos by user
   $echo_recent_videos = "";
   $sql = "SELECT * FROM
-          (SELECT * FROM videos WHERE user = ? ORDER BY id DESC LIMIT 5) sub
+          (SELECT * FROM videos WHERE user = ? ORDER BY id DESC LIMIT 9) sub
           ORDER BY id DESC";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("s", $log_username);
@@ -388,9 +388,19 @@
           </p>
         <?php } ?>
         <?php
-          // Display user's friends
-          for ($i = 0; $i < count($all_friends); $i++){
-            $withone = $all_friends[$i];
+          /*
+            Display user's friends
+          */
+
+          // First select 10 friends by last login date
+          $sql = "SELECT f.user1, f.user2 FROM friends AS f LEFT JOIN users AS u ON
+            (f.user1 = u.username) WHERE (f.user1 = ? OR f.user2 = ?) AND f.accepted=?
+            ORDER BY u.online DESC, u.lastlogin DESC";
+          $tenFriends = getUsersFriends($conn, $log_username, $log_username, $sql);
+          $tenFriends = array_slice($tenFriends, 0, 10);
+          
+          for ($i = 0; $i < count($tenFriends); $i++){
+            $withone = $tenFriends[$i];
             $sql = "SELECT COUNT(id) FROM users WHERE username=? AND online=? ORDER BY
               lastlogin DESC";
             $stmt = $conn->prepare($sql);
