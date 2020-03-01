@@ -65,6 +65,8 @@ function changeTime(e, el){
   let x = mousePosRel(e);
   let percent = x / el.offsetWidth;;
   video.currentTime = percent * video.duration;
+  console.log(x, percent, el.offsetWidth, video.duration, percent * video.duration);
+  console.log(video.currentTime);
 }
 
 // Track mouse pos on desktop
