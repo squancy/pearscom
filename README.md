@@ -1,8 +1,10 @@
-# Pearscom
-An independent and free social media website without ads that sacrifices the "better user experience" for recording the lowest possible amount of information about the users. Therefore users can focus on what truly matters for them instead of system-given suggestions and being able to make their own decisions.<br>
-<b>Note:</b> this is a legacy project that is over 3 years old and is not under development. Since then a lot of things has changed and might be deprecated but Pearscom is still working and functioning currectly.
+<img align="right" width="60" src="http://www.pearscom.com/images/newfav.png">
+<h1>Pearscom</h1>
 
-# Features
+An independent and ad-free social media website that reduces the amount of data recorded and tracked per user in order to minimize data feuds and abuses. It may result in a different user experience since Pearscom might be unprecise or unable to give highly-customized suggestions and AI-powered feeds but this tradeoff is going to pay off when users can trust the service and their data is kept in safe.<br><br>
+<b>Note:</b> this is a legacy project that is almost 4 years old and is not under development. Since then a lot of things has changed and might be deprecated but Pearscom is still working and functioning correctly.
+
+## Features
 Pearscom mostly offers the same features and services as other social media sites and some unique ones as well:
   - News feed to check the happenings around friends and nearby users
   - Own user profile that is highly customizable
@@ -12,37 +14,36 @@ Pearscom mostly offers the same features and services as other social media site
   - Group system (closed, public)
   - Invite friends to the site who are not users yet
   - Notification and messaging system (not real-time yet, would be a nice todo)
-  - many more ...
+  - Use geolocation extensively in suggestions and recommendations (not explicitly seen in other social platforms)
+  - many more...
 
-Pearscom does not require the user to give a valid real name so the user can be completely anonymous under a fantasy username.<br>
-When deleting a user profile, photo, article etc. it actually gets deleted from the database and Pearscom will not keep any redundant information about its users.<br>
-Also note that by not having lots of information about users does not necessarily mean that it will result in a bad user experience, only in a different one.<br>
-The only additional information that is used in suggestions and queries (apart from that the user gave at sign up) is geolocation.<br>
-At sign up the user needs to give more information that is generally required for such a service like timezone and country but these are mostly needed due to the lack of configurability on the server that I hire. (shared-hosted)
-Pearscom can also be downloaded as a PWA (Progessive Web App) for both mobile and desktop.
+Unlike Facebook and other social media sites Pearscom does not require the user to give valid and real-life information about themselves. The emphasis is on communication and connecting people and not on the validity of users.<br><br>
+Also, when deleting a user profile, photo, article etc. it actually gets deleted from the database and server and Pearscom will not keep any redundant information about its users.<br><br>
+One type of information that a potential user has to give is their geolocation. It is allowed in most browsers and is used by Pearscom to serve suggestions that are somehow connected to nearby users.<br><br>
+Due to the lack of configurability I have on the server that I hire users also need to give their timezone at sign up that otherwise would be obvious.
+Pearscom does not have an application in any stores but it can be downloaded as a PWA (Progessive Web App) for both mobile and desktop.
 
-# Nice TODOs:
-The site is written is pure PHP & MySQL, HTML5, CSS3 and JS with some jQuery.
-  - Integrate the service with a framework/library like React or Angular (may also consider using Django or Node.js on server-side)
-  - Restructure code for better readibility and reusability
+## Nice TODOs:
+The site is written is pure PHP & MySQL and JavaScript
+  - Integrate the service with a framework/library like React or Angular (may also consider using Django, Laravel or Node.js on server-side)
   - Implement messaging, notifications etc. in real-time (perhaps with Node.js and Socket.io)
   - Better integration with MySQL, more efficient queries etc.
   - More clever UI
   - Anything else you think would be great
  
-# Play with the code
+## Play with the code
 `git clone https://github.com/squancy/pearscom`
-In order to test Pearscom on your machine you will need a local server like XAMPP or LAMPP. To access MySQL you can run the `.php` files inside `make_sql` that will automatically create the desired tables and databases. In `php_includes` edit `conn.php` to be appropriate for your own local server. Use PHP version 7.1 for the best experience.<br>
+In order to test Pearscom on your machine you will need a local server like XAMPP or LAMPP. The database scheme is located in `make_sql` as `schema.sql` which is a description of the database structure.<br>
+In `php_includes` edit `conn.php` to be appropriate for your own local server. This file is used for connecting to the database.<br>
+Use PHP version 7.1 for the best experience.<br>
 See the live product at <a href="https://www.pearscom.com/">pearscom.com</a>.<br>
-<b>Note:</b> due to the lots of images Pearscom costs about 1.3GB.
 
-# About the live product
+## About the live product
 You can check <a href="https://www.pearscom.com/">Pearscom</a>, play with its features and try out the site.<br>
   - It is on a shared-host web server (I will consider moving it to a VPS because that would be fun)
   - The server is running Linux x84_64
   - Uses Let's Encrypt for https
   - The server is located in Hungary
 
-# Contribute
+## Contribute
 If you have any questions or suggestions drop me with an email at <a href="mailto:mark@pearscom.com">mark@pearscom.com</a>.
-
