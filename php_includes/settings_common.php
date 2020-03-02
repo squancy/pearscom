@@ -208,7 +208,7 @@
   }
 
   function remDir($path) {
-    if(is_dir($path)){
+    if(is_dir($path) && file_exists($path)){
       rmdir($path);
     }
   }

@@ -67,30 +67,37 @@ function confirmChange(input1, input2, input3, box, msg, fmsg, send1, send2) {
   var e = _(input1).value,
       n = _(input2).value,
       a = _(input3);
-  if (e == "" || n == "") {
+  if (input3 == 'delete_status') {
+    if (!e) {
+      a.innerHTML = "Fill out all the form data";
+      return false;
+    }
+  }
+  if ((e == "" || n == "") && input3 != 'delete_status') {
     a.innerHTML = "Fill out all the form data";
+    return false;
   } else {
+    if (input3 == 'delete_status') {
+      if (!confirm("Are you sure you want to delete your account?")) {
+        return false;
+      }
+    }
     _(box).style.display = "none";
     a.innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
-    var t = ajaxObj("POST", "/settings");
+    var t = ajaxObj("POST", "/settings.php");
     t.onreadystatechange = function () {
-      if (input3 == 'delete_status') {
-        if (!confirm("Are you sure you want to delete your account?")) {
-          return false;
-        }
-      }
       if (ajaxReturn(t)) {
         if (t.responseText != msg) {
           a.innerHTML = t.responseText;
           _(box).style.display = "block";
         } else {
-          if (fmsg != null) {
+          if (input3 == 'delete_status') {
+            window.location.href = '/logout';
+          } else if (fmsg != null) {
             _(fmsg).innerHTML = 'Changes applied successfully';
           } else if (input3 != 'delete_status') {
             window.location.href = '/login'; 
-          } else {
-            window.location.href = '/logout'; 
-          }
+          } 
         }
       }
     }

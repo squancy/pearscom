@@ -187,23 +187,8 @@
       $stmt->execute();
       $stmt->close();
 
-
-      // Delete every record in the db that is connected to the user
-      $sql = "DELETE FROM users WHERE username = ? AND email = ?";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("ss",$log_username,$email);
-      $stmt->execute();
-      $stmt->close();
-
-      $sql = "DELETE FROM useroptions WHERE username = ?";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s",$log_username);
-      $stmt->execute();
-      $stmt->close();
-
       // Delete user's folder, images, background, videos etc
       $files = glob('/user/'.$log_username.'/*'); 
-      unlinkFiles($files);
 
       $filenameb = '/user/'.$log_username.'/background';
       if(file_exists($filenameb)){
@@ -221,6 +206,19 @@
       remDir('/user/'.$log_username.'/background');
       remDir('/user/'.$log_username.'/videos');
       remDir('/user/'.$log_username);
+ 
+      // Delete every record in the db that is connected to the user
+      $sql = "DELETE FROM users WHERE username = ? AND email = ?";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("ss",$log_username,$email);
+      $stmt->execute();
+      $stmt->close();
+
+      $sql = "DELETE FROM useroptions WHERE username = ?";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("s",$log_username);
+      $stmt->execute();
+      $stmt->close();
 
       // Then remove every clue of the person from the database
       $sql = "DELETE FROM articles WHERE written_by = ?";
@@ -339,7 +337,7 @@
 
       $sql = "DELETE FROM pm WHERE sender = ? OR receiver = ?";
       $stmt = $conn->prepare($sql);
-      $stmt->bind_param("s",$log_username);
+      $stmt->bind_param("ss",$log_username,$log_username);
       $stmt->execute();
       $stmt->close();
 
@@ -373,7 +371,7 @@
       $stmt->execute();
       $stmt->close();
 
-      $sql = "DELETE FROM vidoes WHERE user = ?";
+      $sql = "DELETE FROM videos WHERE user = ?";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("s",$log_username);
       $stmt->execute();
@@ -402,9 +400,9 @@
       $stmt->bind_param("s",$log_username);
       $stmt->execute();
       $stmt->close();
+      echo "delete_success";
+      exit();
     }
-    echo "delete_success";
-    exit();
   }
 
   // User changes gender
@@ -523,13 +521,6 @@
   if(isset($_POST["pwd"]) && isset($_POST["cun"])){
     $un = $_POST["cun"];
     $pwd = $_POST["pwd"];
-    $sql = "SELECT username FROM users WHERE username = ? LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s",$un);
-    $stmt->execute();
-    $stmt->bind_result($taken);
-    $stmt->fetch();
-    $stmt->close();
   
     // Validate username on the server side
     $taken = takenUname($conn, $un);
@@ -948,7 +939,7 @@
             
           <br>
           <button id="confun" class="pplongbtn main_btn_fill settBtns"
-            onclick="confirmChanges('un_name', 'unpass', 'fullunstat', 'fullunstat',
+            onclick="confirmChange('un_name', 'unpass', 'fullunstat', 'fullunstat',
             'un_success', null, 'cun', 'pwd')">
             Confirm
           </button>
@@ -1113,7 +1104,7 @@
           <br>
 
           <button id="confcg" class="pplongbtn main_btn_fill settBtns"
-            onclick="changeGender('cg_gender', 'fullcgstat', 'cgpass',
+            onclick="confirmChange('cg_gender', 'cgpass', 'fullcgstat',
             'cg_status', 'gender_success', null, 'gender', 'pwd')">Confirm</button>
           <div id="fullcgstat" style="text-align: center; margin-top: 10px;"></div>
         </div>
