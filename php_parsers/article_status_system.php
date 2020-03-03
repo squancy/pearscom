@@ -1,16 +1,16 @@
 <?php
-	// Check to see if the user is not logged in
-	require_once '../php_includes/check_login_statues.php';
-	require_once '../php_includes/perform_checks.php';
-	require_once '../php_includes/insertImage.php';
-	require_once '../php_includes/sentToFols.php';
-	require_once '../safe_encrypt.php';
+  // Check to see if the user is not logged in
+  require_once '../php_includes/check_login_statues.php';
+  require_once '../php_includes/perform_checks.php';
+  require_once '../php_includes/insertImage.php';
+  require_once '../php_includes/sentToFols.php';
+  require_once '../safe_encrypt.php';
   require_once '../php_includes/ind.php';
 
   // Make sure file is not accessed directly
-	if($user_ok != true || !$log_username) {
-		exit();
-	}
+  if($user_ok != true || !$log_username) {
+    exit();
+  }
 
   // Set article id
   $ar = "";
@@ -59,7 +59,7 @@
 
     public function pushToDb($conn, $log_username, $ar) {
       $sql = "INSERT INTO article_status(account_name, author, type, data, artid, postdate) 
-				VALUES(?,?,?,?,?,NOW())";
+        VALUES(?,?,?,?,?,NOW())";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("ssssi", $this->account_name, $log_username, $this->type, $this->data,
         $ar);
@@ -148,10 +148,10 @@
     }
 
     public function delComment($conn, $sql, $param1, ...$values) { 
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param($param1, ...$values);
-			$stmt->execute();
-			$stmt->close();
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param($param1, ...$values);
+      $stmt->execute();
+      $stmt->close();
     }
   }
 
@@ -224,7 +224,7 @@
     }
   }
 
-	if (isset($_POST['action']) && $_POST['action'] == "status_post"){
+  if (isset($_POST['action']) && $_POST['action'] == "status_post"){
     $statPost = new PostGeneral($_POST['type'], $_POST['user'], $_POST['data'],
       $_POST['image'], $conn);
 
@@ -237,21 +237,21 @@
       $valImg->doInsert($statPost->image);
     }
 
-		// Make sure type is either a or c
+    // Make sure type is either a or c
     $statPost->typeCheck($conn);
 
     // Only image or only text or both
     $statPost->setData();
 
-		// Make sure account name exists (the profile being posted on)
+    // Make sure account name exists (the profile being posted on)
     userExists($conn, $statPost->account_name);
     
-		// Insert the status post into the database now
+    // Insert the status post into the database now
     $statPost->pushToDb($conn, $log_username, $ar);
 
-		$a = 'a';
+    $a = 'a';
 
-		// Insert notifications to all friends of the post author
+    // Insert notifications to all friends of the post author
     $sendPost = new SendToFols($conn, $log_username, $log_username);
 
     $ptime = getPostTime($conn, $ar);
@@ -262,12 +262,12 @@
 
     $sendPost->sendNotif($log_username, $app, $note, $conn);
 
-		mysqli_close($conn);
-		echo "post_ok|$id";
-		exit();
-	}
+    mysqli_close($conn);
+    echo "post_ok|$id";
+    exit();
+  }
 
-	if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
+  if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
     $replyPost = new PostReply($_POST['sid'], $_POST['user'], $_POST['data'], $_POST['image'],
       $conn);
 
@@ -284,7 +284,7 @@
     // Only image or only text or both
     $replyPost->setData();
 
-		// Make sure account name exists (the profile being posted on)
+    // Make sure account name exists (the profile being posted on)
     userExists($conn, $replyPost->account_name);
 
     // Insert reply to db
@@ -301,18 +301,18 @@
 
     $sendReply->sendNotif($log_username, $app, $note, $conn);
 
-		mysqli_close($conn);
-		echo "reply_ok|$id";
-		exit();
-	}
+    mysqli_close($conn);
+    echo "reply_ok|$id";
+    exit();
+  }
 
-	if (isset($_POST['action']) && $_POST['action'] == "delete_status"){
+  if (isset($_POST['action']) && $_POST['action'] == "delete_status"){
     $delStat = new DeleteGeneral($_POST['statusid']);
 
     // Make sure id is not empty and set
     $delStat->checkEmptyId($conn);
 
-		// Check to make sure this logged in user actually owns that comment
+    // Check to make sure this logged in user actually owns that comment
     $sql = "SELECT account_name, author, data FROM article_status WHERE id=? AND artid=?
       LIMIT 1";
     $delStat->userOwnsComment($conn, $sql, 'ii', $delStat->statusid, $ar);
@@ -329,13 +329,13 @@
     exit();
   }
 
-	if (isset($_POST['action']) && $_POST['action'] == "delete_reply"){
+  if (isset($_POST['action']) && $_POST['action'] == "delete_reply"){
     $delReply = new DeleteGeneral($_POST['replyid']);
 
     // Make sure id is not empty and set
     $delReply->checkEmptyId($conn);
 
-		// Check to make sure this logged in user actually owns that comment
+    // Check to make sure this logged in user actually owns that comment
     $sql = "SELECT osid, account_name, author FROM article_status WHERE id=? AND artid = ?
       LIMIT 1";
     $delReply->userOwnsComment($conn, $sql, 'ii', $delReply->statusid, $ar);
@@ -344,16 +344,16 @@
       echo 'asd';
 
       // Delete reply
-			$sql = "DELETE FROM article_status WHERE id=? AND artid = ?";
+      $sql = "DELETE FROM article_status WHERE id=? AND artid = ?";
       $delReply->delComment($conn, $sql, 'ii', $delReply->statusid, $ar);
     }
 
     mysqli_close($conn);
     echo "delete_ok";
     exit();
-	}
+  }
 
-	if(isset($_POST['action']) && $_POST['action'] == "share"){
+  if(isset($_POST['action']) && $_POST['action'] == "share"){
     $shareComm = new ShareComment($_POST['id']);
 
     // Check if id is set and valid
@@ -371,8 +371,8 @@
     $sql = "SELECT * FROM article_status WHERE id=? LIMIT 1";
     $shareComm->insertToDb($conn, $sql, 'i', $log_username, $shareComm->id);
 
-		mysqli_close($conn);
-		echo "share_ok";
-		exit();
-	}
+    mysqli_close($conn);
+    echo "share_ok";
+    exit();
+  }
 ?>
