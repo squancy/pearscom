@@ -337,11 +337,11 @@
     var showingSourceCode = false;
     var isInEditMode = false;
 
-    var hasImage1 = "";
-    var hasImage2 = "";
-    var hasImage3 = "";
-    var hasImage4 = "";
-    var hasImage5 = "";  
+    var hasImageGen1 = "";
+    var hasImageGen2 = "";
+    var hasImageGen3 = "";
+    var hasImageGen4 = "";
+    var hasImageGen5 = "";  
   </script>
 </head>
 <body>

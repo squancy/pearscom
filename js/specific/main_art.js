@@ -367,11 +367,11 @@ function doUploadGen(data, holder, num){
 function completeHandlerGen(event, holder, num) {
   var t = event.target.responseText.split("|");
   if ("upload_complete" == t[0]) {
-    if(num == "1") hasImage1 = t[1];
-    else if(num == "2") hasImage2 = t[1];
-    else if(num == "3") hasImage3 = t[1];
-    else if(num == "4") hasImage4 = t[1];
-    else if(num == "5") hasImage5 = t[1];
+    if(num == "1") hasImageGen1 = t[1];
+    else if(num == "2") hasImageGen2 = t[1];
+    else if(num == "3") hasImageGen3 = t[1];
+    else if(num == "4") hasImageGen4 = t[1];
+    else if(num == "5") hasImageGen5 = t[1];
     _(holder).innerHTML = `
       <img src="/tempUploads/${t[1]}" class="triggerBtnreply mob_square"
         style="border-radius: 20px;"/>`;
@@ -431,8 +431,8 @@ function saveEditArt(p, u){
       }
     }
   }
-  ajax.send("p="+p+"&u="+u+"&texta="+texta+"&title="+title+"&img1="+hasImage1+"&img2="+
-    hasImage2+"&img3="+hasImage3+"&img4="+hasImage4+"&img5="+hasImage5);
+  ajax.send("p="+p+"&u="+u+"&texta="+texta+"&title="+title+"&img1="+hasImageGen1+"&img2="+
+    hasImageGen2+"&img3="+hasImageGen3+"&img4="+hasImageGen4+"&img5="+hasImageGen5);
 }
 
 function printContent(el){

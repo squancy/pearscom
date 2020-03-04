@@ -337,7 +337,7 @@
     $agoformrply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl) {
     global $sType;
     return '
-      <div id="reply_'.$statusreplyid.'" class="reply_boxes">
+      <div id="reply_'.$sType.'_'.$statusreplyid.'" class="reply_boxes">
         <div>
         '.$replyDeleteButton.'
         <p id="float">

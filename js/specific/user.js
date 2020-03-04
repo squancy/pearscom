@@ -175,7 +175,7 @@ function editChanges() {
         }
       }
     }
-    xhr.send("job=" + c + "&ta=" + cp + "&pro=" + result + "&city=" + value + "&state=" + input
+    xhr.send("j=" + c + "&ta=" + cp + "&pro=" + result + "&city=" + value + "&state=" + input
       + "&mobile=" + keyword + "&hometown=" + text + "&fmovie=" + currentValue + "&fmusic=" +
       line + "&pstatus=" + hostname + "&elemen=" + name + "&high=" + loca2 + "&uni=" + content
       + "&politics=" + link + "&religion=" + email + "&language=" + val + "&nd_day=" + node +

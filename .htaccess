@@ -1,0 +1,164 @@
+# Custom error pages
+Options -indexes
+ErrorDocument 404 /errors/filenotfound
+ErrorDocument 400 /errors/error400.php
+ErrorDocument 401 /errors/401error.php
+ErrorDocument 402 /errors/402error.php
+ErrorDocument 403 /errors/403error.php
+ErrorDocument 405 /errors/405error.php
+ErrorDocument 406 /errors/406error.php
+ErrorDocument 407 /errors/407error.php
+ErrorDocument 408 /errors/408error.php
+ErrorDocument 409 /errors/409error.php
+ErrorDocument 410 /errors/410error.php
+ErrorDocument 411 /errors/411error.php
+ErrorDocument 412 /errors/412error.php
+ErrorDocument 413 /errors/413error.php
+ErrorDocument 414 /errors/414error.php
+ErrorDocument 415 /errors/415error.php
+IndexIgnore *
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://www.pearscom.com/$1 [L,R=301]
+# Header everything to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^notifications/?$ notifications.php
+
+Redirect 301 /emojilist.php http://www.pearscom.com/index
+Redirect 301 /safe_encrypt.php http://www.pearscom.com/index
+Redirect 301 /sec_session_start.php http://www.pearscom.com/index
+Redirect 301 /template_country_flags.php http://www.pearscom.com/index
+Redirect 301 /template_month_list.php http://www.pearscom.com/index
+Redirect 301 /template_day_list.php http://www.pearscom.com/index
+Redirect 301 /template_country_list.php http://www.pearscom.com/index
+Redirect 301 /template_pageBottom.php http://www.pearscom.com/index
+Redirect 301 /template_pageTop.php http://www.pearscom.com/index
+Redirect 301 /template_year_list.php http://www.pearscom.com/index
+Redirect 301 /timeelapsedstring.php http://www.pearscom.com/index
+Redirect 301 /video_status.php http://www.pearscom.com/index
+Redirect 301 /photos_status.php http://www.pearscom.com/index
+
+RewriteRule ^index/?$ index.php
+RewriteRule ^graph/?$ graph.html
+RewriteRule ^settings/?$ settings.php
+RewriteRule ^loquela/?$ dic.php
+RewriteRule ^feed/?$ feed.php
+RewriteRule ^login/?$ login.php
+RewriteRule ^stockai/?$ main.php
+RewriteRule ^signup/?$ signup.php
+RewriteRule ^forgot_password/?$ forgot_pass.php
+RewriteRule ^filenotfound/?$ filenotfound.php
+RewriteRule ^error400/?$ /errors/error400.php
+RewriteRule ^error401/?$ /errors/error401.php
+RewriteRule ^error402/?$ /errors/error402.php
+RewriteRule ^error403/?$ /errors/error403.php
+RewriteRule ^error405/?$ /errors/error405.php
+RewriteRule ^error406/?$ /errors/error406.php
+RewriteRule ^error407/?$ /errors/error407.php
+RewriteRule ^error408/?$ /errors/error408.php
+RewriteRule ^error409/?$ /errors/error409.php
+RewriteRule ^error410/?$ /errors/error410.php
+RewriteRule ^error411/?$ /errors/error411.php
+RewriteRule ^error412/?$ /errors/error412.php
+RewriteRule ^error413/?$ /errors/error413.php
+RewriteRule ^error414/?$ /errors/error414.php
+RewriteRule ^error415/?$ /errors/error415.php
+RewriteRule ^groups/?$ groups.php
+RewriteRule ^invite/?$ invite.php
+RewriteRule ^image_size_error/?$ /errors/image_size_error.php
+RewriteRule ^image_type_error/?$ /errors/image_type_error.php
+RewriteRule ^image_bigger_error/?$ /errors/image_bigger_error.php
+RewriteRule ^file_upload_error/?$ /errors/file_upload_error.php
+RewriteRule ^needlogged/?$ /errors/needlogged.php
+RewriteRule ^help/?$ help.php
+RewriteRule ^articlenotexist/?$ /errors/artnot.php
+RewriteRule ^logout/?$ logout.php
+RewriteRule ^user_does_not_exist/?$ /errors/usernotexists.php
+RewriteRule ^friend_suggestions/?$ more_friends.php
+RewriteRule ^view_all_groups/?$ view_all_groups.php
+RewriteRule ^user/([^/]+)/?$ user.php?u=$1
+RewriteRule ^photos/([^/]+)/?$ photos.php?u=$1
+RewriteRule ^user_articles/([^/]+)/?$ articles_view_all.php?u=$1
+RewriteRule ^private_messages/([^/]+)/?$ pm_inbox.php?u=$1
+RewriteRule ^videos/([^/]+)/?$ videos.php?u=$1
+RewriteRule ^video_zoom/([^/]+)/?$ video_bigger.php?id=$1
+RewriteRule ^all_articles/([^/]+)/?$ all_art_my.php?u=$1
+RewriteRule ^view_friends/([^/]+)/?$ view_friends.php?u=$1
+RewriteRule ^group/([^/]+)/?$ group.php?g=$1
+RewriteRule ^article_suggestions/?$ more_sugg_art.php
+RewriteRule ^usernotexist/?$ /errors/usernot.php
+RewriteRule ^policies/?$ policy.php
+RewriteRule ^search_members/([^/]+)/?$ search_exec_long.php?search=$1
+RewriteRule ^search_friends/([^/]+)/?$ search_exec_friends.php?search=$1
+RewriteRule ^search_groups/([^/]+)/?$ search_exec_groups.php?search=$1
+RewriteRule ^search_videos/([^/]+)/?$ search_exec_video.php?search=$1
+RewriteRule ^search_articles/([^/]+)/?$ search_exec_longart.php?search=$1
+RewriteRule ^photo_search/([^/]+)/?$ photo_exec_long.php?search=$1
+RewriteRule ^articles/([^/]+)/([^/]+)/?$ articles.php?p=$1&u=$2
+RewriteRule ^photo_zoom/([^/]+)/([^/]+)/?$ photo_big.php?u=$1&p=$2
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule !.*\.php$ %{REQUEST_FILENAME}.php [QSA,L]
+RewriteCond %{HTTP_HOST} ^pearscom.com [NC]
+RewriteRule ^(.*)$ http://www.pearscom.com/$1 [L,R=301]
+Redirect /index https://www.pearscom.com/
+
+## EXPIRES CACHING ##
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/jpg "access plus 1 year"
+ExpiresByType image/jpeg "access plus 1 year"
+ExpiresByType image/gif "access plus 1 year"
+ExpiresByType image/png "access plus 1 year"
+ExpiresByType text/css "access plus 1 month"
+ExpiresByType application/pdf "access plus 1 month"
+ExpiresByType text/x-javascript "access plus 1 month"
+ExpiresByType application/x-shockwave-flash "access plus 1 month"
+ExpiresByType image/x-icon "access plus 1 year"
+ExpiresDefault "access plus 1 month"
+</IfModule>
+## EXPIRES CACHING
+
+RewriteCond %{HTTP_REFERER} !^http://pearscom.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://pearscom.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://www.pearscom.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://www.pearscom.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://pearscom.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://pearscom.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://www.pearscom.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://www.pearscom.com$      [NC]
+RewriteRule .*\.(jpg|jpeg|gif|png|bmp)$ - [F,NC]
+
+
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php71 .php .php7 .phtml
+</IfModule>
+
+<IfModule php7_module>
+   php_flag display_errors Off
+   php_value max_execution_time 180
+   php_value max_input_time 120
+   php_value max_input_vars 10000
+   php_value memory_limit 512M
+   php_value post_max_size 32M
+   php_value session.gc_maxlifetime 1440
+   php_value upload_max_filesize 32M
+   php_flag zlib.output_compression Off
+   php_value session.cookie_httponly "1"
+   php_flag session.use_only_cookies On
+   php_value session.cookie_secure "1"
+</IfModule>
+<IfModule lsapi_module>
+   php_flag display_errors Off
+   php_value max_execution_time 180
+   php_value max_input_time 120
+   php_value max_input_vars 10000
+   php_value memory_limit 512M
+   php_value post_max_size 32M
+   php_value session.gc_maxlifetime 1440
+   php_value upload_max_filesize 32M
+   php_flag zlib.output_compression Off
+   php_value session.cookie_httponly "1"
+   php_flag session.use_only_cookies On
+   php_value session.cookie_secure "1"
+</IfModule>

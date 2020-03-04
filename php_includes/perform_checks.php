@@ -211,6 +211,20 @@
     return false;
   }
 
+  function getFols($conn, $log_username) {
+    $followers = array();
+    $sql = "SELECT * FROM follow WHERE following = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $log_username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while($row = $result->fetch_assoc()){
+      array_push($followers, $row["follower"]);
+    }
+    $stmt->close();
+    return $followers;
+  }
+
   function countFols($conn, $u, $db) {
     $sql = "SELECT COUNT(id) FROM follow WHERE ".$db."=?";
     $stmt = $conn->prepare($sql);

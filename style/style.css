@@ -4883,7 +4883,7 @@ a:hover {
 
 .article_echo_2 {
   width: calc(33.333% - 15px);
-  height: 80px;
+  box-sizing: border-box;
   margin-right: 5px;
   padding: 5px;
   margin-top: 5px;

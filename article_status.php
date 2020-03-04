@@ -21,6 +21,7 @@
   $status_ui = "";
   $statuslist = "";
   $statusid = "";
+  $sType = 'article';
   $one = "1";
   $zero = "0";
   $a = "a";

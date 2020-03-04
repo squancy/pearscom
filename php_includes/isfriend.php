@@ -6,7 +6,7 @@
   function isFriend($u, $log_username, $user_ok, $conn) {
     $one = "1";
     $isFriend = false;
-    if($u != $log_username && $user_ok == true){
+    if($u != $log_username && $user_ok){
       $friend_check = "SELECT id FROM friends WHERE user1=? AND user2=? AND accepted=?
         OR user1=? AND user2=? AND accepted=? LIMIT 1";
       $stmt = $conn->prepare($friend_check);
