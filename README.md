@@ -36,7 +36,7 @@ The site is written is pure PHP & MySQL and JavaScript. Back then, it started ou
 In order to test Pearscom on your machine you will need a local server like XAMPP or LAMPP. The database scheme is located in `make_sql` as `schema.sql` which is a description of the database structure. It will create the necessary database and tables for Pearscom.<br>
 In `php_includes` edit `conn.php` to be appropriate for your own local server. This file is used for connecting to the database.<br>
 Use PHP version 7.1 for the best experience.<br>
-You may also need to edit `.htaccess` and `php.ini` to configure some settings to your own local server. SEO friendly URLs, https, custom caching etc. are used on the live product so make sure that these are set on your machine as well.
+You may also need to edit `.htaccess` and `php.ini` to configure some settings to your own local server. SEO friendly URLs, https, custom caching etc. are used on the live product so make sure that these are set on your machine as well.<br>
 See the live product at <a href="https://www.pearscom.com/">pearscom.com</a>.<br>
 
 ## About the live product
