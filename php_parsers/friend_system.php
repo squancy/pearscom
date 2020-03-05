@@ -191,8 +191,6 @@
       }
 
       $row_count2 = $friendObj->friendCheck($conn, $friendObj->user, $log_username);
-      var_dump($row_count1);
-      var_dump($row_count2);
       
       if ($row_count2 && !$row_count1) {
         // Del friendship
