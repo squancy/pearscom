@@ -283,7 +283,7 @@
     }
   } else {
     // Get user's all friends and display some of them
-    $all_friends = getUsersFriends($conn, $u, $log_username);
+    $all_friends = getUsersFriends($conn, $u, $u);
     shuffle($all_friends);
     $fCSV = implode("','", $all_friends);
 
