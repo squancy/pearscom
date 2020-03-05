@@ -11,7 +11,7 @@ function friendToggle(ftype, status, container) {
         `;
       } else if (request.responseText == "unfriend_ok") {
         _(container).innerHTML = `
-        <button onclick="friendToggle('friend', '${UNAME}', 'friendBtn_${status}')"
+        <button onclick="friendToggle('friend', '${UNAME}', 'friendBtn')"
           class="main_btn_fill fixRed">
           Request As Friend
         </button>`;
