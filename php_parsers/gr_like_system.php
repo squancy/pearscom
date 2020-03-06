@@ -1,133 +1,91 @@
 <?php
-	include_once("../php_includes/check_login_statues.php");
-	if($user_ok != true || $log_username == "") {
-		exit();
-	}
-	$one = "1";
-?>
-<?php
-	if(isset($_POST['type']) && isset($_POST['id']) && isset($_POST['group'])){
-		$id = preg_replace('#[^0-9]#i', '', $_POST['id']);
-		$gname = mysqli_real_escape_string($conn, $_POST['group']);
-		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$stmt->bind_result($exist_count);
-		$stmt->fetch();
-		if($exist_count < 1){
-			mysqli_close($conn);
-			echo "$user does not exist.";
-			exit();
-		}
-		$stmt->close();
-		if($_POST['type'] == "like"){
-			$sql = "SELECT COUNT(id) FROM group_status_likes WHERE username=? AND gpost=? AND gname = ? LIMIT 1";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("sis",$log_username,$id,$gname);
-			$stmt->execute();
-			$stmt->bind_result($row_count1);
-			$stmt->fetch();
+  require_once '../php_includes/check_login_statues.php';
+  require_once '../php_includes/perform_checks.php';
+  require_once '../php_includes/sentToFols.php';
 
-			if($row_count1 > 0){
-				echo "You have already liked it";
-				exit();
-			}else{
-				$stmt->close();
-				$sql = "INSERT INTO group_status_likes(username, gpost, gname, like_time)
-						VALUES (?,?,?,NOW())";
-				$stmt = $conn->prepare($sql);
-				$stmt->bind_param("sis",$log_username,$id,$gname);
-				$stmt->execute();
-				$stmt->close();
+  if(!$user_ok || !$log_username) {
+    exit();
+  }
 
-				// Insert notifications to all friends of the post author
-				$friends = array();
-				$one = "1";
-				$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-				$stmt = $conn->prepare($sql);
-				$stmt->bind_param("ss",$log_username,$one);
-				$stmt->execute();
-				$result = $stmt->get_result();
-				while ($row = $result->fetch_assoc()) { 
-					array_push($friends, $row["user1"]); 
-				}
-				$stmt->close();
-				$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-				$stmt = $conn->prepare($sql);
-				$stmt->bind_param("ss",$log_username,$one);
-				$stmt->execute();
-				$result = $stmt->get_result();
-				while ($row = $result->fetch_assoc()) { 
-					array_push($friends, $row["user2"]); 
-				}
-				$stmt->close();
-				for($i = 0; $i < count($friends); $i++){
-					$friend = $friends[$i];
-					$app = "Group Status Like <img src='/images/likeb.png' class='notfimg'>";
-					$note = $log_username.' liked a post on '.$gname.' group: <br /><a href="/group/'.$gname.'#status_'.$id.'">Check it now</a>';
-					// Insert into database
-					$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-					$stmt = $conn->prepare($sql);
-					$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-					$stmt->execute();
-					$stmt->close();			
-				}
+  class LikeGeneral {
+    public function __construct($conn, $p1, $p2) {
+      $this->p1 = preg_replace('#[^0-9]#i', '', $p1);
+      $this->p2 = mysqli_real_escape_string($conn, $p2);
+    }
 
-				// Send it to followers
-				$followers = array();
-				$sql = "SELECT * FROM follow WHERE following = ?";
-				$stmt = $conn->prepare($sql);
-				$stmt->bind_param("s",$log_username);
-				$stmt->execute();
-				$result = $stmt->get_result();
-				while($row = $result->fetch_assoc()){
-					$fwer = $row["follower"];
-					array_push($followers, $fwer);
-				}
-				$stmt->close();
+    public function checkIfLiked($conn, $sql, $param1, ...$values) {
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param($param1, ...$values);
+      $stmt->execute();
+      $stmt->bind_result($row_count1);
+      $stmt->fetch();
+      return $row_count1;
+    }
 
-				$diffarr = array_diff($followers, $friends);
+    public function manageDb($conn, $sql, $param1, ...$values) {
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param($param1, ...$values);
+      $stmt->execute();
+      $stmt->close();
+    }
+  }
 
-				for($i = 0; $i < count($diffarr); $i++){
-					$friend = $diffarr[$i];
-					$app = "Groups Status Like | your following, ".$log_username.", liked a group post <img src='/images/likeb.png' class='notfimg'>";
-					$note = '<a href="/group/'.$gname.'#status_'.$id.'">Check it now</a>';
-					// Insert into database
-					$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-					$stmt = $conn->prepare($sql);
-					$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-					$stmt->execute();
-					$stmt->close();			
-				}
+  if(isset($_POST['type']) && isset($_POST['id']) && isset($_POST['group'])){
+    $grLike = new LikeGeneral($conn, $_POST['id'], $_POST['group']);
 
-				mysqli_close($conn);
-				echo "like_success";
-				exit();
-			}
-		}else if($_POST['type'] == "unlike"){
-			$sql = "SELECT COUNT(id) FROM group_status_likes WHERE username=? AND gpost=? AND gname = ? LIMIT 1";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("sis",$log_username,$id,$gname);
-			$stmt->execute();
-			$stmt->bind_result($row_count1);
-			$stmt->fetch();
+    // Make sure user exists in db
+    userExists($conn, $log_username);
 
-			if($row_count1 > 0){
-				$stmt->close();
-		        $sql = "DELETE FROM group_status_likes WHERE username=? AND gpost=? AND gname = ? LIMIT 1";
-				$stmt = $conn->prepare($sql);
-				$stmt->bind_param("sis",$log_username,$id,$gname);
-				$stmt->execute();
-				$stmt->close();
-				mysqli_close($conn);
-		        echo "unlike_success";
-		        exit();
-		    }else{
-		    	mysqli_close($conn);
-		        echo "You do not like this post";
-		        exit();
-		    }
-		}
-	}
+    if ($_POST['type'] == 'like') {
+      // Check if user liked the post
+      $sql = "SELECT COUNT(id) FROM group_status_likes WHERE username=? AND gpost=? AND
+        gname = ? LIMIT 1";
+      $row_count1 = $grLike->checkIfLiked($conn, $sql, 'sis', $log_username, $grLike->p1,
+        $grLike->p2);
+
+      if($row_count1){
+        echo "You have already liked it";
+        exit();
+      }else{
+        // Insert to db
+        $sql = "INSERT INTO group_status_likes(username, gpost, gname, like_time)
+          VALUES (?,?,?,NOW())";
+        $grLike->manageDb($conn, $sql, 'sis', $log_username, $grLike->p1, $grLike->p2);
+
+        // Insert notifications to all friends of the post author
+        $sendNotif = new SendToFols($conn, $log_username, $log_username);
+        
+        $app = "Group Status Like <img src='/images/likeb.png' class='notfimg'>";
+        $note = $log_username.' liked a post on '.$grLike->p2.' group: <br />
+          <a href="/group/'.$grLike->p2.'#status_'.$grLike->p1.'">Check it now</a>';
+
+        $sendNotif->sendNotif($log_username, $app, $note, $conn);
+
+        mysqli_close($conn);
+        echo "like_success";
+        exit();
+      }
+    }else if($_POST['type'] == "unlike"){
+      // Check if already liked
+      $sql = "SELECT COUNT(id) FROM group_status_likes WHERE username=? AND gpost=?
+        AND gname = ? LIMIT 1";
+      $row_count1 = $grLike->checkIfLiked($conn, $sql, 'sis', $log_username, $grLike->p1,
+        $grLike->p2);
+
+      if($row_count1){
+        // Delete from db
+        $sql = "DELETE FROM group_status_likes WHERE username=? AND gpost=? AND gname = ?
+          LIMIT 1";
+        $grLike->manageDb($conn, $sql, 'sis', $log_username, $grLike->p1, $grLike->p2);
+
+        mysqli_close($conn);
+        echo "unlike_success";
+        exit();
+      }else{
+        mysqli_close($conn);
+        echo "You do not like this post";
+        exit();
+      }
+    }
+  }
 ?>
