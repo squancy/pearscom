@@ -2,36 +2,15 @@
   require_once '../php_includes/check_login_statues.php';
   require_once '../php_includes/perform_checks.php';
   require_once '../php_includes/sentToFols.php';
+  require_once '../php_includes/like_common.php';
 
   if(!$user_ok || !$log_username) {
     exit();
   }
 
-  class LikeGeneral {
-    public function __construct($conn, $p1, $p2) {
-      $this->p1 = preg_replace('#[^0-9]#i', '', $p1);
-      $this->p2 = mysqli_real_escape_string($conn, $p2);
-    }
-
-    public function checkIfLiked($conn, $sql, $param1, ...$values) {
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $stmt->bind_result($row_count1);
-      $stmt->fetch();
-      return $row_count1;
-    }
-
-    public function manageDb($conn, $sql, $param1, ...$values) {
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $stmt->close();
-    }
-  }
-
   if(isset($_POST['type']) && isset($_POST['id']) && isset($_POST['group'])){
-    $grLike = new LikeGeneral($conn, $_POST['id'], $_POST['group']);
+    $grLike = new LikeGeneral($conn, preg_replace('#[^0-9]#i', '', $_POST['id']),
+      mysqli_real_escape_string($conn, $_POST['group']));
 
     // Make sure user exists in db
     userExists($conn, $log_username);
