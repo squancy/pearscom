@@ -1,14 +1,17 @@
 <?php
   // Check to see if the user is not logged in
   require_once '../php_includes/check_login_statues.php';
+  require_once '../php_includes/share_general.php';
   require_once '../php_includes/perform_checks.php';
   require_once '../php_includes/insertImage.php';
+  require_once '../php_includes/del_general.php';
   require_once '../php_includes/sentToFols.php';
+  require_once '../php_includes/post_general.php';
   require_once '../safe_encrypt.php';
   require_once '../php_includes/ind.php';
 
   // Make sure file is not accessed directly
-  if($user_ok != true || !$log_username) {
+  if(!$user_ok || !$log_username) {
     exit();
   }
 
@@ -20,87 +23,6 @@
     $ar = $_SESSION["id"];
   }
 
-  class PostGeneral {
-    public function __construct($type, $account_name, $data, $image, $conn) {
-      $this->type = preg_replace('#[^a-z]#', '', $type);
-      $this->account_name = mysqli_real_escape_string($conn, $account_name);
-      $this->data = htmlentities($data);
-      $this->image = $image;
-    }
-
-    public function checkForEmpty($conn) {
-      if(strlen($this->data) < 1 && $this->image == "na"){
-        mysqli_close($conn);
-        echo "data_empty";
-        exit();
-      }
-    }
-
-    public function performImage($img) {
-      $pImage = new InImage();
-      $pImage->doInsert($img);
-    }
-
-    public function typeCheck($conn) {
-      if($this->type != ("a" || "c")){
-        mysqli_close($conn);
-        echo "type_unknown";
-        exit();
-      }
-    }
-
-    public function setData() {
-      if($this->data == "||na||" && $this->image != "na"){
-        $this->data = '<img src="/permUploads/'.$this->image.'" /><br>';
-      }else if($this->data != "||na||" && $this->image != "na"){
-        $this->data = $this->data.'<br /><img src="/permUploads/'.$this->image.'" /><br>';
-      }
-    }
-
-    public function pushToDb($conn, $log_username, $ar) {
-      $sql = "INSERT INTO article_status(account_name, author, type, data, artid, postdate) 
-        VALUES(?,?,?,?,?,NOW())";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("ssssi", $this->account_name, $log_username, $this->type, $this->data,
-        $ar);
-      $stmt->execute();
-      $stmt->close();
-
-      $id = mysqli_insert_id($conn);
-
-      $sql = "UPDATE article_status SET osid=? WHERE id=? AND artid = ? LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("iii", $id, $id, $ar);
-      $stmt->execute();
-      $stmt->close();
-    }
-  }
-
-  class PostReply extends PostGeneral {
-    public function __construct($osid, $account_name, $data, $image, $conn) {
-      $this->osid = preg_replace('#[^0-9]#', '', $osid);
-      $this->account_name = mysqli_real_escape_string($conn, $account_name);
-      $this->data = htmlentities($data);
-      $this->image = $image;
-    } 
-
-    public function pushToDb($conn, $log_username, $ar) {
-      $b = 'b';
-      $sql = "INSERT INTO article_status(osid, account_name, author, type, data, artid,
-        postdate) VALUES(?,?,?,?,?,?,NOW())";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("issssi", $this->osid, $this->account_name, $log_username, $b,
-        $this->data, $ar);
-      $stmt->execute();
-      $row = $stmt->num_rows;
-      if($row < 1){
-        $id = mysqli_insert_id($conn);
-      }
-      $stmt->close(); 
-      return $id;
-    }
-  }
-
   function getPostTime($conn, $ar) {
     $sql = "SELECT post_time FROM articles WHERE id = ? LIMIT 1";
     $stmt = $conn->prepare($sql);
@@ -110,118 +32,6 @@
     $stmt->fetch();
     $stmt->close();
     return $ptime;
-  }
-
-  class DeleteGeneral {
-    public function __construct($statusid) {
-      $this->statusid = preg_replace('#[^0-9]#', '', $statusid);
-    } 
-
-    public function checkEmptyId($conn) {
-      if(!isset($this->statusid) || !$this->statusid){
-        mysqli_close($conn);
-        echo "status id is missing";
-        exit();
-      }
-    }
-
-    public function userOwnsComment($conn, $sql, $param1, ...$values) {
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      if ($row = $result->fetch_assoc()) {
-        $this->account_name = $row["account_name"]; 
-        $this->author = $row["author"];
-        $this->data = $row["data"];
-      }
-      $stmt->close();
-    }
-
-    public function checkForImg() {
-      if(preg_match('/<img.+src=[\'"](?P<src>.+)[\'"].*>/i', $this->data, $has_image)){
-        $source = '../'.$has_image['src'];
-        if (file_exists($source)) {
-          unlink($source);
-        }
-      }
-    }
-
-    public function delComment($conn, $sql, $param1, ...$values) { 
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $stmt->close();
-    }
-  }
-
-  class ShareComment {
-    public function __construct($id) {
-      $this->id = preg_replace('#[^0-9]#', '', $id);
-    }
-
-    public function checkId($conn) {
-      if(!isset($this->id) || !$this->id){
-        mysql_close($conn);
-        echo "fail";
-        exit();
-      }
-    }
-
-    public function postExists($conn, $sql, $param1, ...$values) {
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $stmt->store_result();
-      $stmt->fetch();
-      $numrows = $stmt->num_rows;
-      if($numrows < 1){
-        mysqli_close($conn);
-        echo "fail";
-        exit();
-      }
-    }
-
-    private function postToStatus($conn, $log_username, $data) {
-      $a = 'a';
-      $sql = "INSERT INTO status(account_name, author, type, data, postdate)
-        VALUES(?,?,?,?,NOW())";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("ssss", $log_username, $log_username, $a, $data);
-      $stmt->execute();
-      $stmt->close();
-    } 
-
-    private function updateDb($conn, $id) {
-      $sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("ii", $id, $id);
-      $stmt->execute();
-      $stmt->close();
-    }
-
-    public function insertToDb($conn, $sql, $param1, $log_username, ...$values) {
-      $sql = "SELECT * FROM article_status WHERE id=? LIMIT 1";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param($param1, ...$values);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      while($row = $result->fetch_assoc()){
-        /*
-          TODO: $data must be one line, otherwise <br> gets inserted into style in db
-          -> fix issue by creating a separate table for shares and inserting the necessary
-          information instead of pushing hardcoded HTML to the database
-        */
-        $data = '
-          <div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared via <a href="/user/'.$row["author"].'/">'.$row["author"].'</a></p></div><hr class="dim"><div id="share_data">'.$row["data"].'</div>
-        ';
-        $stmt->close();
-        
-        $this->postToStatus($conn, $log_username, $data);
-        $id = mysqli_insert_id($conn);
-        $this->updateDb($conn, $id);
-      }
-    }
   }
 
   if (isset($_POST['action']) && $_POST['action'] == "status_post"){
@@ -247,9 +57,13 @@
     userExists($conn, $statPost->account_name);
     
     // Insert the status post into the database now
-    $statPost->pushToDb($conn, $log_username, $ar);
+    $sql = "INSERT INTO article_status(account_name, author, type, data, artid, postdate) 
+      VALUES(?,?,?,?,?,NOW())";
+    $statPost->pushToDb($conn, $sql, 'ssssi', $statPost->account_name, $log_username,
+      $statPost->type, $statPost->data, $ar);
 
-    $a = 'a';
+    $sql = "UPDATE article_status SET osid=? WHERE id=? AND artid = ? LIMIT 1";
+    $statPost->updateId($conn, $sql, 'iii', $statPost->id, $statPost->id, $ar);
 
     // Insert notifications to all friends of the post author
     $sendPost = new SendToFols($conn, $log_username, $log_username);
@@ -263,7 +77,7 @@
     $sendPost->sendNotif($log_username, $app, $note, $conn);
 
     mysqli_close($conn);
-    echo "post_ok|$id";
+    echo "post_ok|$statPost->id";
     exit();
   }
 
@@ -288,7 +102,10 @@
     userExists($conn, $replyPost->account_name);
 
     // Insert reply to db
-    $id = $replyPost->pushToDb($conn, $log_username, $ar);
+    $sql = "INSERT INTO article_status(osid, account_name, author, type, data, artid,
+      postdate) VALUES(?,?,?,?,?,?,NOW())";
+    $replyPost->pushToDb($conn, $sql, 'issssi', $replPost->osid, $replyPost->account_name,
+      $log_username, 'b', $replyPost->data, $ar);
     
     // Send notif about reply
     $sendReply = new SendToFols($conn, $log_username, $log_username);
@@ -297,12 +114,13 @@
 
     $app = "Article Status Reply <img src='/images/reply.png' class='notfimg'>";
     $note = $log_username.' posted on: <br />
-      <a href="/articles/'.$ptime.'/'.$log_username.'/#status_'.$osid.'">Below an article</a>';
+      <a href="/articles/'.$ptime.'/'.$log_username.'/#status_'.$replyPost->osid.'">
+        Below an article</a>';
 
     $sendReply->sendNotif($log_username, $app, $note, $conn);
 
     mysqli_close($conn);
-    echo "reply_ok|$id";
+    echo "reply_ok|$replyPost->id";
     exit();
   }
 
