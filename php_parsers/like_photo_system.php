@@ -10,8 +10,6 @@
     exit();
   }
 
-  $one = "1";
-  $zero = "0";
   $ph = "";
 
   if(isset($_POST["phot"]) && $_POST["phot"] != ""){
