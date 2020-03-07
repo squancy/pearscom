@@ -29,6 +29,8 @@ The site is written is pure PHP & MySQL and JavaScript. Back then, it started ou
   - Implement messaging, notifications etc. in real-time (perhaps with Node.js and Socket.io)
   - Better integration with MySQL, more efficient queries etc.
   - More clever UI
+  - More server side checks
+  - Do the tasks marked with `TODO...` in the source code
   - Anything else you think would be great
  
 ## Play with the code
