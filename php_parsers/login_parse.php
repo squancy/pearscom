@@ -52,7 +52,6 @@
       setcookie("id", $this->db_id, strtotime( '+30 days' ), "/", "", "", TRUE);
       setcookie("user", $this->db_username, strtotime( '+30 days' ), "/", "", TRUE, TRUE);
       setcookie("pass", $this->db_pass_str, strtotime( '+30 days' ), "/", "", TRUE, TRUE);
-      echo $_COOKIE['pass'];
       session_regenerate_id();
     }
 
