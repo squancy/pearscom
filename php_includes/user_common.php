@@ -40,7 +40,7 @@
     return $numrows2 > 0 ? true : false;
   }
 
-  function genRightBox($row, $conn) {
+  function genRightBox($row, $lat, $lon, $conn) {
     $friend_username = $row["username"];
     $friend_avatar = $row["avatar"];
     $fuco = $row["country"];

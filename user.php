@@ -301,7 +301,7 @@
     $stmt->execute();
     $result3 = $stmt->get_result();
     while($row = $result3->fetch_assoc()) {
-      $friendsHTML .= genRightBox($row, $conn);
+      $friendsHTML .= genRightBox($row, $lat, $lon, $conn);
     }
     $stmt->close();
   }
@@ -328,7 +328,7 @@
     $stmt->execute();
     $result = $stmt->get_result();
     while($row = $result->fetch_assoc()){
-      ${$varNames[$i]} .= genRightBox($row, $conn);
+      ${$varNames[$i]} .= genRightBox($row, $lat, $lon, $conn);
     }
   
     $stmt->close();

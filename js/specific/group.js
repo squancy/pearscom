@@ -161,14 +161,14 @@ function opentext_gr(name) {
 }
 
 function quitGroup(id) {
-  if (1 != confirm("Are you sure you want to quit from this group?")) {
+  if (!confirm("Are you sure you want to quit from this group?")) {
     return false;
   }
 
   var xhr = ajaxObj("POST", "/php_parsers/group_parser2.php");
   xhr.onreadystatechange = function() {
     if (ajaxReturn(xhr) && xhr.responseText == "was_removed") {
-      window.location.href = "user.php?u=" + UNAME;
+      window.location.href = "/user/" + UNAME;
     }
   }
   xhr.send("action=quit_group&g=" + id);
