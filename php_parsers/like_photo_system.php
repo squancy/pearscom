@@ -50,7 +50,7 @@
         // Insert notifications to all friends of the post author
         $sendNotif = new SendToFols($conn, $log_username, $log_username);
         
-        $phh = base64url_encode($ph,$hshkey);
+        $phh = base64url_encode($ph, $hshkey);
         $app = "Liked Status Photo <img src='/images/likeb.png' class='notfimg'>";
         $note = $log_username.' liked a status: <br />
           <a href="/photo_zoom/'.$phh.'/'.$log_username.'">Below a photo</a>';
