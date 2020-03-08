@@ -1,5 +1,4 @@
 <?php
-  // Check to see if the user is not logged in
   require_once '../php_includes/check_login_statues.php';
   require_once '../php_includes/share_general.php';
   require_once '../php_includes/perform_checks.php';
@@ -72,7 +71,8 @@
 
     $app = "Article Status Post <img src='/images/post.png' class='notfimg'>";
     $note = $log_username.' posted on: <br />
-      <a href="/articles/'.$ptime.'/'.$log_username.'/#status_'.$id.'">Below an article</a>';
+      <a href="/articles/'.$ptime.'/'.$log_username.'/#status_'.$statPost->id.'">
+        Below an article</a>';
 
     $sendPost->sendNotif($log_username, $app, $note, $conn);
 
@@ -84,6 +84,9 @@
   if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
     $replyPost = new PostReply($_POST['sid'], $_POST['user'], $_POST['data'], $_POST['image'],
       $conn);
+
+    // Make sure no empty post
+    $replyPost->checkForEmpty($conn);
 
     // Validate image, if any
     if($replyPost->image != "na"){
@@ -104,7 +107,7 @@
     // Insert reply to db
     $sql = "INSERT INTO article_status(osid, account_name, author, type, data, artid,
       postdate) VALUES(?,?,?,?,?,?,NOW())";
-    $replyPost->pushToDb($conn, $sql, 'issssi', $replPost->osid, $replyPost->account_name,
+    $replyPost->pushToDb($conn, $sql, 'issssi', $replyPost->osid, $replyPost->account_name,
       $log_username, 'b', $replyPost->data, $ar);
     
     // Send notif about reply
@@ -159,7 +162,6 @@
     $delReply->userOwnsComment($conn, $sql, 'ii', $delReply->statusid, $ar);
     if ($delReply->author == $log_username || $delReply->account_name == $log_username) {
       $delReply->checkForImg();
-      echo 'asd';
 
       // Delete reply
       $sql = "DELETE FROM article_status WHERE id=? AND artid = ?";
