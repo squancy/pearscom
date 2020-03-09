@@ -21,11 +21,6 @@
     $p = $_SESSION["photo"];
   }
 
-  $one = "1";
-  $zero = "0";
-  $a = "a";
-  $b = "b";
-
   if (isset($_POST['action']) && $_POST['action'] == "status_post"){
     $statPost = new PostGeneral($_POST['type'], $_POST['user'], $_POST['data'],
       $_POST['image'], $conn);
