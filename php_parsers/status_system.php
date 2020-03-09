@@ -1,937 +1,413 @@
 <?php
-	include_once("../php_includes/check_login_statues.php");
-	require_once "../safe_encrypt.php";
-	require_once '../ccov.php';
-	
-	if($user_ok != true || $log_username == "") {
-		exit();
-	}
-	$one = "1";
-	$a = "a";
-	$b = "b";
-?>
-<?php
-	if (isset($_POST['action']) && $_POST['action'] == "status_post"){
-		// Make sure post data and image is not empty
-		if(strlen($_POST['data']) < 1 && $_POST['image'] == "na"){
-			mysqli_close($conn);
-		    echo "data_empty";
-		    exit();
-		}
-		$image = mysqli_real_escape_string($conn, $_POST["image"]);
-		// Move the image(s) to the permanent folder
-		if($image != "na"){
-			$kaboom = explode(".", $image);
-			$fileExt = end($kaboom);
-			rename("../tempUploads/$image", "../permUploads/$image");
-			require_once '../php_includes/image_resize.php';
-			$target_file = "../permUploads/$image";
-			$resized_file = "../permUploads/$image";
-			$wmax = 400;
-			$hmax = 500;
-			list($width, $height) = getimagesize($target_file);
-			if($width > $wmax || $height > $hmax){
-				img_resize($target_file, $resized_file, $wmax, $hmax, $fileExt);
-			}
-		}
-		// Make sure type is either a or c
-		// if($_POST['type'] != "a" || $_POST['type'] != "c"){
-		if($_POST['type'] != ("a" || "c")){
-			mysqli_close($conn);
-		    echo "type_unknown";
-		    exit();
-		}
+  require_once '../php_includes/check_login_statues.php';
+  require_once '../php_includes/share_general.php';
+  require_once '../php_includes/perform_checks.php';
+  require_once '../php_includes/insertImage.php';
+  require_once '../php_includes/del_general.php';
+  require_once '../php_includes/wrapText.php';
+  require_once '../php_includes/sentToFols.php';
+  require_once '../php_includes/post_general.php';
+  require_once '../safe_encrypt.php';
+  require_once '../php_includes/ind.php';
 
-		// Clean all of the $_POST vars that will interact with the database
-		$type = preg_replace('#[^a-z]#', '', $_POST['type']);
-		$account_name = mysqli_real_escape_string($conn, $_POST["user"]);
-		$data = htmlentities($_POST['data']);
-		// We just have an image
-		if($data == "||na||" && $image != "na"){
-			$data = '<img src="/permUploads/'.$image.'" /><br>';
-		// We have an image and text
-		}else if($data != "||na||" && $image != "na"){
-			$data = $data.'<br /><img src="/permUploads/'.$image.'" /><br>';
-		}
-		
-		// Make sure account name exists (the profile being posted on)
-		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$account_name,$one);
-		$stmt->execute();
-		$stmt->bind_result($row);
-		$stmt->fetch();
-		if($row < 1){
-			mysqli_close($conn);
-			echo "$account_no_exist";
-			exit();
-		}
-		$stmt->close();
-		// Insert the status post into the database now
-		$sql = "INSERT INTO status(account_name, author, type, data, postdate) 
-				VALUES(?,?,?,?,NOW())";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ssss",$account_name,$log_username,$type,$data);
-		$stmt->execute();
-		$stmt->close();
-		$id = mysqli_insert_id($conn);
-		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
-		// Count posts of type "a" for the person posting and evaluate the count
-		$sql = "SELECT COUNT(id) FROM status WHERE author=? AND type=?";
-	    $stmt = $conn->prepare($sql);
-	    $stmt->bind_param("ss",$log_username,$a);
-	    $stmt->execute();
-	    $stmt->bind_result($row);
-	    $stmt->fetch();
-	    $stmt->close();
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Status Post <img src='/images/post.png' class='notfimg'>";
-			$note = $log_username.' posted on '.$account_name.'&#39;s profile: <br /><a href="/user/'.$account_name.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+  // Make sure file is not accessed directly
+  if(!$user_ok || !$log_username) {
+    exit();
+  }
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+  class BdWish {
+    public function __construct($conn, $type, $account_name, $data) {
+      $this->type = mysqli_real_escape_string($conn, $type);
+      $this->account_name = mysqli_real_escape_string($conn, $account_name);
+      $this->data = htmlentities($data);
+    }
 
-		$diffarr = array_diff($followers, $friends);
+    public function errorCheck($conn) {
+      if(strlen($this->data) < 1 || !$this->account_name || $this->type != 'bd_wish') {
+        mysqli_close($conn);
+        echo "data or type is invalid";
+        exit();
+      }
+    }
+    
+    public function setData($log_username) {
+      $this->data = '
+        <span style="color: red">
+          '.$log_username.' wished a happy birthday to you and wrote this message:
+          <img src="/images/bdcake.png" width="14" height="14" style="margin-bottom: -2px;">
+        </span>
+        <br>'.$this->data;
+    }
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Status Post | your following, ".$log_username.", posted on ".$account_name."&#39;s profile: <img src='/images/post.png' class='notfimg'>";
-			$note = '<a href="/user/'.$account_name.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();
-		}
-		mysqli_close($conn);
-		echo "post_ok|$id";
-		exit();
-	}
-?>
-<?php
-	if (isset($_POST['action']) && $_POST['action'] == "bd_wish"){
-		// Make sure post data and image is not empty
-		if(strlen($_POST['data']) == "" || $_POST['bduser'] == ""){
-			mysqli_close($conn);
-		    echo "data_empty";
-		    exit();
-		}
+    private function updateDb($conn) {
+      $sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("ii", $this->id, $this->id);
+      $stmt->execute();
+      $stmt->close();
+    }
 
-		if($_POST['type'] != "bd_wish"){
-			mysqli_close($conn);
-		    echo "type_unknown";
-		    exit();
-		}
+    public function pushToDb($conn, $log_username) {
+      $sql = "INSERT INTO status(account_name, author, type, data, postdate) 
+        VALUES(?,?,?,?,NOW())";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("ssss", $this->account_name, $log_username, $this->type, $this->data);
+      $stmt->execute();
+      $stmt->close();
+      $this->id = mysqli_insert_id($conn);
+      $this->updateDb($conn);
+    }
+  }
 
-		// Clean all of the $_POST vars that will interact with the database
-		$type = mysqli_real_escape_string($conn, $_POST['type']);
-		$account_name = mysqli_real_escape_string($conn, $_POST["bduser"]);
-		$data = htmlentities($_POST['data']);
-		
-		$data = '<i>'.$log_username.' wished a happy birthday to you and wrote this message: <img src="/images/bdcake.png" width="14" height="14"></i><br>'.$data;
-		
-		// Make sure account name exists (the profile being posted on)
-		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$account_name,$one);
-		$stmt->execute();
-		$stmt->bind_result($row);
-		$stmt->fetch();
-		if($row < 1){
-			mysqli_close($conn);
-			echo "$account_no_exist";
-			exit();
-		}
-		$stmt->close();
-		// Insert the status post into the database now
-		$sql = "INSERT INTO status(account_name, author, type, data, postdate) 
-				VALUES(?,?,?,?,NOW())";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ssss",$account_name,$log_username,$type,$data);
-		$stmt->execute();
-		$stmt->close();
-		$id = mysqli_insert_id($conn);
-		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
-		// Count posts of type "a" for the person posting and evaluate the count
-		$sql = "SELECT COUNT(id) FROM status WHERE author=? AND type=?";
-	    $stmt = $conn->prepare($sql);
-	    $stmt->bind_param("ss",$log_username,$a);
-	    $stmt->execute();
-	    $stmt->bind_result($row);
-	    $stmt->fetch();
-	    $stmt->close();
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Birthday Wish <img src='/images/post.png' class='notfimg'>";
-			$note = $log_username.' posted on '.$account_name.'&#39;s birthday: <br /><a href="/user/'.$account_name.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+  function shareArt($row) {
+    global $hshkey, $wbauth;
+    $written_by = $row["written_by"];
+    $wb_original = $written_by;
+    $title = $row["title"];
+    $tags = $row["tags"];
+    $post_time_ = $row["post_time"];
+    $pt = base64url_encode($post_time_,$hshkey);
+    $posttime = strftime("%b %d, %Y", strtotime($post_time_));
+    $cat = $row["category"];
+    $cover = chooseCover($cat);
+    $wb_auth = $wb_original;
+    
+    $cover = preg_replace('/<img src="\/images\/\w+\/(\w+)\.jpg"\s+class="cover_art">/',
+      "/images/art_cover/$1.jpg", $cover);
+ 
+    /*
+      $data is inserted to db directly -> bad integration with SQL, potential TODO
+    */
+    $data = '
+      <div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared article via <a href="/user/'.$wb_original.'/">'.$written_by.'</a></p></div><hr class="dim"><a href="/articles/'.$pt.'/'.$wb_original.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src=\''.$cover.'\'></div></a><div class="txtc">
+        <b style="font-size: 14px;">Title: </b>'.$title.'
+        <b style="font-size: 14px;">Published: </b>'.$posttime.'
+        <b style="font-size: 14px;">Category: </b>'.$cat.'</div>
+    ';
+    return $data;
+  }
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+  function sharePhot($row) {
+      global $photUname, $photFname;
+      $user = $row["user"];
+      $user_ori = $user;
+      $gallery = $row["gallery"];
+      $filename = $row["filename"];
+      $des = wrapText($row["description"], 60);
+      if (!$des) {
+        $des = 'No description given';
+      }
+      $uploaddate_ = $row["uploaddate"];
+      $ud = strftime("%b %d, %Y", strtotime($uploaddate_));
 
-		$diffarr = array_diff($followers, $friends);
+      $photUname = $user_ori;
+      $photFname = $filename;
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Birthday Wish | your following, ".$log_username.", posted on ".$account_name."&#39;s birthday: <img src='/images/post.png' class='notfimg'>";
-			$note = '<a href="/user/'.$account_name.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();
-		}
-		mysqli_close($conn);
-		echo "bdsent_ok";
-		exit();
-	}
-?>
-<?php 
-	//action=status_reply&osid="+osid+"&user="+user+"&data="+data
-	if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
-		// Make sure data is not empty
-		if(strlen($_POST['data']) < 1 && $_POST['image'] == "na"){
-			mysqli_close($conn);
-		    echo "data_empty";
-		    exit();
-		}
+      $data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared photo via <a href="/user/'.$user_ori.'/">'.$user.'</a></p></div><hr class="dim"><a href="/photo_zoom/'.$user_ori.'/'.$filename.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src="/user/'.$user_ori.'/'.$filename.'"></div></a><br><div style="text-align: center;"><b style="font-size: 14px;">Gallery: </b>'.$gallery.'<br /><b style="font-size: 14px;">Published: </b>'.$ud.'<br /><b style="font-size: 14px;">Description: </b>'.$des.'</div>';
+      return $data;
+  }
 
-		$image = mysqli_real_escape_string($conn, $_POST["image"]);
-		// Move the image(s) to the permanent folder
-		if($image != "na"){
-			$kaboom = explode(".", $image);
-			$fileExt = end($kaboom);
-			rename("../tempUploads/$image", "../permUploads/$image");
-			require_once '../php_includes/image_resize.php';
-			$target_file = "../permUploads/$image";
-			$resized_file = "../permUploads/$image";
-			$wmax = 400;
-			$hmax = 500;
-			list($width, $height) = getimagesize($target_file);
-			if($width > $wmax || $height > $hmax){
-				img_resize($target_file, $resized_file, $wmax, $hmax, $fileExt);
-			}
-		}
+  function shareVid($row) {
+    global $hshkey, $vidId;
+    $user = $row["user"];
+    $id = $row["id"];
+    $user_ori = $user;
+    $video_name = $row["video_name"];
+    $video_description = $row["video_description"];
+    $video_poster = $row["video_poster"];
+    $video_file = $row["video_file"];
+    $uploaddate = $row["video_upload"];
+    $vup = strftime("%b %d, %Y", strtotime($uploaddate));
+    if(!$video_name){
+      $video_name = "Untitled";
+    }
 
-		// Clean the posted variables
-		$osid = preg_replace('#[^0-9]#', '', $_POST['sid']);
-		$account_name = mysqli_real_escape_string($conn, $_POST["user"]);
-		$data = htmlentities($_POST['data']);
-		// We just have an image
-		if($data == "||na||" && $image != "na"){
-			$data = '<img src="/permUploads/'.$image.'" /><br>';
-		// We have an image and text
-		}else if($data != "||na||" && $image != "na"){
-			$data = $data.'<br /><img src="/permUploads/'.$image.'" /><br>';
-		}
-		
-		// Make sure account name exists (the profile being posted on)
-		$sql = "SELECT COUNT(id) FROM users WHERE username=? AND activated=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$stmt->bind_result($row);
-		$stmt->fetch();
-		if($row < 1){
-			mysqli_close($conn);
-			echo "$account_no_exist";
-			exit();
-		}
-		$stmt->close();
-		// Insert the status reply post into the database now
-		$sql = "INSERT INTO status(osid, account_name, author, type, data, postdate)
-		        VALUES(?,?,?,?,?,NOW())";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("issss",$osid,$account_name,$log_username,$b,$data);
-		$stmt->execute();
-		$row = $stmt->num_rows;
-		if($row < 1){
-			$id = mysqli_insert_id($conn);
-		}
-		$id = mysqli_insert_id($conn);
-		// Insert the status post into the database now
-		$sql = "INSERT INTO status(account_name, author, type, data, postdate) 
-				VALUES(?,?,?,?,NOW())";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ssss",$account_name,$log_username,$type,$data);
-		$stmt->execute();
-		$stmt->close();
-		$id = mysqli_insert_id($conn);
-		// Count posts of type "a" for the person posting and evaluate the count
-		$sql = "SELECT COUNT(id) FROM status WHERE author=? AND type=?";
-	    $stmt = $conn->prepare($sql);
-	    $stmt->bind_param("ss",$log_username,$a);
-	    $stmt->execute();
-	    $stmt->bind_result($row);
-	    $stmt->fetch();
-	    $stmt->close();
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Status Reply <img src='/images/reply.png' class='notfimg'>";
-			$note = $log_username.' commented on '.$account_name.'&#39;s profile: <br /><a href="/user/'.$account_name.'/#reply_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    if(!$video_description){
+      $video_description = "No description given";
+    }
+    
+    $video_description = wrapText($video_description, 60);
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+    if(!$video_poster){
+      $video_poster = 'images/defaultimage.png';
+    }else{
+      $video_poster = '/user/'.$user_ori.'/videos/'.$video_poster;
+    }
+    $id = base64url_encode($id, $hshkey);
+    $vidId = $id;
+    $data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared video via <a href="/user/'.$user_ori.'/">'.$user.'</a></p></div><hr class="dim">';
+    $data .= '<a href="/video_zoom/'.$id.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src=\''.$video_poster.'\'></div></a><br />';
+    $data .= '<div class="txtc"><b style="font-size: 14px;">Title: </b>'.$video_name.'<br />';
+    $data .= '<b style="font-size: 14px;">Description: </b>'.$video_description.'<br />';
+    $data .= '<b style="font-size: 14px;">Published: </b>'.$vup.'</div>';
+    return $data;
+  }
 
-		$diffarr = array_diff($followers, $friends);
+  if (isset($_POST['action']) && $_POST['action'] == "status_post"){
+    $statPost = new PostGeneral($_POST['type'], $_POST['user'], $_POST['data'],
+      $_POST['image'], $conn);
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Status Reply | your following, ".$log_username.", commented on ".$account_name."&#39;s profile: <img src='/images/reply.png' class='notfimg'>";
-			$note = '<a href="/user/'.$account_name.'/#reply_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
-		mysqli_close($conn);
-		echo "reply_ok|$id";
-		exit();
-	}
-?><?php 
-	if (isset($_POST['action']) && $_POST['action'] == "delete_status"){
-		if(!isset($_POST['statusid']) || $_POST['statusid'] == ""){
-			mysqli_close($conn);
-			echo "status id is missing";
-			exit();
-		}
-		$statusid = preg_replace('#[^0-9]#', '', $_POST['statusid']);
-		// Check to make sure this logged in user actually owns that comment
-		$sql = "SELECT account_name, author, data FROM status WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$statusid);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) {
-			$account_name = $row["account_name"]; 
-			$author = $row["author"];
-			$data = $row["data"];
-		}
-		$stmt->close();
-	    if ($author == $log_username || $account_name == $log_username) {
-	    	// Check for images
-	    	if(preg_match('/<img.+src=[\'"](?P<src>.+)[\'"].*>/i', $data, $has_image)){
-				$source = '../'.$has_image['src'];
-				if (file_exists($source)) {
-	        		unlink($source);
-	    		}
-			}
-			$sql = "DELETE FROM status WHERE osid=?";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("i",$statusid);
-			$stmt->execute();
-			$stmt->close();
-			mysqli_close($conn);
-		    echo "delete_ok";
-			exit();
-		}
-	}
-?><?php 
-	if (isset($_POST['action']) && $_POST['action'] == "delete_reply"){
-		if(!isset($_POST['replyid']) || $_POST['replyid'] == ""){
-			mysqli_close($conn);
-			exit();
-		}
-		$replyid = preg_replace('#[^0-9]#', '', $_POST['replyid']);
-		// Check to make sure the person deleting this reply is either the account owner or the person who wrote it
-		$sql = "SELECT osid, account_name, author FROM status WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$replyid);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) {
-			$osid = $row["osid"];
-			$account_name = $row["account_name"];
-			$author = $row["author"];
-		}
-		$stmt->close();
-	    if ($author == $log_username || $account_name == $log_username) {
-			$sql = "DELETE FROM status WHERE id=?";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("i",$replyid);
-			$stmt->execute();
-			$stmt->close();
-			mysqli_close($conn);
-		    echo "delete_ok";
-			exit();
-		}
-	}
-?>
-<?php
-	if(isset($_POST['action']) && $_POST['action'] == "share"){
-		if(!isset($_POST['id'])){
-			mysql_close($conn);
-			echo "fail";
-			exit();
-		}
-		$id = preg_replace('#[^0-9]#', '', $_POST['id']);
-		if($id == ""){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$sql = "SELECT author, data FROM status WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-		$numrows = $stmt->num_rows;
-		if($numrows < 1){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$stmt->close();
-		$sql = "SELECT * FROM status WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared via <a href="/user/'.$row["author"].'/">'.$row["author"].'</a></p></div><hr class="dim">';
-			$data .= '<div id="share_data">'.$row["data"].'</div>';
-			$stmt->close();
-			$sql = "INSERT INTO status(account_name, author, type, data, postdate) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$log_username,$log_username,$a,$data);
-			$stmt->execute();
-			$stmt->close();
-			$id = mysqli_insert_id($conn);
-		}
- 		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
- 		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
-		mysqli_close($conn);
-		echo "share_ok";
-		exit();
-	}
-?>
-<?php
-	if(isset($_POST['action']) && $_POST['action'] == "share_art"){
-		if(!isset($_POST['id'])){
-			mysql_close($conn);
-			echo "fail";
-			exit();
-		}
-		$id = preg_replace('#[^0-9]#', '', $_POST['id']);
-		if($id == ""){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$sql = "SELECT id FROM articles WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-		$numrows = $stmt->num_rows;
-		if($numrows < 1){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$stmt->close();
-		$sql = "SELECT * FROM articles WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$written_by = $row["written_by"];
-			$wb_original = $written_by;
-			$title = $row["title"];
-			$tags = $row["tags"];
-			$post_time_ = $row["post_time"];
-			$pt = base64url_encode($post_time_,$hshkey);
-			$posttime = strftime("%b %d, %Y", strtotime($post_time_));
-			$cat = $row["category"];
-			$cover = chooseCover($cat);
-			
-			$cover = preg_replace('/<img src="\/images\/\w+\/(\w+)\.jpg"\s+class="cover_art">/', "/images/art_cover/$1.jpg", $cover);
+    // Make sure posted data is not empty
+    $statPost->checkForEmpty($conn);
 
-			$data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared photo via <a href="/user/'.$wb_original.'/">'.$written_by.'</a></p></div><hr class="dim">';
-			$data .= '<a href="/articles/'.$pt.'/'.$wb_original.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src=\''.$cover.'\'></div></a><br />';
-			$data .= '<div class="txtc"><b style="font-size: 14px;">Title: </b>'.$title.'<br />';
-			$data .= '<b style="font-size: 14px;">Published: </b>'.$posttime.'<br />';
-			$data .= '<b style="font-size: 14px;">Category: </b>'.$cat.'</div>';
+    // Validate image, if any
+    if($statPost->image != "na"){
+      $valImg = new InImage();
+      $valImg->doInsert($statPost->image);
+    }
 
-			$stmt->close();
-			$sql = "INSERT INTO status(account_name, author, type, data, postdate) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$log_username,$log_username,$a,$data);
-			$stmt->execute();
-			$stmt->close();
-			$id = mysqli_insert_id($conn);
-		}
- 		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
- 		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
+    // Make sure type is either a or c
+    $statPost->typeCheck($conn);
 
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Shared Article <img src='/images/black_share.png' class='notfimg'>";
-			$note = $log_username.' shared an article.<br /><a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    // Only image or only text or both
+    $statPost->setData();
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+    // Make sure account name exists (the profile being posted on)
+    userExists($conn, $statPost->account_name);
 
-		$diffarr = array_diff($followers, $friends);
+    // Insert the status post into the database now
+    $sql = "INSERT INTO status(account_name, author, type, data, postdate) 
+        VALUES(?,?,?,?,NOW())";
+    $statPost->pushToDb($conn, $sql, 'ssss', $statPost->account_name, $log_username,
+      $statPost->type, $statPost->data);
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Shared Article | your following, ".$log_username.", shared an article <img src='/images/black_share.png' class='notfimg'>";
-			$note = '<a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    $sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
+    $statPost->updateId($conn, $sql, 'ii', $statPost->id, $statPost->id);
 
-		mysqli_close($conn);
-		echo "share_art_ok";
-		exit();
-	}
-?>
-<?php
-	if(isset($_POST['action']) && $_POST['action'] == "share_photo"){
-		if(!isset($_POST['id'])){
-			mysql_close($conn);
-			echo "fail";
-			exit();
-		}
-		$id = preg_replace('#[^0-9]#', '', $_POST['id']);
-		if($id == ""){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$sql = "SELECT id FROM photos WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-		$numrows = $stmt->num_rows;
-		if($numrows < 1){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$stmt->close();
-		$sql = "SELECT * FROM photos WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$user = $row["user"];
-			$user_ori = $user;
-			$gallery = $row["gallery"];
-			$filename = $row["filename"];
-			$des = $row["description"];
-			if(strlen($des) > 60){
-			    $des = substr($des, 0, 57);
-			    $des .= "...";
-			}
-			$uploaddate_ = $row["uploaddate"];
-			$ud = strftime("%b %d, %Y", strtotime($uploaddate_));
-			$data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared photo via <a href="/user/'.$user_ori.'/">'.$user.'</a></p></div><hr class="dim">';
-			$data .= '<a href="/photo_zoom/'.$user_ori.'/'.$filename.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src="/user/'.$user_ori.'/'.$filename.'"></div></a><br>';
-			$data .= '<div style="text-align: center;"><b style="font-size: 14px;">Gallery: </b>'.$gallery.'<br />';
-			$data .= '<b style="font-size: 14px;">Published: </b>'.$ud.'<br />';
-			$data .= '<b style="font-size: 14px;">Description: </b>'.$des.'</div>';
-			$stmt->close();
-			$sql = "INSERT INTO status(account_name, author, type, data, postdate) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$log_username,$log_username,$a,$data);
-			$stmt->execute();
-			$stmt->close();
-			$id = mysqli_insert_id($conn);
-		}
- 		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
- 		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
+    // Insert notifications to all friends of the post author
+    $sendPost = new SendToFols($conn, $log_username, $log_username);
 
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Shared Photo <img src='/images/black_share.png' class='notfimg'>";
-			$note = $log_username.' shared a photo.<br /><a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    $app = "Status Post <img src='/images/post.png' class='notfimg'>";
+    $note = $log_username.' posted on '.$statPost->account_name.'&#39;s profile: <br />
+      <a href="/user/'.$statPost->account_name.'/#status_'.$statPost->id.'">Check it now</a>';
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+    $sendPost->sendNotif($log_username, $app, $note, $conn);
 
-		$diffarr = array_diff($followers, $friends);
+    mysqli_close($conn);
+    echo "post_ok|$statPost->id";
+    exit();
+  }
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Shared Photo | your following, ".$log_username.", shared a photo <img src='/images/black_share.png' class='notfimg'>";
-			$note = '<a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+  if (isset($_POST['action']) && $_POST['action'] == "bd_wish"){
+    $bdWish = new BdWish($conn, $_POST['type'], $_POST['bduser'], $_POST['data']);
 
-		mysqli_close($conn);
-		echo "share_photo_ok";
-		exit();
-	}
-?>
-<?php
-	if(isset($_POST['action']) && $_POST['action'] == "share_video"){
-		if(!isset($_POST['id'])){
-			mysql_close($conn);
-			echo "fail";
-			exit();
-		}
-		$id = preg_replace('#[^0-9]#', '', $_POST['id']);
-		if($id == ""){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$sql = "SELECT id FROM videos WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-		$numrows = $stmt->num_rows;
-		if($numrows < 1){
-			mysqli_close($conn);
-			echo "fail";
-			exit();
-		}
-		$stmt->close();
-		$sql = "SELECT * FROM videos WHERE id=? LIMIT 1";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("i",$id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$user = $row["user"];
-			$user_ori = $user;
-			$video_name = $row["video_name"];
-			$video_description = $row["video_description"];
-			$video_poster = $row["video_poster"];
-			$video_file = $row["video_file"];
-			$uploaddate = $row["video_upload"];
-			$vup = strftime("%b %d, %Y", strtotime($uploaddate));
-			if($video_name == ""){
-				$video_name = "Untitled";
-			}
+    // Make sure post data and image is not empty
+    $bdWish->errorCheck($conn);
 
-			if($video_description == ""){
-				$video_description = "not given";
-			}
-			
-			if(strlen($video_description) > 60){
-			    $video_description = substr($video_description, 0, 57);
-			    $video_description .= "...";
-			}
+    // Append static msg
+    $bdWish->setData($log_username);
 
-			if($video_poster == NULL){
-				$video_poster = 'images/defaultimage.png';
-			}else{
-				$video_poster = '/user/'.$user_ori.'/videos/'.$video_poster;
-			}
-            $id = base64url_encode($id,$hshkey);
-			$data = '<div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared video via <a href="/user/'.$user_ori.'/">'.$user.'</a></p></div><hr class="dim">';
-			$data .= '<a href="/video_zoom/'.$id.'"><div class="genBg lazy-bg shareImg" style="display: block; height: 300px; margin: 0 auto; border-radius: 20px;" data-src=\''.$video_poster.'\'></div></a><br />';
-			$data .= '<div class="txtc"><b style="font-size: 14px;">Title: </b>'.$video_name.'<br />';
-			$data .= '<b style="font-size: 14px;">Description: </b>'.$video_description.'<br />';
-			$data .= '<b style="font-size: 14px;">Published: </b>'.$vup.'</div>';
+    // Make sure account name exists (the profile being posted on)
+    userExists($conn, $bdWish->account_name);
 
-			$stmt->close();
-			$sql = "INSERT INTO status(account_name, author, type, data, postdate) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$log_username,$log_username,$a,$data);
-			$stmt->execute();
-			$stmt->close();
-			$id = mysqli_insert_id($conn);
-		}
- 		$sql = "UPDATE status SET osid=? WHERE id=? LIMIT 1";
- 		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ii",$id,$id);
-		$stmt->execute();
-		$stmt->close();
+    // Insert the status post into the database now
+    $bdWish->pushToDb($conn, $log_username);
 
-		// Insert notifications to all friends of the post author
-		$friends = array();
-		$one = "1";
-		$sql = "SELECT user1 FROM friends WHERE user2=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user1"]); 
-		}
-		$stmt->close();
-		$sql = "SELECT user2 FROM friends WHERE user1=? AND accepted=?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("ss",$log_username,$one);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while ($row = $result->fetch_assoc()) { 
-			array_push($friends, $row["user2"]); 
-		}
-		$stmt->close();
-		for($i = 0; $i < count($friends); $i++){
-			$friend = $friends[$i];
-			$app = "Shared Video <img src='/images/black_share.png' class='notfimg'>";
-			$note = $log_username.' shared a video.<br /><a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    // Insert notifications to all friends of the post author
+    $sendPost = new SendToFols($conn, $log_username, $log_username);
 
-		// Send it to followers
-		$followers = array();
-		$sql = "SELECT * FROM follow WHERE following = ?";
-		$stmt = $conn->prepare($sql);
-		$stmt->bind_param("s",$log_username);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		while($row = $result->fetch_assoc()){
-			$fwer = $row["follower"];
-			array_push($followers, $fwer);
-		}
-		$stmt->close();
+    $app = "Birthday Wish <img src='/images/post.png' class='notfimg'>";
+    $note = $log_username.' posted on '.$bdWish->account_name.'&#39;s birthday: <br />
+      <a href="/user/'.$bdWish->account_name.'/#status_'.$bdWish->id.'">Check it now</a>';
 
-		$diffarr = array_diff($followers, $friends);
+    $sendPost->sendNotif($log_username, $app, $note, $conn);
 
-		for($i = 0; $i < count($diffarr); $i++){
-			$friend = $diffarr[$i];
-			$app = "Shared Photo | your following, ".$log_username.", shared a video <img src='/images/black_share.png' class='notfimg'>";
-			$note = '<a href="/user/'.$log_username.'/#status_'.$id.'">Check it now</a>';
-			// Insert into database
-			$sql = "INSERT INTO notifications(username, initiator, app, note, date_time) VALUES(?,?,?,?,NOW())";
-			$stmt = $conn->prepare($sql);
-			$stmt->bind_param("ssss",$friend,$log_username,$app,$note);
-			$stmt->execute();
-			$stmt->close();			
-		}
+    mysqli_close($conn);
+    echo "bdsent_ok";
+    exit();
+  }
 
-		mysqli_close($conn);
-		echo "share_video_ok";
-		exit();
-	}
+  if (isset($_POST['action']) && $_POST['action'] == "status_reply"){
+    $replyPost = new PostReply($_POST['sid'], $_POST['user'], $_POST['data'], $_POST['image'],
+      $conn);
+
+    // Make sure no empty post
+    $replyPost->checkForEmpty($conn);
+
+    // Validate image, if any
+    if($replyPost->image != "na"){
+      $valImg = new InImage();
+      $valImg->doInsert($replyPost->image);
+    }
+
+    // Only image or only text or both
+    $replyPost->setData();
+
+    // Make sure account name exists (the profile being posted on)
+    userExists($conn, $replyPost->account_name);
+
+    // Insert the status reply post into the database now
+    $sql = "INSERT INTO status(osid, account_name, author, type, data, postdate)
+            VALUES(?,?,?,?,?,NOW())";
+    $replyPost->pushToDb($conn, $sql, 'issss', $replyPost->osid, $replyPost->account_name,
+      $log_username, 'b', $replyPost->data);
+
+    // Insert the status post into the database now
+    $sendReply = new SendToFols($conn, $log_username, $log_username);
+
+    $app = "Status Reply <img src='/images/reply.png' class='notfimg'>";
+    $note = $log_username.' commented on '.$replyPost->account_name.'&#39;s profile: <br />
+      <a href="/user/'.$replyPost->account_name.'/#reply_'.$replyPost->id.'">Check it now</a>';
+
+    $sendReply->sendNotif($log_username, $app, $note, $conn);
+
+    mysqli_close($conn);
+    echo "reply_ok|$replyPost->id";
+    exit();
+  }
+
+  if (isset($_POST['action']) && $_POST['action'] == "delete_status"){
+    $delStat = new DeleteGeneral($_POST['statusid']);
+
+    // Make sure id is not empty and set
+    $delStat->checkEmptyId($conn);
+
+    // Check to make sure this logged in user actually owns that comment
+    $sql = "SELECT account_name, author, data FROM status WHERE id=? LIMIT 1";
+    $delStat->userOwnsComment($conn, $sql, 'i', $delStat->statusid);
+    if ($delStat->author == $log_username || $delStat->account_name == $log_username) {
+      $delStat->checkForImg();
+
+      // Delete status
+      $sql = "DELETE FROM status WHERE osid=?";
+      $delStat->delComment($conn, $sql, 'i', $delStat->statusid);
+    }
+
+    mysqli_close($conn);
+    echo "delete_ok";
+    exit();
+  }
+
+  if (isset($_POST['action']) && $_POST['action'] == "delete_reply"){
+    $delReply = new DeleteGeneral($_POST['replyid']);
+
+    // Make sure id is not empty and set
+    $delReply->checkEmptyId($conn);
+
+    // Check to make sure this logged in user actually owns that comment
+    $sql = "SELECT osid, account_name, author FROM status WHERE id=? LIMIT 1";
+    $delReply->userOwnsComment($conn, $sql, 'i', $delReply->statusid);
+    if ($delReply->author == $log_username || $delReply->account_name == $log_username) {
+      $delReply->checkForImg();
+
+      // Delete reply
+      $sql = "DELETE FROM status WHERE id=?";
+      $delReply->delComment($conn, $sql, 'i', $delReply->statusid);
+    }
+
+    mysqli_close($conn);
+    echo "delete_ok";
+    exit();
+  }
+
+  if(isset($_POST['action']) && $_POST['action'] == "share"){
+    $shareComm = new ShareComment($_POST['id']);
+
+    // Check if id is set and valid
+    $shareComm->checkId($conn);
+
+    // Make sure post exists in db
+    $sql = "SELECT author, data FROM status WHERE id=? LIMIT 1";
+    $shareComm->postExists($conn, $sql, 'i', $shareComm->id);
+
+    $sql = "SELECT * FROM status WHERE id=? LIMIT 1";
+    $shareComm->insertToDb($conn, $sql, 'i', $log_username, $shareComm->id);
+
+    // Send notif
+    $sendReply = new SendToFols($conn, $log_username, $log_username);
+
+    $app = "Status Share <img src='/images/black_share.png' class='notfimg'>";
+    $note = $log_username.' posted on '.$replyPost->account_name.'&#39;s profile: <br />
+      <a href="/user/'.$replyPost->account_name.'/#status_'.$replyPost->id.'">Check it now</a>';
+
+    $sendReply->sendNotif($log_username, $app, $note, $conn);
+
+    mysqli_close($conn);
+    echo "share_ok";
+    exit();
+  }
+
+  if(isset($_POST['action']) && $_POST['action'] == "share_art"){
+    $shareComm = new ShareComment($_POST['id'], "shareArt");
+
+    // Check if id is set and valid
+    $shareComm->checkId($conn);
+
+    // Make sure post exists in db
+    $sql = "SELECT id FROM articles WHERE id=? LIMIT 1";
+    $shareComm->postExists($conn, $sql, 'i', $shareComm->id);
+
+    $sql = "SELECT * FROM articles WHERE id=? LIMIT 1";
+    $shareComm->insertToDb($conn, $sql, 'i', $log_username, $shareComm->id);
+
+    // Send notif
+    $sendReply = new SendToFols($conn, $log_username, $log_username);
+
+    $ptime = getPostTime($conn, $shareComm->id);
+
+    $app = "Article Share <img src='/images/black_share.png' class='notfimg'>";
+    $note = $log_username.' shared an article: <br />
+      <a href="/articles/'.$ptime.'/'.$wb_auth.'">Check it now</a>';
+
+    $sendReply->sendNotif($log_username, $app, $note, $conn);
+
+    mysqli_close($conn);
+    echo "share_art_ok";
+    exit();
+  }
+
+  if(isset($_POST['action']) && $_POST['action'] == "share_photo"){
+    $shareComm = new ShareComment($_POST['id'], "sharePhot");
+
+    // Check if id is set and valid
+    $shareComm->checkId($conn);
+
+    // Make sure post exists in db
+    $sql = "SELECT id FROM photos WHERE id=? LIMIT 1";
+    $shareComm->postExists($conn, $sql, 'i', $shareComm->id);
+
+    $sql = "SELECT * FROM photos WHERE id=? LIMIT 1";
+    $shareComm->insertToDb($conn, $sql, 'i', $log_username, $shareComm->id);
+
+    // Insert notifications to all friends of the post author
+    $sendReply = new SendToFols($conn, $log_username, $log_username);
+
+    $app = "Shared Photo <img src='/images/black_share.png' class='notfimg'>";
+    $note = $log_username.' shared a photo.<br />
+      <a href="/photo_zoom/'.$photUname.'/'.$photFname.'">Check it now</a>';
+
+    $sendReply->sendNotif($log_username, $app, $note, $conn);
+
+    mysqli_close($conn);
+    echo "share_photo_ok";
+    exit();
+  }
+
+  if(isset($_POST['action']) && $_POST['action'] == "share_video"){
+    $shareComm = new ShareComment($_POST['id'], "shareVid");
+
+    // Check if id is set and valid
+    $shareComm->checkId($conn);
+
+    // Make sure vid exists
+    $sql = "SELECT id FROM videos WHERE id=? LIMIT 1";
+    $shareComm->postExists($conn, $sql, 'i', $shareComm->id);
+
+    // Share vid
+    $sql = "SELECT * FROM videos WHERE id=? LIMIT 1";
+    $shareComm->insertToDb($conn, $sql, 'i', $log_username, $shareComm->id);
+
+    // Insert notifications to all friends of the post author
+    $sendReply = new SendToFols($conn, $log_username, $log_username);
+
+    $app = "Shared Video <img src='/images/black_share.png' class='notfimg'>";
+    $note = $log_username.' shared a video.<br />
+      <a href="/video_zoom/'.$vidId.'">Check it now</a>';
+
+    $sendReply->sendNotif($log_username, $app, $note, $conn);
+
+    mysqli_close($conn);
+    echo "share_video_ok";
+    exit();
+  }
 ?>

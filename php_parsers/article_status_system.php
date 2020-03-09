@@ -22,17 +22,6 @@
     $ar = $_SESSION["id"];
   }
 
-  function getPostTime($conn, $ar) {
-    $sql = "SELECT post_time FROM articles WHERE id = ? LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $ar);
-    $stmt->execute();
-    $stmt->bind_result($ptime);
-    $stmt->fetch();
-    $stmt->close();
-    return $ptime;
-  }
-
   if (isset($_POST['action']) && $_POST['action'] == "status_post"){
     $statPost = new PostGeneral($_POST['type'], $_POST['user'], $_POST['data'],
       $_POST['image'], $conn);
