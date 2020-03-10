@@ -678,6 +678,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Unveil your creativity and find new friends.">
   <link rel="manifest" href="/manifest.json">
+  <?php if (!$isfeed) { ?>
+    <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <?php } ?>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="#282828">
@@ -732,34 +735,37 @@
   <script src='/js/specific/like_status.js' defer></script>
   <script type="text/javascript">
     var hasImage = "";
-
   </script>
 </head>
-<body style="background-color: #fafafa;">
-  <?php require_once 'template_pageTop.php'; ?>
+<body 
+  <?php if ($isfeed) { ?>
+    style="background-color: #fafafa;"
+  <?php } else { ?>
+    style="background-color: black;"
+  <?php } ?>
+  >
+  <?php
+    if ($isfeed) {
+      require_once 'template_pageTop.php';
+    }
+  ?>
   <?php if(!$isfeed){ ?>
-    <div id="pearHolder" class="seekhide"></div>
-      <section id="startContent">
-        <div>
-          <p>Connect us, connect the world</p><br>
-          <p>Join to Pearscom now and get a pear.</p><br>
-          <button class="main_btn" onclick="location.href='/login'">Log In</button>
-          <button class="main_btn main_btn_fill" onclick="location.href='/signup'">
-            Sign Up
-          </button>
-          <p class="centerBox">
-            By signing up you agree our
-            <a href="/policies" class="rlink">Privacy and Policy</a>,
-            how we collect and use your data and accept the use of
-            <a href="policies" class="rlink">cookies</a> on the site.
-          </p>
-        </div>
-      </section>
-      <div id="pearHolder" class="hideseek"></div>
-      <div id="changingWords"><div class="wordsStyle"><span class="wordsBg">Share your ideas</span></div>
+    <div class="banner">
+      <div class="video-overlays"></div>
+      <video autoplay muted loop id="indexVideo">
+        <source src="images/background.mp4" type="video/mp4">
+      </video>
+      <div class="content">
+        <p class="indTitle">Pearscom</p>
+        <button class="indexBtns" onclick="location.href='/login'">Log In</button>
+        <button class="indexBtns" style="background-color: red; color: white;"
+          onclick="location.href='/signup'">
+          Sign Up
+        </button>
+        <p>An innovative and open source social-media site</p>
       </div>
-      <div class="clear"></div>
-    <?php }else{ ?>
+    </div>
+  <?php }else{ ?>
       <div id="dialogbox"></div>
       <div id="overlay"></div>
       <div id="pageMiddle_index" style="background-color: transparent;">
@@ -782,10 +788,6 @@
         <div id="pcload"></div>
       </div>
     <?php } ?>
-    <?php if(!$isfeed){
-      require_once 'template_pageBottom.php';
-    } ?>
-
   <script type="text/javascript">
     var isf = "<?php echo $isfeed; ?>";
   </script>

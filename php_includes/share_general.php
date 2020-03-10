@@ -1,7 +1,10 @@
 <?php
+  require_once '../ccov.php';
+  
   class ShareComment {
-    public function __construct($id) {
+    public function __construct($id, $isCustom = false) {
       $this->id = preg_replace('#[^0-9]#', '', $id);
+      $this->isCustom = $isCustom;
     }
 
     public function checkId($conn) {
@@ -55,9 +58,13 @@
           -> fix issue by creating a separate table for shares and inserting the necessary
           information instead of pushing hardcoded HTML to the database
         */
-        $data = '
-          <div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared via <a href="/user/'.$row["author"].'/">'.$row["author"].'</a></p></div><hr class="dim"><div id="share_data">'.$row["data"].'</div>
-        ';
+        if (!$this->isCustom) {
+          $data = '
+            <div style="box-sizing: border-box; text-align: center; color: white; background-color: #282828; border-radius: 20px; font-size: 16px; margin-top: 40px; padding: 5px;"><p>Shared via <a href="/user/'.$row["author"].'/">'.$row["author"].'</a></p></div><hr class="dim"><div id="share_data">'.$row["data"].'</div>';
+        } else {
+          $data = call_user_func($this->isCustom, $row);
+        }
+
         $stmt->close();
         
         $this->postToStatus($conn, $log_username, $data);

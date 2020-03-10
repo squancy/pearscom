@@ -291,7 +291,7 @@
     </style>
   <?php } ?>
   <script type="text/javascript">
-    const UNAME = '<?php echo $log_username; ?>';
+    const TOP_UNAME = '<?php echo $log_username; ?>';
   </script>
   <script src="/js/specific/top.js" defer></script>
 </head>
@@ -305,7 +305,7 @@
           <img src="/images/newfav.png" alt="Pearscom" width="47" height="47" id="newfav">
         </a>
         <div id="icons_align"
-          <?php if($log_username == ""){ ?>
+          <?php if(!$log_username){ ?>
             style="display: none;"
           <?php } ?>
         >

@@ -155,7 +155,7 @@
           'Video reply');
 
         $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
-          $agoformreply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl);
+          $agoformrply, $user_image2, $replydata, $data_old_reply, $replyLog, $rpycl);
       }
     }
 

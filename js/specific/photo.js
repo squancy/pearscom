@@ -114,8 +114,14 @@ function progressHandler(e) {
 // Called when image has been successfully uploaded
 function completeHandler(e) {
   var o = e.target.responseText.split('|');
-  //_('progressBar').style.width = '0%';
-  //_('progressBar').style.display = 'none';
+  _('progressBar').style.width = '0%';
+  _('progressBar').style.display = 'none';
+  _('pbc').style.display = 'none';
+  _('p_status').innerHTML = `
+    <p style="color: green; text-align: center;">
+      Photo has been successfully uploaded
+    </p>
+  `;
   if (o[0] != 'upload_complete') {
     _('p_status').innerHTML = `
       <p style='font-size: 14px; margin: 0px; padding: 0px;'>

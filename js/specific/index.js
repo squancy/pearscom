@@ -131,6 +131,10 @@ if (isf) {
 }
 
 // If user is not logged in display an some constantly altering text
+/*
+  This is left from the old design: may reuse later but currently not seen on the site
+*/
+/*
 if(!isf){
   let keepLoop = 0;
 
@@ -159,4 +163,4 @@ if(!isf){
     keepLoop++;
   }
 }
-
+*/

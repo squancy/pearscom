@@ -235,4 +235,15 @@
     $stmt->close();
     return $follower_count;
   }
+
+  function getPostTime($conn, $ar) {
+    $sql = "SELECT post_time FROM articles WHERE id = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $ar);
+    $stmt->execute();
+    $stmt->bind_result($ptime);
+    $stmt->fetch();
+    $stmt->close();
+    return $ptime;
+  }
 ?>

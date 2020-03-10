@@ -61,7 +61,7 @@ function getNames(e) {
 var mobilecheck = mobilecheck();
 var now = new Date,
     hrs = now.getHours(),
-    loguname = UNAME;
+    loguname = TOP_UNAME;
 if (loguname != '') {
     ("https://www.pearscom.com/#" && "https://www.pearscom.com/") != (window.location.href ||
       document.URL) && (window.addEventListener("mouseup", function (e) {
