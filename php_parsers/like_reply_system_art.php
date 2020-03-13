@@ -2,6 +2,7 @@
   require_once '../php_includes/check_login_statues.php';
   require_once '../php_includes/perform_checks.php';
   require_once '../php_includes/sentToFols.php';
+  require_once '../php_includes/index_fire.php';
   require_once '../php_includes/like_common.php';
   require_once '../safe_encrypt.php';
 

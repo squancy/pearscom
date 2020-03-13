@@ -24,7 +24,8 @@ Due to the lack of configurability I have on the server that I hire users also n
 Pearscom does not have an application in any stores but it can be downloaded as a PWA (Progessive Web App) for both mobile and desktop.
 
 ## Nice TODOs
-The site is written is pure PHP & MySQL and JavaScript. Back then, it started out as a small project and only evolved to a somwhat larger one later so I didn't use any framework or library, that now I regret.
+The site is written is pure PHP & MySQL and JavaScript. Back then, it started out as a small
+project and only evolved to a somewhat larger one later so I didn't use any framework or library, that now I regret.
   - Integrate the service with a framework/library like React or Angular (may also consider using Django, Laravel or Node.js on server-side)
   - Implement messaging, notifications etc. in real-time (perhaps with Node.js and Socket.io)
   - Better integration with MySQL, more efficient queries etc.

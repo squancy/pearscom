@@ -81,7 +81,7 @@
     }
 
     if (!$vi) {
-      $vi = indexId($conn, $osid, "video_status", "vidid");
+      $vi = indexId($conn, $replyPost->osid, "video_status", "vidid");
     }
 
     // Only image or only text or both
@@ -106,7 +106,7 @@
     $sendReply->sendNotif($log_username, $app, $note, $conn);
 
     mysqli_close($conn);
-    echo "reply_ok|$id";
+    echo "reply_ok|$replyPost->id";
     exit();
   }
 
@@ -140,6 +140,10 @@
     // Make sure id is not empty and set
     $delReply->checkEmptyId($conn);
 
+    if (!$vi) {
+      $vi = indexId($conn, $delReply->statusid, "video_status", "vidid");
+    }
+
     // Check to make sure this logged in user actually owns that comment
     $sql = "SELECT osid, account_name, author FROM video_status WHERE id=? AND vidid = ?
       LIMIT 1";
@@ -165,8 +169,7 @@
     $shareComm->checkId($conn);
 
     if (!$vi) {
-      // Fired from index.php like so get the photo file name from status id
-      $vi = indexId($conn, $id, "video_status", "vidid");
+      $vi = indexId($conn, $shareComm->id, "video_status", "vidid");
     }
 
     $sql = "SELECT author, data FROM video_status WHERE id=? AND vidid = ? LIMIT 1";

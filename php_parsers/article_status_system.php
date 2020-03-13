@@ -148,7 +148,13 @@
     // Check to make sure this logged in user actually owns that comment
     $sql = "SELECT osid, account_name, author FROM article_status WHERE id=? AND artid = ?
       LIMIT 1";
+
+    if (!$ar) {
+      $ar = indexId($conn, $delReply->statusid, "article_status", "artid");
+    }
+
     $delReply->userOwnsComment($conn, $sql, 'ii', $delReply->statusid, $ar);
+
     if ($delReply->author == $log_username || $delReply->account_name == $log_username) {
       $delReply->checkForImg();
 

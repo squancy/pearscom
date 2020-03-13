@@ -2,6 +2,7 @@
   while ($row = $result->fetch_assoc()) {
     if ($isIndex) {
       $_SESSION['id'] = '';
+      $viHash = base64url_encode($row["video_id"], $hshkey);
       $vi = $row["video_id"];
     }
     $statusid = $row["id"];
@@ -151,7 +152,7 @@
         $replyLog = genLog($_SESSION['username'], $statusreplyid, $likeButton_reply,
           $likeText_reply, false);
 
-        $replyLog .= addIndexText($isIndex, '/video_zoom/'.$vi.'/#reply_'.$statusreplyid,
+        $replyLog .= addIndexText($isIndex, '/video_zoom/'.$viHash.'/#reply_'.$statusreplyid,
           'Video reply');
 
         $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
@@ -175,7 +176,7 @@
 
     // If file is used on index.php add 'status post' text
     $statusLog .= addIndexText($isIndex,
-      '/video_zoom/'.$vi.'/#status_'.$statusid, 'Video post');
+      '/video_zoom/'.$viHash.'/#status_'.$statusid, 'Video post');
 
     $statvidl .= genStatCommon($statusid, $statusDeleteButton, $postdate, $agoform,
       $user_image, $data, $data_old, $statusLog, $cl, $showmore, $status_replies);

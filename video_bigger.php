@@ -171,6 +171,15 @@
           onmousedown="shareVideo(\'' . $id_number . '\');" id="shareBlink"
           style="vertical-align: middle;">
       ';
+      
+      $delButton = '';
+      if ($tUname == $log_username) {
+        $delButton = '
+          <img src="/images/dildel.png" width="18" height="18" onclick="return false;"
+            onmousedown="deleteVid(\'' . $id_number . '\');" id="shareBlink"
+            style="vertical-align: middle;">
+          ';
+      }
 
       // Wrap description if longer than 200 chars
       $dold = $description;
@@ -191,7 +200,12 @@
           <div class="shareDiv">
             ' . $shareButton . '
             <span style="vertical-align: middle;">Share</span>
-          </div>';
+          </div>
+          <div class="shareDiv">
+            '.$delButton.'
+            <span style="vertical-align: middle;">Delete</span>
+          </div>
+        ';
       }
 
       $stmt->close();
@@ -331,7 +345,7 @@
   $all_friends = getUsersFriends($conn, $u, $log_username);
   $allfmy = join("','", $all_friends);
   $related_vids = "";
-  $sql = "SELECT * FROM videos WHERE user IN ('$allfmy') LIMIT 30";
+  $sql = "SELECT * FROM videos WHERE user IN ('$allfmy') LIMIT 10";
   $stmt = $conn->prepare($sql);
   $stmt->execute();
   $result = $stmt->get_result();
@@ -341,7 +355,7 @@
   $stmt->close();
   
   if(empty($all_friends)){
-    $sql = "SELECT * FROM videos LIMIT 30";
+    $sql = "SELECT * FROM videos LIMIT 10";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -353,7 +367,7 @@
 
   // Get users's videos
   $myvids = "";
-  $sql = "SELECT * FROM videos WHERE user = ? LIMIT 30";
+  $sql = "SELECT * FROM videos WHERE user = ? LIMIT 10";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("s", $log_username);
   $stmt->execute();
@@ -462,6 +476,7 @@
   </div>
   <?php require_once 'template_pageBottom.php'; ?>
   <script type="text/javascript">
+    const VID_UNAME = "<?php echo $log_username; ?>";
     let ec = "<?php echo $ec; ?>";
     let vDur = "<?php echo $pDur ?>";
     let video = _("my_video_" + ec);

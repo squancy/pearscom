@@ -3,6 +3,7 @@
     $statusid = $row["id"];
     $type = $row["type"];
     if ($isIndex) {
+      $_SESSION['photo'] = NULL;
       $p = $row["photo"];
     }
     $account_name = $row["account_name"];

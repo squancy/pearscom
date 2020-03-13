@@ -3,6 +3,17 @@
     if ($isIndex) {
       $_SESSION['id'] = '';
       $ar = $row['aid'];
+
+      // Select post time of art
+      $sql = "SELECT post_time FROM articles WHERE id = ?";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param('s', $ar);
+      $stmt->execute();
+      $stmt->bind_result($pdate);
+      $stmt->fetch();
+      $stmt->close();
+
+      $arLink = base64url_encode($pdate, $hshkey);
     }
     $statusid = $row["id"];
     $account_name = $row["account_name"];
@@ -146,7 +157,7 @@
         $replyLog = genLog($_SESSION["username"], $statusreplyid, $likeButton_reply,
           $likeText_reply, false);
         $replyLog .= addIndexText($isIndex,
-          '/articles/'.$account_name.'/#reply_'.$statusreplyid,
+          '/articles/'.$arLink.'/'.$account_name.'/#reply_'.$statusreplyid,
           'Article reply');
 
         $status_replies .= genStatusReplies($statusreplyid, $replyDeleteButton, $replypostdate,
@@ -170,11 +181,11 @@
 
     // If file is used on index.php add 'status post' text
     if ($row["type"] != "b") {
-      $statusLog .= addIndexText($isIndex, '/articles/'.$account_name.'/#status_'.$statusid,
-        'Article post');
+      $statusLog .= addIndexText($isIndex,
+        '/articles/'.$arLink.'/'.$account_name.'/#status_'.$statusid, 'Article post');
     } else {
       $statusLog .= addIndexText($isIndex,
-        '/articles/'.$account_name.'/#reply_'.$statusreplyid,
+        '/articles/'.$arLink.'/'.$account_name.'/#reply_'.$statusreplyid,
         'Article reply');
     }
 

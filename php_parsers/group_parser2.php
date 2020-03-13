@@ -12,10 +12,6 @@
   $one = "1";
   $zero = "0";
 
-  if(!isset($_SESSION['gname']) || !$_SESSION['gname']){
-    exit();
-  }
-
   $u = $_SESSION['username'];
 
   // Do not access script directly
@@ -313,7 +309,7 @@
       }
     }
 
-    public function typeCheck($conn, $n = 0) {
+    public function typeCheck($conn, $n = "0") {
       if ($this->type != $n) {
         mysqli_close($conn);
         echo "type_unknown";
@@ -331,7 +327,7 @@
       $this->u = $u;
     }
 
-    public function typeCheck($conn, $n = 1) {
+    public function typeCheck($conn, $n = "1") {
       parent::typeCheck($conn, $n);
 
       // also check for empty sid
@@ -578,9 +574,6 @@
     // Group exists?
     $grPost->groupExists($conn);
 
-    // Type check
-    $grPost->typeCheck($conn);
-
     // Set post data with text + img
     $grPost->setData();
 
@@ -614,9 +607,6 @@
     // Make sure post data is not empty
     $replyGr->checkForEmpty($conn);
 
-    // Type check
-    $replyGr->typeCheck($conn);
-
     // Move the image(s) to the permanent folder
     if($replyGr->image != "na"){
       $valImg = new InImage();
@@ -633,20 +623,22 @@
     $replyGr->setData();
 
     // Insert the status into the database now
+    $sql = "INSERT INTO grouppost(pid, gname, author, type, data, pdate)
+      VALUES(?,?,?,?,?,NOW())";
     $replyGr->pushToDb($conn, $sql, 'issss', $replyGr->sid, $replyGr->g, $u, '1',
       $replyGr->data);
 
     // Insert notifications to all friends of the post author
     $sendNotif = new SendToFols($conn, $u, $log_username);
 
-      $app = "Group Status Reply <img src='/images/reply.png' class='notfimg'>";
-      $note = $log_username.' commented on '.$replyGr->g.' group: <br />
-        <a href="/group/'.$replyGr->g.'/#status_'.$replyGr->sid.'">Check it now</a>';
+    $app = "Group Status Reply <img src='/images/reply.png' class='notfimg'>";
+    $note = $log_username.' commented on '.$replyGr->g.' group: <br />
+      <a href="/group/'.$replyGr->g.'/#status_'.$replyGr->sid.'">Check it now</a>';
 
     $sendNotif->sendNotif($log_username, $app, $note, $conn);
 
     mysqli_close($conn);
-    echo "reply_ok|$replyGr->sid";
+    echo "reply_ok|$replyGr->id";
     exit();
   }
 
@@ -679,16 +671,14 @@
     // Error check
     $delReply->checkEmptyId($conn);
 
-    $group = mysqli_real_escape_string($conn, $_SESSION["gname"]);
-
     // Account check
-    $sql = "SELECT author FROM grouppost WHERE id=? AND gname = ? LIMIT 1";
-    $delReply->userOwnsComment($conn, $sql, 'is', $delReply->statusid, $group);
+    $sql = "SELECT * FROM grouppost WHERE id=? LIMIT 1";
+    $delReply->userOwnsComment($conn, $sql, 'i', $delReply->statusid);
 
     if ($delReply->author == $log_username) {
       // delete comment
-      $sql = "DELETE FROM grouppost WHERE id=? AND gname = ?";
-      $delReply->delComment($conn, $sql, 'is', $delReply->statusid, $group);
+      $sql = "DELETE FROM grouppost WHERE id=?";
+      $delReply->delComment($conn, $sql, 'i', $delReply->statusid);
 
       mysqli_close($conn);
       echo "delete_ok";

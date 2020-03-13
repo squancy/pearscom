@@ -140,6 +140,10 @@
     // Make sure id is not empty and set
     $delReply->checkEmptyId($conn);
 
+    if (!$p) {
+      $p = indexId($conn, $delReply->statusid, "photos_status", "photo");
+    }
+
     // Check to make sure this logged in user actually owns that comment
     $sql = "SELECT osid, account_name, author FROM photos_status WHERE id=? AND photo = ?
       LIMIT 1";
@@ -165,7 +169,7 @@
     $shareComm->checkId($conn);
 
     if (!$p) {
-      $p = indexId($conn, $id, "photos_status", "photo");
+      $p = indexId($conn, $shareComm->id, "photos_status", "photo");
     }
 
     $sql = "SELECT author, data FROM photos_status WHERE id=? AND photo = ? LIMIT 1";

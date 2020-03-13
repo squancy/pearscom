@@ -407,11 +407,30 @@ function shareVideo(o) {
           <button id="vupload" style="position: absolute; right: 3px; bottom: 3px;"
             onclick="closeDialog()">Close</button>`;
       } else {
-        showErrorDialog();
+        genErrorDialog();
       }
     }
   }
   e.send("action=share_video&id=" + o);
+}
+
+function deleteVid(o) {
+  if (!confirm('Are you sure you want to delete this video?')) {
+    return false;
+  }
+
+  var e = ajaxObj("POST", "/php_parsers/video_parser.php");
+  e.onreadystatechange = function() {
+    if (ajaxReturn(e)) {
+      if (e.responseText == "delete_success") {
+        window.location.href = '/videos/' + encodeURI(VID_UNAME)
+      } else {
+        console.log(e.responseText);
+        genErrorDialog();
+      }
+    }
+  }
+  e.send("type=delete&id=" + o);
 }
 
 function changeSetts() {

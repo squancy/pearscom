@@ -92,7 +92,7 @@
         LEFT JOIN users AS u ON u.username = s.author
         WHERE s.osid = ? 
         AND s.type = ? 
-        ORDER BY s.postdate ASC";
+        ORDER BY s.postdate DESC";
     $stmt = $conn->prepare($sql2);
     $stmt->bind_param("is", $statusid, $b);
     $stmt->execute();

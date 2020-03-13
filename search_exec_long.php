@@ -2,17 +2,56 @@
   require_once 'timeelapsedstring.php';
   require_once 'php_includes/check_login_statues.php';
   require_once 'php_includes/pagination.php';
+  require_once 'search_exec_common.php';
   require_once 'php_includes/status_common.php';
   require_once 'php_includes/mtime.php';
   require_once 'php_includes/wrapText.php';
 
-  $output = "";
-  $u = "";
+  function genUserRow($row) {
+    global $count;
+    $uname = $row["username"];
+    $country = $row["country"];
+    $avatar = $row["avatar"];
+    $isonline = $row["online"];
+    $bday = $row["bday"];
+    $signupdate = $row["signup"];
+    $uname_original = $uname;
+    $mfor = time_elapsed_string($signupdate);
+    $age = floor((time() - strtotime($bday)) / 31556926);
+
+    $uname = wrapText($uname, 36);
+
+    if($isonline == "yes"){
+      $isonline = "border: 2px solid rgb(0, 161, 255);";
+    }else{
+      $isonline = "border: 2px solid grey;";
+    }
+
+    $pcurl = avatarImg($uname, $avatar);
+
+    return '
+      <a href="/user/'.$uname.'/">
+        <div class="lazy-bg genBg sepDivs" data-src=\''.$pcurl.'\'
+          style="width: 50px; height: 50px; border-radius: 50%; float: left;
+          margin-right: 5px; '.$isonline.'"></div>
+      </a>
+      <div class="flexibleSol" style="justify-content: space-evenly; flex-wrap: wrap;"
+        id="sLong">
+        <p><a href="/user/'.$uname.'/">'.$uname.'</a></p>
+        <p>'.$country.'</p>
+        <p>'.$age.' years old</p>
+        <p>Member for '.$mfor.'</p>
+      </div>
+      <div class="clear"></div>
+      <hr class="dim">
+    ';
+    $count++;
+  }
+
   $count = 0;
-  $one = "1";
 
   // If user is not logged in no search is allowed
-  if(!isset($_SESSION["username"]) || $_SESSION["username"] == ""){
+  if(!isset($_SESSION["username"]) || !$_SESSION["username"]){
     $output = '
       <p style="font-size: 14px; margin: 0px;">
         You are not logged in therefore you cannot search!
@@ -24,11 +63,10 @@
   // AJAX calls this code
   if(isset($_GET['search'])){
     $u = mysqli_real_escape_string($conn, $_GET["search"]);  
-    if ($u == ""){
+    if (!$u){
       header('Location: index.php');
       exit();
     }
-    $u_search = "%$u%";
 
     // Handle pagination
     $sql_s = "SELECT COUNT(id) FROM users 
@@ -37,57 +75,7 @@
     list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'ss', $url_n, $u_search, $one);
 
     // Perform search query
-    $sql = "SELECT * FROM users 
-            WHERE username LIKE ? AND activated = ?
-            ORDER BY username ASC $limit";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $u_search, $one);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if($result->num_rows > 0){
-      while ($row = $result->fetch_assoc()){
-        $uname = $row["username"];
-        $country = $row["country"];
-        $avatar = $row["avatar"];
-        $isonline = $row["online"];
-        $bday = $row["bday"];
-        $signupdate = $row["signup"];
-        $uname_original = $uname;
-        $mfor = time_elapsed_string($signupdate);
-        $age = floor((time() - strtotime($bday)) / 31556926);
-
-        $uname = wrapText($uname, 36);
-
-        if($isonline == "yes"){
-          $isonline = "border: 2px solid rgb(0, 161, 255);";
-        }else{
-          $isonline = "border: 2px solid grey;";
-        }
-
-        $pcurl = avatarImg($uname, $avatar);
-
-        $output .= '
-          <a href="/user/'.$uname.'/">
-            <div class="lazy-bg genBg sepDivs" data-src=\''.$pcurl.'\'
-              style="width: 50px; height: 50px; border-radius: 50%; float: left;
-              margin-right: 5px; '.$isonline.'"></div>
-          </a>
-          <div class="flexibleSol" style="justify-content: space-evenly; flex-wrap: wrap;"
-            id="sLong">
-            <p><a href="/user/'.$uname.'/">'.$uname.'</a></p>
-            <p>'.$country.'</p>
-            <p>'.$age.' years old</p>
-            <p>Member for '.$mfor.'</p>
-          </div>
-          <div class="clear"></div>
-          <hr class="dim">
-        ';
-        $count++;
-      }
-    } else {
-      // No results from search
-      $output = "<p class='txtc' style='color: #999;'>Unfortunately, no results were found</p>";
-    }
+    $output = performSearch($conn, substr($limit, 6));
   }
 ?>
 <!DOCTYPE html>

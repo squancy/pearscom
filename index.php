@@ -723,6 +723,7 @@
   <script src="/js/mbc.js"></script>
   <script src="/js/ajax.js" defer></script>
   <script src='/js/specific/p_dialog.js' defer></script>
+  <script src='/js/specific/friendsugg.js' defer></script>
   <script src='/js/specific/file_dialog.js' defer></script>
   <script src='/js/specific/see_hide.js' defer></script>
   <script src='/js/specific/open_emoji.js' defer></script>
@@ -756,7 +757,7 @@
         <source src="images/background.mp4" type="video/mp4">
       </video>
       <div class="content">
-        <p class="indTitle">Pearscom</p>
+        <p class="indTitle" style="margin-top: 0;">Pearscom</p>
         <button class="indexBtns" onclick="location.href='/login'">Log In</button>
         <button class="indexBtns" style="background-color: red; color: white;"
           onclick="location.href='/signup'">
@@ -790,6 +791,9 @@
     <?php } ?>
   <script type="text/javascript">
     var isf = "<?php echo $isfeed; ?>";
+
+    // On-hover pop-up info box collides with header
+    document.getElementsByClassName('infotsrdiv')[0].style.visibility = 'hidden';
   </script>
   <script src="/js/specific/index.js"></script>
 </body>

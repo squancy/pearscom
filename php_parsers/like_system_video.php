@@ -12,7 +12,7 @@
 
   $vi = "";
 
-  if(isset($_POST["vi"]) && $_POST["vi"] != ""){
+  if(isset($_POST["vi"]) && $_POST["vi"]){
     $vi = mysqli_real_escape_string($conn, $_POST["vi"]);
   }else if(isset($_SESSION["id"]) && !empty($_SESSION["id"])){
     $vi = $_SESSION["id"];
@@ -34,8 +34,8 @@
     if($_POST['type'] == "like"){
       $sql = "SELECT COUNT(id) FROM video_status_likes WHERE username=? AND video=?
         AND status=? LIMIT 1";
-      $row_count1 = $vLike->checkIfLiked($conn, $sql, 'sii', $log_username, $vLike->p1,
-        $vi);
+      $row_count1 = $vLike->checkIfLiked($conn, $sql, 'sii', $log_username, $vi,
+        $vLike->p1);
 
       if($row_count1){
         echo "You have already liked it";
@@ -44,7 +44,7 @@
         // Insert to db
         $sql = "INSERT INTO video_status_likes(username, video, status, like_time)
             VALUES (?,?,?,NOW())";
-        $vLike->manageDb($conn, $sql, 'sii', $log_username, $vLike->p1, $vi);
+        $vLike->manageDb($conn, $sql, 'sii', $log_username, $vi, $vLike->p1);
 
         // Insert notifications to all friends of the post author
         $sendNotif = new SendToFols($conn, $log_username, $log_username);
@@ -63,13 +63,13 @@
     }else if($_POST['type'] == "unlike"){
       $sql = "SELECT COUNT(id) FROM video_status_likes WHERE username=? AND video=? AND
         status=? LIMIT 1";
-      $row_count1 = $vLike->checkIfLiked($conn, $sql, 'sii', $log_username, $vLike->p1,
-        $vi);
+      $row_count1 = $vLike->checkIfLiked($conn, $sql, 'sii', $log_username, $vi,
+        $vLike->p1);
 
       if($row_count1){
-        $sql2 = "DELETE FROM video_status_likes WHERE username=? AND video=? AND status=?
+        $sql = "DELETE FROM video_status_likes WHERE username=? AND video=? AND status=?
           LIMIT 1";
-        $vLike->manageDb($conn, $sql, 'sii', $log_username, $vLike->p1, $vi);
+        $vLike->manageDb($conn, $sql, 'sii', $log_username, $vi, $vLike->p1);
 
         mysqli_close($conn);
         echo "unlike_success";

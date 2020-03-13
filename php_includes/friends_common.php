@@ -1,11 +1,12 @@
 <?php
+  require_once 'php_includes/check_login_statues.php';
   /*
     Commonly used functions & classes used in the friend suggestion system
   */
 
   function isAccepted($conn, $log_username, $unamerq) {
-    $sql = "SELECT accepted FROM friends WHERE user1 = ? AND user2 = ? OR user1 = ? AND
-      user2 = ? LIMIT 1";
+    $sql = "SELECT accepted FROM friends WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND
+      user2 = ?) LIMIT 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssss", $log_username, $unamerq, $unamerq, $log_username);
     $stmt->execute();
@@ -16,20 +17,21 @@
   }
 
   function isMoMo($ordtype, $moMoFriends) {
-    if(isset($ordtype) && $moMoFriends == ""){
+    if(isset($ordtype) && !$moMoFriends){
       echo "
         <p style='color: #999; text-align: center;'>
           Sorry, there are no friend suggestions in this category
         </p>
       ";
       exit();
-    }else if(isset($ordtype) && $moMoFriends != ""){
+    }else if(isset($ordtype) && $moMoFriends){
       echo $moMoFriends;
       exit();
     }
   }
 
   function genUserBox($row, $conn) {
+    global $log_username;
     $avatar = $row["avatar"];
     $country = $row["country"];
     $gender = $row["gender"];
@@ -49,12 +51,10 @@
     }
     
     $zeroone = isAccepted($conn, $log_username, $unamerq);
-
     $pcurl = "/user/".$unamerq."/".$avatar;
-
-    if($zeroone == '0'){
+    if($zeroone == "0"){
       $friend_btn = "<p style='color: #999; margin-right: 5px;'>Friend request sent</p>";
-    }else if($zeroone == NULL || $zeroone == ""){
+    }else{
       $friend_btn = '
         <span id="friendBtn_'.$unamerq.'">
           <button onclick="friendToggle(\'friend\', \''.$unamerq.'\', \'friendBtn_'.$unamerq.'\')"

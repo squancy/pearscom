@@ -1,6 +1,7 @@
 <?php
   require_once '../php_includes/check_login_statues.php';
   require_once '../php_includes/perform_checks.php';
+  require_once '../php_includes/index_fire.php';
   require_once '../php_includes/sentToFols.php';
   require_once '../php_includes/like_common.php';
   require_once '../safe_encrypt.php';
@@ -20,7 +21,7 @@
     $artLike = new LikeGeneral($conn, preg_replace('#[^0-9]#i', '', $_POST['id']), NULL);
 
     if (!$parid) {
-      // Fired from index.php like so get the photo file name from status id
+      // Fired from index.php like so get art name from status id
       $sql = "SELECT artid FROM article_status WHERE id=? LIMIT 1";
       $parid = indFire($conn, $sql, $artLike->p1);
     } 

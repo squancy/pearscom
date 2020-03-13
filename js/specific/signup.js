@@ -63,7 +63,7 @@ function signup() {
       s.innerHTML = "<p>Your password fields do not match</p>";
       return false;
     } else if (p && l && h) {
-      _("signupbtn").style.display = "none";
+      _("signupbtn").disabled = true;
       s.innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
       var m = ajaxObj("POST", "signup.php");
       m.onreadystatechange = function() {
