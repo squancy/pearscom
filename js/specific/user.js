@@ -192,7 +192,7 @@ function saveArticle() {
   var cp = _("art_cat").value;
   line.elements.myTextArea.value = window.frames.richTextField.document.body.innerHTML;
   var username = line.elements.myTextArea.value;
-  if (username = encodeURIComponent(username), !email || !username || !name || !cp) {
+  if (!username || !email || !username || !name || !cp) {
     message.innerHTML = '<p class="error_red">Please fill in all fields!</p>';
     return false;
   } else {
@@ -217,7 +217,7 @@ function saveArticle() {
       }
     }
   }
-  xhr.send("title=" + email + "&area=" + encodeURIComponent(username) + "&tags=" + name +
+  xhr.send("title=" + email + "&area=" + username + "&tags=" + name +
     "&cat=" + cp + "&img1="+hasImageGen1+"&img2="+hasImageGen2+"&img3="+hasImageGen3+"&img4="+
     hasImageGen4+"&img5="+hasImageGen5);
 }
@@ -296,13 +296,13 @@ function showBiBg() {
   }
 }
 
-function articleGuide(canCreateDiscussions) {
+function articleGuide(image) {
   prepareDialog();
   _("dialogbox").innerHTML = `
     <p style="font-size: 18px; margin: 0px;">
       Simple guide how to write an article
     </p>
-    <img src="/images/' + canCreateDiscussions + '"><br />
+    <img src="/images/${image}"><br />
     <button id="vupload" style="position: absolute; right: 3px; bottom: 3px;"
       onclick="closeDialog()">Close</button>`;
 }

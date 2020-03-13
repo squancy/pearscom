@@ -7,16 +7,21 @@ $("#sort").click(function () {
 // Search btn clicked; perform article search 
 function getLAll() {
   var searchVal = _("fts").value;
-  if (searchVal == "") {
+  if (!searchVal) {
     return _("artSearchResults").style.display = "none";
   }
   var encVal = encodeURI(searchVal);
-  window.location = "/search_articles/" + encVal + "&inmy=yes";
+
+  if (isOwner == "Yes") {
+    window.location = "/search_articles/" + encVal + "&inmy=yes";
+  } else {
+    window.location = "/search_articles/" + encVal + "&user=" + uPHP;
+  }
 }
 
 // Search on keydown; fetch matching articles from server
 function getArt(e) {
-  if (e == "") {
+  if (!e) {
     return _("artSearchResults").style.display = "none";
   }
   _("artSearchResults").style.display = "block";

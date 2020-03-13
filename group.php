@@ -393,7 +393,7 @@
 
   $sql = "SELECT DISTINCT gr.* FROM gmembers AS gm LEFT JOIN groups AS gr ON
     gr.name = gm.gname WHERE gm.mname IN ('$allfmy') AND gm.mname != ? AND gr.creator != ?
-    AND gr.name NOT IN ('$myarr') ORDER BY RAND() LIMIT 30";
+    AND gr.name NOT IN ('$myarr') ORDER BY RAND() LIMIT 5";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("ss", $log_username, $log_username);
   $stmt->execute();
@@ -404,9 +404,9 @@
     }
     $stmt->close();
   }else{
-    $sql = "SELECT gr.* FROM groups AS gr LEFT JOIN gmembers AS gm ON gr.name = gm.gname
-      WHERE gm.mname != ? AND gr.creator != ? AND gr.name NOT IN ('$myarr') ORDER BY RAND()
-      LIMIT 30";
+    $sql = "SELECT DISTINCT gr.* FROM groups AS gr LEFT JOIN gmembers AS gm
+      ON gr.name = gm.gname WHERE gm.mname != ? AND gr.creator != ? AND gr.name NOT IN
+      ('$myarr') ORDER BY RAND() LIMIT 5";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $log_username, $log_username);
     $stmt->execute();
@@ -428,7 +428,7 @@
   // Get my groups
   $myallgroups = "";
   $sql = "SELECT DISTINCT gr.* FROM gmembers AS gm LEFT JOIN groups AS gr
-    ON gm.gname = gr.name WHERE gm.mname = ? AND gm.approved = ? ORDER BY RAND() LIMIT 30";
+    ON gm.gname = gr.name WHERE gm.mname = ? AND gm.approved = ? ORDER BY RAND() LIMIT 5";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("ss", $log_username, $one);
   $stmt->execute();
@@ -483,8 +483,8 @@
   <script type="text/javascript">
     const GNAME = '<?php echo $g ?>';
     const UNAME = '<?php echo $log_username; ?>';
-    let GRDES = '<?php echo $gr_des; ?>';
-    let GRDES_OLD = '<?php echo $gr_des_old; ?>';
+    let GRDES = `<?php echo $gr_des; ?>`;
+    let GRDES_OLD = `<?php echo $gr_des_old; ?>`;
 
     var hasImage = "";
     window.onbeforeunload = function() {

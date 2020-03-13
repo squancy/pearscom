@@ -25,7 +25,7 @@
   // Get paramaters in the URL and perform search
   if(isset($_GET['search'])){
     $u = mysqli_real_escape_string($conn, $_GET["search"]);  
-    if ($u == ""){
+    if (!$u){
       header('Location: index.php');
       exit();
     }
@@ -34,9 +34,11 @@
     // If user searches in their articles do not search by author
     $clause = "written_by LIKE ? OR title LIKE ? OR tags LIKE ? OR category LIKE ?";
     $inputText = "Search for articles by their author, title, category or tags";
-    if(isset($_GET["inmy"]) && $_GET["inmy"] == "yes"){
+    if($_GET["inmy"] == "yes" || $_GET['user'] != NULL){
       $clause = "(written_by = ?) AND (title LIKE ? OR tags LIKE ? OR category LIKE ?)";
-      $inputText = "Search in your articles by their title, category or tags";
+      if (!isset($_GET['user'])) {
+        $inputText = "Search in your articles by their title, category or tags";
+      }
     }
 
     // Handle pagination
@@ -46,11 +48,17 @@
     list($paginationCtrls, $limit) = pagination($conn, $sql_s, 'ssss', $url_n, $u_search,
       $u_search, $u_search, $u_search);
 
+    if (isset($_GET['user'])) {
+      $sqlUname = mysqli_real_escape_string($conn, $_GET['user']);
+    } else {
+      $sqlUname = $log_username;
+    }
+
     // Perform search query
     $sql = "SELECT * FROM articles WHERE $clause $limit";
     $stmt = $conn->prepare($sql);
-    if(isset($_GET["inmy"]) && $_GET["inmy"] == "yes"){
-      $stmt->bind_param("ssss", $log_username, $u_search, $u_search, $u_search);
+    if((isset($_GET["inmy"]) && $_GET["inmy"] == "yes") || isset($_GET['user'])){
+      $stmt->bind_param("ssss", $sqlUname, $u_search, $u_search, $u_search);
     }else{
       $stmt->bind_param("ssss", $u_search, $u_search, $u_search, $u_search);
     }
@@ -145,6 +153,7 @@
   </style>
   <script type="text/javascript">
     let inmy = "<?php echo $_GET["inmy"]; ?>";
+    let user = "<?php echo $_GET['user'] ?>";
   </script>
 </head>
 <body>
@@ -155,7 +164,7 @@
         <input id="searchArt" type="text" autocomplete="off"
           placeholder="<?php echo $inputText; ?>">
         <div id="artSearchBtn" onclick="getMyFLArr('searchArt',
-          '/search_articles/' + (encodeURI(_('searchArt').value)),
+          '/search_articles/' + (encodeURI(_('searchArt').value)) + '&user=' + user,
           '/search_articles/' + (encodeURI(_('searchArt').value)) + '&inmy=yes',
           inmy == 'yes')">
           <img src="/images/searchnav.png" width="17" height="17">

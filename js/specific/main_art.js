@@ -169,6 +169,7 @@ function editArt(){
       <select class="ssel sselArt" style="width: 85px; margin-top: 5px; margin-right: 5px;
         background-color: #fff;" onchange="execCmdWithArg('formatBlock', this.value)"
         class="font_all">
+        <option value="" selected="true" disabled="true">Heading</option>
         <option value="H1">H1</option>
         <option value="H2">H2</option>
         <option value="H3">H3</option>
@@ -195,6 +196,7 @@ function editArt(){
       <select onchange="execCmdWithArg('fontName', this.value)" class="ssel sselArt"
         style="width: 85px; margin-top: 5px; margin-right: 5px; background-color: #fff;"
         id="font_name">
+        <option value="" selected="true" disabled="true">Font style</option>
         <option value="Arial">Arial</option>
         <option value="Comic Sans MS">Comic Sans MS</option>
         <option value="Courier">Courier</option>
@@ -205,19 +207,6 @@ function editArt(){
         <option value="Courier New">Courier New</option>
       </select>
 
-      &nbsp;
-
-      <select class="ssel sselArt" style="width: 85px; margin-top: 5px; margin-right: 5px;
-        background-color: #fff;" onchange="execCmdWithArg('formatSize', this.value)"
-        class="font_all">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-      </select>
       <br>
       <span>
         Fore Color:
@@ -397,7 +386,7 @@ function saveEditArt(p, u){
   var texta = theForm.elements["myTextArea"].value;
   texta = encodeURIComponent(texta);
 
-  if(title == "" || theForm == ""){
+  if(!title || !theForm){
     status.innerHTML = '<p style="color: red;">Please fill in all fields!</p>';
   }
 

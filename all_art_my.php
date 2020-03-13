@@ -174,6 +174,12 @@
     }
   }
 
+  if ($isOwner == "Yes") {
+    $searchText = "my";
+  } else {
+    $searchText = $u."'s";
+  }
+
   // Get how many articles has the user written
   $sql = "SELECT COUNT(id) FROM articles WHERE written_by = ?";
   $stmt = $conn->prepare($sql);
@@ -249,7 +255,7 @@
         <div id="artSearchInput">
           <input id="fts" class="lsearch" type="text" autocomplete="off"
             onkeyup="getArt(this.value)"
-            placeholder="Search in your articles by their title, category or tags">
+            placeholder="Search in <?php echo $searchText; ?> articles by their title, category or tags">
             <div id="sButton" class="lsearchBtn" onclick="getLAll()">
               <img src="/images/searchnav.png" width="17" height="17">
             </div>
@@ -330,6 +336,7 @@
   <?php require_once 'template_pageBottom.php'; ?>
   <script type='text/javascript'>
     var uPHP = "<?php echo $u; ?>";
+    var isOwner = "<?php echo $isOwner; ?>";
   </script>
   <script src='/js/specific/all_art_my.js'></script>
   <script src='/js/specific/mode.js'></script>

@@ -40,7 +40,8 @@
     }
 
     public function updateArt($conn) {
-      $sql = "UPDATE articles SET content=?, title=? WHERE written_by=? AND post_time=? LIMIT 1";
+      $sql = "UPDATE articles SET content=?, title=? WHERE written_by=? AND post_time=?
+        LIMIT 1";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("ssss", $this->texta, $this->title, $this->u, $this->p);
       $stmt->execute();

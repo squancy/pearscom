@@ -63,9 +63,9 @@
     }
     $stmt->close();
   }else{
-    $sql = "SELECT gr.* FROM groups AS gr LEFT JOIN gmembers AS gm ON gr.name = gm.gname
-      WHERE gm.mname != ? AND gr.creator != ? AND gr.name NOT IN ('$myarr') ORDER BY RAND()
-      LIMIT 30";
+    $sql = "SELECT DISTINCT gr.* FROM groups AS gr LEFT JOIN gmembers AS gm
+      ON gr.name = gm.gname WHERE gm.mname != ? AND gr.creator != ? AND gr.name NOT IN
+      ('$myarr') ORDER BY RAND() LIMIT 30";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $log_username, $log_username);
     $stmt->execute();

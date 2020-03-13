@@ -12,9 +12,15 @@ function deleteStatus(id, status, serverSide = "/php_parsers/article_status_syst
     if (ajaxReturn(xhr)) {
       if (xhr.responseText == "delete_ok") {
         _(status).style.display = "none";
-        if (_("replytext_" + id) != null) {
-          _("replytext_" + id).style.display = "none";
-          _("replyBtn_" + id).style.display = "none";
+
+        // Get type
+        let firstIndex = status.indexOf('_');
+        let lastIndex = status.lastIndexOf('_');
+        let sType = status.slice(firstIndex + 1, lastIndex);
+        if (_("replytext_" + sType + "_" + id) != null) {
+          _("replytext_" + sType + "_" + id).style.display = "none";
+          _("replyBtn_" + sType + "_" + id).style.display = "none";
+          _("btns_SP_reply_" + sType + "_" + id).style.display = "none";
         }
       } else {
         genErrorDialog();

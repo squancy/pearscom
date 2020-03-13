@@ -35,7 +35,7 @@
 
     return '
       <a href="/group/'.$gnameori.'">
-        <div class="article_echo_2 artRelGen" style="height: auto; width: 100%;">
+        <div class="article_echo_2" style="height: auto; width: 100%;">
           <div data-src=\''.$logo.'\' style="background-repeat: no-repeat;
             background-position: center; background-size: cover; width: 80px; height: 80px;
             float: right; border-radius: 50%;" class="lazy-bg">

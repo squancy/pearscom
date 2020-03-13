@@ -1224,26 +1224,9 @@
                   <option value="Courier">Courier</option>
                   <option value="Georgia">Georgia</option>
                   <option value="Helvetica">Helvetica</option>
-                  <option value="Thaoma">Thaoma</option>
-                  <option value="Palatino Linotype">Palatino Linotype</option>
                   <option value="Arial Black">Arial Black</option>
-                  <option value="Lucida Sans Unicode">Lucida Sans Unicode</option>
-                  <option value="Trebuchet MS">Trebuchet MS</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Lucida Console">Lucida Console</option>
                   <option value="Times New Roman">Times New Roman</option>
-                </select>
-                <select class="ssel sselArt"
-                  style="width: 85px; margin-top: 5px; background-color: #fff;"
-                  onchange="execCmdWithArg('formatSize', this.value)" class="font_all">
-                  <option value="" selected="true" disabled="true">Font size</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
+                  <option value="Courier New">Courier New</option>
                 </select>
                 <span>
                   Fore Color:

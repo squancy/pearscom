@@ -131,7 +131,7 @@
     }
 
     public function errorCheck() {
-      if (!$name || !$group){
+      if (!$this->name || !$this->group){
         exit();
       }
     }

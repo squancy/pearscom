@@ -52,10 +52,13 @@
     $sql = "SELECT * FROM articles WHERE written_by IN ('$friendsGR') ORDER BY RAND() $limit";
 
     // Custom queries for each filter
-    if($otype == "afn"){
+    if($otype == "afn" || !$friendsGR){
       $sql = "SELECT a.*,u.* FROM users AS u LEFT JOIN articles AS a ON a.written_by =
         u.username WHERE a.written_by NOT IN ('$friendsGR') AND lat BETWEEN ? AND ? AND lon
         BETWEEN ? AND ? AND a.written_by != ? ORDER BY RAND() $limit";
+        if (!$friendsGR) {
+          $otype = "afn";
+        }
     }else if($otype == "afr"){
       $sql = "SELECT a.*,u.* FROM users AS u LEFT JOIN articles AS a ON a.written_by =
         u.username WHERE a.written_by NOT IN ('$friendsGR') AND lat NOT BETWEEN ? AND ? AND lon
@@ -63,7 +66,7 @@
     }
 
     $stmt = $conn->prepare($sql);
-    if($otype == "afn" || $otype == "afr"){
+    if($otype == "afn" || $otype == "afr" || !$friendsGR){
       $stmt->bind_param("sssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $log_username);
     }
 
@@ -148,6 +151,11 @@
   </div>
   <?php require_once 'template_pageBottom.php'; ?>
   <script type="text/javascript">
+    const RED_ONE = "<?php echo !$friendsGR; ?>";
+    var display = "aff";
+    if (RED_ONE) {
+      display = "afn";
+    }
     doDD("sort", "sortTypes");
 
     function successHandler(req) {
@@ -163,7 +171,7 @@
       addListener(box, box, 'userFlexArts', SERVER, successHandler);
     }
 
-    changeStyle("aff", BOXES);
+    changeStyle(display, BOXES);
   </script>
 </body>
 </html>

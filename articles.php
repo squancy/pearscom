@@ -191,12 +191,14 @@
     If related articles are still none suggest articles created at the same time or
     titled the same
   */
-
-  if($related == ""){
-    $sql = "SELECT * FROM articles WHERE written_by != ? AND category = ? OR post_time = ?
-      OR title = ? LIMIT 3";
+  
+  $catLike = "%$cat%";
+  $titleLike = "%$title%";
+  if(!$related){
+    $sql = "SELECT * FROM articles WHERE written_by != ? AND (category LIKE ? OR title LIKE ?)
+      LIMIT 3";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssss", $log_username, $cat, $post_time, $title);
+    $stmt->bind_param("sss", $log_username, $catLike, $titleLike);
     $stmt->execute();
     $result = $stmt->get_result();
     while($row = $result->fetch_assoc()){
@@ -206,8 +208,9 @@
   }
 
   $isrel = false;
+
   // If related articles is still none display not found msg
-  if($related == ""){
+  if(!$related){
     $related = '
       <p style="font-size: 14px; color: #999;" class="txtc">
         We could not list any related article for you

@@ -94,7 +94,6 @@ function postToStatus(cond, thencommands, pollProfileId, userId, isGr = false,
               ${line}
             </div>
           </div>
-          <br />
           ${newHTML}
         `;
 
