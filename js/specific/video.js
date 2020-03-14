@@ -282,29 +282,42 @@ function changeSpeed(speed){
 }
 
 // Implement the same functionality with key bindings
-if(vcheck != true){
+function isInView() {
+  var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset :
+  (document.documentElement || document.body.parentNode || document.body).scrollTop;
+  var vidHeight = video.offsetHeight;
+  return vidHeight > scrollTop;
+}
+
+if(!vcheck){
   video.addEventListener("click", togglePP);
   window.addEventListener("keydown", function arrForward(e){
+    if (!isInView()) return false;
     if(e.keyCode == 39) video.currentTime += 5;
     else if(e.keyCode == 37) video.currentTime -= 5;
   });
 
   window.addEventListener("keydown", function keyboardSpeed(e){
+    if (!isInView()) return false;
     if(e.keyCode == 79) speedToggle();
   });
 
   window.addEventListener("keydown", function keyboardFullS(e){
+    if (!isInView()) return false;
     if(e.keyCode == 70) handleFullscreen();
   });
 
   window.addEventListener("keydown", function keyboardMute(e){
+    if (!isInView()) return false;
     if(e.keyCode == 77) muteUnmute();
   });
 
   window.addEventListener("keydown", function keyPlayPause(e){
+    if (!isInView()) return false;
     if(e.keyCode == 80) togglePP();
     if(video.paused) controls.style.opacity = 1;
   });
+
   _("optionsGears").addEventListener("click", function wrapper(){
     speedToggle(false);
   });

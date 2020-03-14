@@ -56,9 +56,10 @@
     // Insert notifications to all friends of the post author
     $sendPost = new SendToFols($conn, $log_username, $log_username);
 
+    $vii = base64url_encode($vi, $hshkey);
     $app = "Video Status Post <img src='/images/post.png' class='notfimg'>";
     $note = $log_username.' posted below a video: <br />
-      <a href="/video_zoom/'.$vi.'/#status_'.$statPost->id.'">Check it now</a>';
+      <a href="/video_zoom/'.$vii.'/#status_'.$statPost->id.'">Check it now</a>';
 
     $sendPost->sendNotif($log_username, $app, $note, $conn);
 
@@ -99,6 +100,7 @@
     // Insert notifications to all friends of the post author
     $sendReply = new SendToFols($conn, $log_username, $log_username);
 
+    $vii = base64url_encode($vi, $hshkey);
     $app = "Video Status Reply <img src='/images/reply.png' class='notfimg'>";
     $note = $log_username.' commented below a video: <br />
       <a href="/video_zoom/'.$vi.'/#reply_'.$replyPost->id.'">Check it now</a>';

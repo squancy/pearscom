@@ -87,7 +87,7 @@
     // Send a notif about art edit
     $app = "Edited Article";
     $note = $log_username.' edited his/her article: <br />
-      <a href="/articles/'.$p.'/'.$log_username.'">Check it now</a>';
+      <a href="/articles/'.$updateArt->p.'/'.$log_username.'">Check it now</a>';
 
     $sendNotif = new SendToFols($conn, $log_username, $log_username);
     $sendNotif->sendNotif($log_username, $app, $note, $conn);

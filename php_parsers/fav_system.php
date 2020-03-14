@@ -65,7 +65,7 @@
 
         $app = "Favourite Article <img src='/images/lace.png' class='notfimg'>";
         $note = $log_username.' added an article as a favourite: <br />
-          <a href="/articles/'.$ptime.'/'.$u.'">Check it now</a>';
+          <a href="/articles/'.$folObj->p.'/'.$folObj->u.'">Check it now</a>';
 
         $sendNotif->sendNotif($log_username, $app, $note, $conn);
 

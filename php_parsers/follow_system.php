@@ -51,8 +51,8 @@
         $sendNotif = new SendToFols($conn, $log_username, $log_username);
 
         $app = "New follower <img src='/images/nfol.png' class='notfimg'>";
-        $note = $log_username.' started to follow '.$user.': <br />
-          <a href="/user/'.$user.'/">Check it now</a>';
+        $note = $log_username.' started to follow '.$folObj->user.': <br />
+          <a href="/user/'.$folObj->user.'/">Check it now</a>';
 
         $sendNotif->sendNotif($log_username, $app, $note, $conn);
 

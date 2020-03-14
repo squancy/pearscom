@@ -32,11 +32,8 @@
     
     public function setData($log_username) {
       $this->data = '
-        <span style="color: red">
-          '.$log_username.' wished a happy birthday to you and wrote this message:
-          <img src="/images/bdcake.png" width="14" height="14" style="margin-bottom: -2px;">
-        </span>
-        <br>'.$this->data;
+        <span style="color: red">'.$log_username.' wished a happy birthday to you and wrote this message:<img src="/images/bdcake.png" width="14" height="14" style="margin-bottom: -2px;"></span>
+        '.$this->data;
     }
 
     private function updateDb($conn) {
@@ -60,7 +57,7 @@
   }
 
   function shareArt($row) {
-    global $hshkey, $wbauth;
+    global $hshkey, $wb_auth;
     $written_by = $row["written_by"];
     $wb_original = $written_by;
     $title = $row["title"];
