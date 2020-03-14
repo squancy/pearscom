@@ -181,11 +181,8 @@ window.addEventListener('beforeinstallprompt', function(e){
       if(_('pearHolder') != null) _('pearHolder').style.marginTop = '100px';
       if(_('startContent') != null) _('startContent').style.marginTop = '120px';
       if(_('changingWords') != null) _('changingWords').style.height = 'calc(50% - 20px)';
-    }else if(window.location.pathname == '/login' || window.location.pathname == '/signup'
-      || window.location.pathname == '/forgot_password'){
-      _('pageMiddle_2').style.marginTop = '120px';
     }else{
-      _('pageMiddle_2').style.marginTop = '100px';
+      _('pageMiddle_2').style.marginTop = '120px';
     }
   }
 });
