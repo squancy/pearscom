@@ -206,7 +206,7 @@
               onblur="checkField('grname', 'gnamecheck', 'gnamestatus')">
             <span class="signupStats" id="gnamestatus" style="right: 10px;"></span>
 
-            <select id="gcat" onblur="checkField('gcat', 'catcheck', 'catstatus')"
+            <select id="gcat" onblur="checkField('gcat', 'catcheck', 'status')"
               style="width: calc(50% - 3px);">
                 <option value="" disabled="true" selected="true">Choose category</option>
                 <option value="1">Animals</option>
@@ -220,7 +220,7 @@
             </select>
             <span class="signupStats" id="catstatus" style="right: 10px;"></span>
 
-            <select id="invite" onblur="checkField('invite', 'typecheck', 'typestatus')"
+            <select id="invite" onblur="checkField('invite', 'typecheck', 'status')"
               style="width: calc(50% - 3px);">
                 <option value="" disabled="true", selected="true">Choose type</option>
                 <option value="0">Private group</option>

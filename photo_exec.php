@@ -12,14 +12,13 @@
     // Escape vars
     $a = mysqli_real_escape_string($conn, $_POST["a"]);
     $u = mysqli_real_escape_string($conn, $_POST["u"]);
-    if ($a == "" || $u == ""){
-      echo $output;
+    if (!$a || !$u){
       exit();
     }
 
     // Perform search
     $a_search = "$a%";
-    $sql = "SELECT * FROM photos WHERE user = ? AND gallery LIKE ? OR description LIKE ?
+    $sql = "SELECT * FROM photos WHERE user = ? AND (gallery LIKE ? OR description LIKE ?)
       LIMIT 15";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sss", $u, $a_search, $a_search);

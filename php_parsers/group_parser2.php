@@ -92,8 +92,8 @@
       }
     }
 
-    public function checkType() {
-      if(!$this->p1){
+    public function checkType($isCool = true) {
+      if($this->p1 !== "0" && $this->p1 !== "1"){
         echo errMsg('Please choose a type', $isCool);
         exit();
       }else if($this->p1 < 0 || $this->p1 > 1){
@@ -448,7 +448,7 @@
 
   // Approve member
   if(isset($_POST["action"]) && $_POST['action'] == "approve_member"){
-    $appMem = new ManageMember($_POST['g'], $_POST['u']);
+    $appMem = new ManageMember($conn, $_POST['g'], $_POST['u']);
 
     // Check for errors
     $appMem->errorCheck();
@@ -467,7 +467,7 @@
 
   // Decline member
   if(isset($_POST["action"]) && $_POST['action'] == "decline_member"){
-    $decMem = new ManageMember($_POST['g'], $_POST['u']);
+    $decMem = new ManageMember($conn, $_POST['g'], $_POST['u']);
 
     // Check for errors
     $decMem->errorCheck();
@@ -518,7 +518,7 @@
     $addAdmin->emptyCheck();
   
     // Make sure already member
-    alreadyMember($conn, $addAdmin->g, $addAdmin->u);
+    alreadyMember($conn, $addAdmin->gS, $addAdmin->uS);
   
     // Check if user is not already an admin
     $addAdmin->alreadyAdmin($conn);
@@ -610,7 +610,7 @@
     // Move the image(s) to the permanent folder
     if($replyGr->image != "na"){
       $valImg = new InImage();
-      $valImg->doInsert($grPost->image);
+      $valImg->doInsert($replyGr->image);
     }
 
     // Make sure account name exists (the profile being posted on)
@@ -656,7 +656,7 @@
 
       // Del post
       $sql = "DELETE FROM grouppost WHERE pid=?";
-      $delStat->delComment($conn, $sql, 'i', $statusid);
+      $delStat->delComment($conn, $sql, 'i', $delStat->statusid);
 
       mysqli_close($conn);
       echo "delete_ok";

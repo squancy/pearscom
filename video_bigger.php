@@ -132,7 +132,7 @@
       $poster = thumbnailImg($u, $poster);
 
       if($description == ""){
-        $description = "Untitled";
+        $description = "No description given";
       }
 
       if($video_name == ""){

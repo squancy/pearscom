@@ -55,7 +55,7 @@
 
   // Check for new private messages
   $pm_n = '';
-  if($user_ok == true){
+  if($user_ok){
     $sql = "SELECT id FROM pm WHERE (receiver=? AND parent=? AND rdelete=? AND rread=?)
             OR (sender=? AND sdelete=? AND parent=? AND hasreplies=? AND sread=?)";
     $stmt = $conn->prepare($sql);

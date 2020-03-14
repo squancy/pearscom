@@ -177,11 +177,10 @@
     $replyPM->insertToDb($conn);
    
     // Update db + notif
+    $sql = "UPDATE pm SET hasreplies=?, rread=?, sread=? WHERE id=? LIMIT 1";
     if ($log_username != $replyPM->osender){
-      $sql = "UPDATE pm SET hasreplies=?, rread=?, sread=? WHERE id=? LIMIT 1";
       $replyPM->updateDb($conn, $sql);
     } else {
-      $sql = "UPDATE pm SET hasreplies=?, rread=?, sread=? WHERE id=? LIMIT 1";
       $replyPM->updateDb($conn, $sql, false);
     }
 

@@ -63,6 +63,7 @@ function approveMember(pollProfileId, userId) {
           <br />
           <button id="vupload" style="position: absolute; right: 3px; bottom: 3px;"
             onclick="closeDialog()">Close</button>`;
+        _('member_' + pollProfileId).style.display = "none";
       } else {
         genErrorDialog();
       }
@@ -91,6 +92,7 @@ function declineMember(pollProfileId, userId) {
         `;
       }
     }else{
+      _('member_' + pollProfileId).style.display = "none";
       genErrorDialog();
     }
   }

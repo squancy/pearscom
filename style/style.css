@@ -30,6 +30,10 @@ form>.vInfo {
   align-items: center;
 }
 
+div#statusui img, .status_boxes img, .reply_boxes img {
+  max-height: 400px;
+}
+
 .banner video {
   position: absolute;
   top: 0;
@@ -961,7 +965,7 @@ div#profile_pic_box>form {
   position: absolute;
   z-index: 3000;
   padding: 10px;
-  opacity: .8;
+  opacity: .9;
   background: #f2f2f2;
   width: 180px;
   height: 180px;
@@ -1475,6 +1479,7 @@ div#profile_pic_box:hover #ca {
   max-width: 100%;
   border-radius: 20px;
   margin-top: 20px
+  max-height: 400px;
 }
 
 .groupspeech>div {
@@ -1600,6 +1605,7 @@ div.status_boxes>div>b {
 .sdata>img {
   max-width: 100%;
   background-size: cover;
+  max-height: 400px;
   height: auto
 }
 
@@ -4026,9 +4032,12 @@ textarea.newpost:focus {
 }
 
 #show_in_div {
-  max-width: 222px;
   word-wrap: break-word;
-  font-size: 14px!important
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 80px);
+  white-space: nowrap;
 }
 
 .show_pic_div {
@@ -4972,7 +4981,7 @@ a:hover {
 }
 
 body #userFlexArts.mainPhotRel>a>div {
-  height: 180px
+  height: 200px;
 }
 
 .artRelGen {
@@ -5380,10 +5389,6 @@ table {
   float: right;
   margin-top: 60px;
   margin-right: -35px
-}
-
-.rdate {
-  font-size: 13px
 }
 
 .art_font,

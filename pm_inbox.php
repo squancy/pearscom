@@ -33,7 +33,7 @@
   if(isset($_GET["otype"])){
     $otype = mysqli_real_escape_string($conn, $_GET["otype"]);
   }else{
-    $otype = "nto";
+    $otype = "sort_0";
   }
 
   // Select the member from the users table
@@ -96,35 +96,31 @@
         $time = strftime("%R, %b %d, %Y", strtotime($time_));
         $subject_new = $subject;
 
-        $subject = wrapText($subject, 22);
         $message_old = sanitizeData($row["message"]);
 
         // Wrap pm text if longer than 1,000 chars
         list($message, $message_old) = seeHideWrap($message, $message_old, $pmid, false,
           false);
         $message = sanitizeData($message);
+
+        if ($sender == $log_username) {
+          $toMsg = $receiver;
+        } else {
+          $toMsg = $sender;
+        }
         
         // Get user avatar
-        $pcurlk = getUserAvatar($conn, $sender);
+        $pcurlk = getUserAvatar($conn, $toMsg);
         
         $style = $stylef = 'background-repeat: no-repeat; background-position: center;
           background-size: cover; width: 50px; height: 50px; border-radius: 50%;';
         $stylef .= 'float: left;';
         
-        $sourceURL = "";
-        $sourceURLFrom = "";
-
-        if($otype == 'nto'){
-          $sourceURL = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$style."'";
-          $sourceURLFrom = "data-src=\"" . $pcurlk . "\" class='lazy-bg'
-            style='".$stylef."'";
-        }else{
-          $sourceURL = "style='background-image: url(\"$pcurlk\"); ".$style."'";
-          $sourceURLFrom = "style='background-image: url(\"$pcurlk\"); ".$stylek."'";
-        }
+        $sourceURL = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$style."'";
+        $sourceURLFrom = "data-src=\"" . $pcurlk . "\" class='lazy-bg' style='".$stylef."'";
         
-        $senderpic = "<a href='/user/".$sender."/'><div ".$sourceURL."></div></a>";
-        $senderpic_from = "<a href='/user/".$sender."'><div ".$sourceURLFrom."></div>
+        $senderpic = "<a href='/user/".$toMsg."/'><div ".$sourceURL."></div></a>";
+        $senderpic_from = "<a href='/user/".$toMsg."'><div ".$sourceURLFrom."></div>
           </a>";
 
         $pmids = strval($pmid);
@@ -226,7 +222,7 @@
               border-radius: 50%;';
             
             $sourceURL_r = "";
-            if($otype == 'nto'){
+            if($otype == 'sort_0'){
               $sourceURL_r = "data-src=\"" . $pcurlkk . "\" class='lazy-bg'
                 style='".$style_r."'";
             }else{
@@ -417,6 +413,7 @@
 
     function successHandler(req) {
       _("holdit").innerHTML = req.responseText;
+      startLazy(true);
     }
 
     const BOXES = [];

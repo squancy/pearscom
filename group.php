@@ -64,7 +64,7 @@
     $creator = $row["creator"];
     $gr_des = $row["des"];
     $gr_des_old = $row["des"];
-    $gr_des_old = str_replace( '\n', '<br />', $gr_des_old ); 
+    $gr_des_old = str_replace(["\r\n", "\r", "\n"], "<br/>", $gr_des_old);
 
     // Wrap description if too long
     if(strlen($gr_des) > 250){
@@ -81,7 +81,7 @@
       $gr_des_old = "";
     }
 
-    $gr_des = str_replace('\n', '<br />', $gr_des); 
+    $gr_des = str_replace(["\r\n", "\r", "\n"], "<br/>", $gr_des);
     if (!$gr_des) {
       $gr_des = 'not yet given';
     }
@@ -302,7 +302,7 @@
       $country = wrapText($country, 20);
 
       $addMembers .= '
-        <div class="wfaHolder">
+        <div class="wfaHolder" id="member_'.$curuser.'">
           <a href="/user/'.$curuser.'/">'.$avatar.'</a>
           <div id="btn_align">
             <button id="appbtn" class="main_btn_fill fixRed"
@@ -484,7 +484,13 @@
     const GNAME = '<?php echo $g ?>';
     const UNAME = '<?php echo $log_username; ?>';
     let GRDES = `<?php echo $gr_des; ?>`;
+    GRDES = GRDES.replace('<br/>', '\n');
     let GRDES_OLD = `<?php echo $gr_des_old; ?>`;
+    GRDES_OLD = GRDES_OLD.replace('<br/>', '\n');
+    if (GRDES == "not yet given") {
+      GRDES = "";
+      GRDES_OLD = "";
+    }
 
     var hasImage = "";
     window.onbeforeunload = function() {

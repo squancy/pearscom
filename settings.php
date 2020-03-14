@@ -927,7 +927,7 @@
         <div class="settingsall styleform" style="margin-top: 10px;">
           <input type="password" name="unpass" id="unpass"
             onblur="clientFbOne('un_status','unpass','cpasscheck')" maxlength="255"
-            placeholder="Current password">
+            placeholder="Current password" autocomplete="off">
           <span class="signupStats" style="right: 10px; margin-top: -26px;" id="un_status">
           </span>
 

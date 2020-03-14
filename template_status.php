@@ -117,4 +117,4 @@
 <div id="statusarea">
   <?php echo $statuslist; ?>
 </div>
-<div id="pagination_controls"><?php echo $paginationCtrls; ?></div>
+<div id="pagination_controls" style="margin: 30px;"><?php echo $paginationCtrls; ?></div>

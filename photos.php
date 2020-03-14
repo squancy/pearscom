@@ -102,7 +102,7 @@
   $stmt->close();
 
   // Count how many comments
-  $all_count = countComments($conn, 'photos_status', 'account_name');
+  $all_count = countComments($conn, 'photos_status', 'account_name', "s", $u);
 
   $out_likes = cntLikesNew($conn, $u, 'photo_stat_likes', 'username');
 
@@ -125,7 +125,7 @@
 
   // If there are no friends suggest photos randomly
   $nof = false;
-  if($allfmy == ""){
+  if(!$allfmy){
     $nof = true;
     $sql = "SELECT * FROM photos WHERE user != ? ORDER BY RAND() LIMIT 30";
     $stmt = $conn->prepare($sql);
@@ -244,6 +244,12 @@
       </p>
     ";
     $isP = false;
+  }
+
+  if (!$gallery_list) {
+    $gallery_list = '
+      <p style="text-align: center; color: #999;">You have not uploaded any photos yet</p>
+    ';
   }
 ?>
 <!DOCTYPE html>
@@ -401,9 +407,11 @@
 
     <div class="flexibleSol mainPhotRel" id="userFlexArts"><?php echo $gallery_list; ?></div>
     <div class="clear"></div>
-    <div id="paginationCtrls" style="text-align: center; margin: 30px;">
-      <?php echo $paginationCtrls; ?>
-    </div>
+    <?php if ($countMine > 0) { ?>
+      <div id="paginationCtrls" style="text-align: center; margin: 30px;">
+        <?php echo $paginationCtrls; ?>
+      </div>
+    <?php } ?>
     <hr class="dim">
 
     <div id="data_holder">
@@ -415,15 +423,6 @@
     <div class="flexibleSol mainPhotRel" id="userFlexArts">
       <?php echo $related_p; ?>
     </div>
-    <div class="clear"></div>
-    <?php if($count_all == 0 && $isOwner == "Yes"){ ?>
-      <i style="font-size: 14px;">You have not uploaded any videos yet ...</i>
-    <?php }else if($count_all == 0 && $isOwner == "No"){ ?>
-      <i style="font-size: 14px;">
-        Unfortunately, <?php echo $u; ?> has not uploaded any videos yet ...
-      </i>
-    <?php } ?>
-                
     <div class="clear"></div>
     
     <?php echo $belong; ?>

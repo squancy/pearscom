@@ -97,7 +97,6 @@ function postPmMsg(holder, uname, texta, sender, pmid) {
     hasImage = "na";
   }
 
-  _("pmsendBtn").disabled = true;
   var request = ajaxObj("POST", "/php_parsers/ph_system.php");
   request.onreadystatechange = function() {
     if (ajaxReturn(request)) {
@@ -111,7 +110,6 @@ function postPmMsg(holder, uname, texta, sender, pmid) {
           <span id="sdb_${pmid}"></span><br/>
           ${flag}
           </div></div>`;
-        _("pmsendBtn").disabled = false;
         /*
           <button class="delete_s" onclick="deleteMessage(\'' + pmid + "','" + sender + "','"
           + uname + '\')" title="Delete Status And Its Replies">X</button>

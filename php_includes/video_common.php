@@ -22,13 +22,13 @@
     if ($isFromSQL) {
       $id_o = $row["video"];
       $id_hsh = base64url_encode($id_o, $hshkey);
-      $vdate_ = $row["video_upload"];
 
-      $sql = "SELECT video_poster, user, dur, video_name FROM videos WHERE id=? LIMIT 1";
+      $sql = "SELECT video_poster, user, dur, video_name, video_upload FROM videos WHERE id=?
+        LIMIT 1";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("s", $id_o);
       $stmt->execute();
-      $stmt->bind_result($vidp, $vidu, $dur, $vidn);
+      $stmt->bind_result($vidp, $vidu, $dur, $vidn, $vdate_);
       $stmt->fetch();
       $stmt->close();
     } else {

@@ -157,10 +157,10 @@
     return [$lat, $lon];
   }
 
-  function countComments($conn, $db, $param) {
+  function countComments($conn, $db, $param, $param1, ...$values) {
     $sql = "SELECT COUNT(id) FROM ".$db." WHERE ".$param." = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $p);
+    $stmt->bind_param($param1, ...$values);
     $stmt->execute();
     $stmt->bind_result($all_count);
     $stmt->fetch();

@@ -210,7 +210,8 @@
   }
 
   if (isset($_POST['action']) && isset($_POST['reqid']) && isset($_POST['user1'])){
-    $fReq = new FriendReq($conn, $_POST['reqid'], $_POST['user']);
+    $friendObj = new FriendHandle($conn, $_POST['user1']);
+    $fReq = new FriendReq($conn, $_POST['reqid'], $_POST['user1']);
 
     // Make sure the user exists in the database
     userExists($conn, $fReq->user);

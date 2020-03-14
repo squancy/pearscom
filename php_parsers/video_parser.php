@@ -114,6 +114,7 @@
   }
 
   // Video delete
+  // TODO: delete file from server as well!!!
   if(isset($_POST["id"]) && $_POST["id"] && $_POST["type"] == "delete"){
     $delVid = new DeleteVid($_POST['id'], $hshkey);
 

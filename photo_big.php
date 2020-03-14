@@ -71,7 +71,9 @@
       <div class='flexibleSol' id='photSamegp'>
   ";
 
-  $sql = "SELECT * FROM photos WHERE gallery = ? AND user = ? AND filename != ?
+  $defArray = array();
+
+  $sql = "SELECT DISTINCT * FROM photos WHERE gallery = ? AND user = ? AND filename != ?
     ORDER BY RAND() LIMIT $imit";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("sss", $galgal, $u, $p);
@@ -80,6 +82,7 @@
   if($result->num_rows > 0){
     while($row = $result->fetch_assoc()){
       $samegp .= genPhotoBox($row);      
+      array_push($defArray, $row["user"]);
       $o++;
       $hasSugg = true;
     }
@@ -88,9 +91,13 @@
 
   // If the num of suggested photos is less than limit suggest more
   if($o < $imit){
+    $diff = array_diff($pcallf, $defArray);
+    $diff = implode("','", $diff);
     $lmit = $imit - $o;
-    $sql = "SELECT * FROM photos WHERE user IN('$pcallf') AND filename != ? ORDER BY RAND()
-      LIMIT $lmitS";
+    $fArray = array();
+
+    $sql = "SELECT DISTINCT * FROM photos WHERE user IN('$diff') AND filename != ?
+      ORDER BY RAND() LIMIT $lmitS";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $p);
     $stmt->execute();
@@ -98,6 +105,7 @@
     if($result->num_rows > 0){
       while($row = $result->fetch_assoc()){
         $samegp .= genPhotoBox($row);
+        array_push($fArray, $row["user"]);
         $hasSugg = true;
         $o++;
       }
@@ -106,6 +114,7 @@
 
   // If we can still suggest more photos list images from users nearby
   if($o < $imit){
+    $fVals = implode("','", $fVals);
     // First get user's lat and lon coords
     list($mylat, $mylon) = getLatLon($conn, $u);
 
@@ -117,9 +126,9 @@
     $lon_p2 = $mylon+0.2;
     $lmit = 9 - $o;
 
-    $sql = "SELECT u.*, p.* FROM photos AS p LEFT JOIN users AS u ON u.username = p.user
+    $sql = "SELECT DISTINCT u.*, p.* FROM photos AS p LEFT JOIN users AS u ON u.username = p.user
       WHERE p.user NOT IN ('$all_friends') AND u.lat BETWEEN ? AND ? AND u.lon BETWEEN ?
-      AND ? AND p.user != ? $lmitS";
+      AND ? AND p.user != ? AND p.user NOT IN ('$fVals') $lmitS";
     $stmt->bind_param("sssss", $lat_m2, $lat_p2, $lon_m2, $lon_p2, $log_username);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -250,7 +259,7 @@
   $isOwner = isOwner($u, $log_username, $user_ok);
 
   // Count how many comments there are
-  $all_count = countComments($conn, 'photos_status', 'photo');
+  $all_count = countComments($conn, 'photos_status', 'photo', "s", $u);
 
   // Get related photos
   $related_p = "";
@@ -310,11 +319,10 @@
   }
 
   $temp = false;
-  if($minep == ""){
+  if(!$minep){
     $minep = '
-      <p style="font-size: 14px; color: #999; text-align: center;">
-        Unfortunately, you have no other listable photos uploaded. Come back later and upload
-        new photos to your gallery.
+      <p style="color: #999; text-align: center;">
+        No photos found from your gallery
       </p>
     ';
     $temp = true;
