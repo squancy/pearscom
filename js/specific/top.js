@@ -59,13 +59,19 @@ function getNames(e) {
 
 // TODO: deobfuscate the following code
 var mobilecheck = mobilecheck();
+
+// Check if PWA or web
+const isInStandaloneMode = () =>
+  (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone)
+  || document.referrer.includes('android-app://');
+
 var now = new Date,
     hrs = now.getHours(),
     loguname = TOP_UNAME;
 if (loguname != '') {
-    ("https://www.pearscom.com/#" && "https://www.pearscom.com/"
-      && "https://www.pearscom.com/index.php") != (window.location.href ||
-      document.URL) && (window.addEventListener("mouseup", function (e) {
+    ("https://www.pearscom.com/#" && "https://www.pearscom.com/") != (window.location.href ||
+      document.URL) && !isInStandaloneMode() &&
+      (window.addEventListener("mouseup", function (e) {
         
     }), 0 == mobilecheck && window.addEventListener("mouseup", function (e) {
         var t = _("cp"),
