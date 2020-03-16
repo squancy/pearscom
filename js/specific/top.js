@@ -63,7 +63,8 @@ var now = new Date,
     hrs = now.getHours(),
     loguname = TOP_UNAME;
 if (loguname != '') {
-    ("https://www.pearscom.com/#" && "https://www.pearscom.com/") != (window.location.href ||
+    ("https://www.pearscom.com/#" && "https://www.pearscom.com/"
+      && "https://www.pearscom.com/index.php") != (window.location.href ||
       document.URL) && (window.addEventListener("mouseup", function (e) {
         
     }), 0 == mobilecheck && window.addEventListener("mouseup", function (e) {
