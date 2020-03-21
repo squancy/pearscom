@@ -25,7 +25,12 @@ function uploadVideo() {
     var request = new XMLHttpRequest;
 
     // Register upload handlers
-    request.upload.addEventListener("progress", progressHandler, false);
+
+    /*
+      TODO: progressHandler is not fired for some unknown reasons; fix it
+      request.upload.addEventListener("progress", progressHandler, false);
+    */
+
     request.addEventListener("load", completeHandler, false);
     request.addEventListener("error", errorHandler, false);
     request.addEventListener("abort", abortHandler, false);
@@ -85,7 +90,11 @@ function uploadVideo() {
     });
   }
   player.src = URL.createObjectURL(blob);
-  _("pbc").style.display = "block";
+  _('rolling').innerHTML = `
+    <img src="/images/rolling.gif" width="30" height="30"
+      style="display: block; margin: 0 auto;">
+  `;
+  // _("pbc").style.display = "block";
 }
 
 // Update progress bar during upload

@@ -84,9 +84,12 @@ function uploadPhoto() {
     return false;
   }
 
-  // i.innerHTML = '<img src="/images/rolling.gif" width="30" height="30">';
+  i.innerHTML = `
+    <img src="/images/rolling.gif" width="30" height="30"
+      style="display: block; margin: 0 auto;">
+  `;
   n.style.display = 'none';
-  _('pbc').style.display = 'block';
+  // _('pbc').style.display = 'block';
 
   // Create a new form data and append photo, gallery and description to it
   var a = new FormData();
@@ -96,7 +99,12 @@ function uploadPhoto() {
   
   // Handle progress bar
   var p = new XMLHttpRequest();
-  p.upload.addEventListener('progress', progressHandler, false);
+
+  /*
+    TODO: progressHandler is not called for some unknown reasons; solve bug
+    p.upload.addEventListener('progress', progressHandler, false);
+  */
+
   p.addEventListener('load', completeHandler, false);
   p.addEventListener('error', errorHandler, false);
   p.addEventListener('abort', abortHandler, false);

@@ -33,15 +33,16 @@
     public function checkErrors() {
       if ($this->width < 10 || $this->height < 10) {
         header("location: ../image_size_error");
+        echo 'Image dimension error';
         exit();  
-      } else if($this->fileSize > 3145728) {
-        header("location: ../image_bigger_error");
+      } else if($this->fileSize > 5242880) {
+        echo 'Image size error';
         exit();  
       } else if (!preg_match("/\.(gif|jpg|png|jfif|jpeg)$/i", $this->fileName)) {
-        header("location: ../image_type_error");
+        echo 'Image extension error';
         exit();
       } else if ($this->fileErrorMsg) {
-        header("location: ../file_upload_error");
+        echo 'An error occurred';
         exit();
       }
     }
