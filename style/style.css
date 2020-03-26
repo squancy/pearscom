@@ -6473,8 +6473,8 @@ input::-moz-focus-inner {
     font-size: 28px
   }
   #pageBottom>a {
-    margin-right: 5px;
-    line-height: 25px
+    margin-right: 10px;
+    line-height: 30px
   }
   #changingWords {
     width: 100%;
