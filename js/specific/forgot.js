@@ -16,12 +16,12 @@ function forgotpass() {
           _("forgotpassbtn").style.display = "block";
           if (response == "success") {
             _("loginform").innerHTML = `
-              <p style='font-size: 14px; color: #129c12;'>
-                Step 2. Check your email inbox in a few minutes
+              <p class="gothamNormal align" style="color: red;"">
+                Check your email inbox in a few minutes
               </p>
-              <p style='font-size: 14px;'>
+              <p class="align">
                 You can close this window or tab if you like, every detail will be readable
-                in the email ...
+                in the email.
               </p>
             `;
           } else if (response == "no_exists") {

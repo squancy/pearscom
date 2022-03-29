@@ -281,58 +281,44 @@
   <script type="text/javascript">
   </script>
 </head>
-<body style="background-color: #fafafa;">
+<body>
   <?php require_once 'template_pageTop.php'; ?>
-  <div id="pageMiddle_2" style="background: transparent;">
-    <form name="signupform" id="loginform" class="mwAlign" onsubmit="return false;">
-      <p style="font-size: 28px; text-align: left;">Sign up</p>
-      <input id="username" type="text" onblur="clientFbOne('unamestatus',
-        'username', 'usernamecheck', 'signup.php')" maxlength="100"
-        placeholder="Username or real name">
-      <span class="signupStats" id="unamestatus"></span>
-      <input id="email" type="text" onblur="clientFbOne('emailstatus', 'email', 'emailcheck'
-        , 'signup.php')"
-        placeholder="Email">
-      <span class="signupStats" id="emailstatus"></span>
-      <input id="pass1" type="password" onblur="clientFbOne('passwordstatus', 'pass1',
-        'passwordcheck', 'signup.php')" autocomplete="true"
-        placeholder="Password">
-      <span class="signupStats" id="passwordstatus"></span>
-      <input id="pass2" type="password" onblur="checkFbTwo('pass2', 'pass1', 'confrimstatus',
-        'confrimcheck', 'password_original', 'signup.php')" autocomplete="true"
-        placeholder="Confirm password">
-      <span class="signupStats" id="confrimstatus"></span>
-      <select id="gender" onblur="clientFbOne('genderstatus', 'gender', 'gendercheck'
-        , 'signup.php')">
+  <div id="pageMiddle_2">
+    <p style="margin-top: 75px;" class="align gotham font30" id="sutxt">Sign Up</p>
+    <form name="signupform" id="loginform" class="align formContainer" onsubmit="return false;">
+      <input id="username" type="text"  maxlength="100"
+        placeholder="Username or real name" class="formField">
+      <input id="email" type="text" placeholder="Email" class="formField">
+      <input id="pass1" type="password" autocomplete="true"
+        placeholder="Password" class="formField">
+      <input id="pass2" type="password" autocomplete="true"
+        placeholder="Confirm password" class="formField">
+      <select id="gender" class="specSelect">
         <option disabled="true" value="" selected="true">Choose gender</option>
         <option value="m">Male</option>
         <option value="f">Female</option>
       </select>
 
       <span class="signupStats" id="genderstatus"></span>
-      <select id="country" onblur="clientFbOne('countrystatus', 'country', 'countrycheck'
-        , 'signup.php')">
+      <select id="country" class="specSelect">
         <option disabled="true" value="" selected="true">Choose country</option>
         <?php require_once 'template_country_list.php'; ?>
       </select>
 
-      <span class="signupStats" id="countrystatus" style='margin-top: 31px;'></span>
       <div class="clear"></div>
-      <input type="date" id="birthday" min="1899-01-01" max="<?php echo date("Y-m-d"); ?>"
-        required aria-required="true" data-placeholder="Date of birth" style="width: 45%;"
-        onblur="clientFbOne('bdstatus', 'birthday', 'checkbd', 'signup.php')">
-      <span class="signupStats" id="bdstatus"></span>
 
-      <select id="timezone" onblur="clientFbOne('timezstatus', 'timezone', 'tzcheck'
-        , 'signup.php')">
+      <input type="date" id="birthday" min="1899-01-01" max="<?php echo date("Y-m-d"); ?>"
+        data-placeholder="Date of birth" 
+        class="specSelect">
+
+      <select id="timezone" class="specSelect">
         <option disabled="true" value="" selected="true">Choose timezone</option>
         <?php require_once 'template_timezone_list.php'; ?>
       </select>
 
-      <span id="timezstatus"></span>
       <div class="clear"></div>
-      <div id="acc_geo">Geolocation</b></div>
-      <button id="signupbtn" onclick="signup()">Sign Up</button>
+      <button id="acc_geo" class="btnCommon redBtnFill">Geolocation</button>
+      <button id="signupbtn" class="redBtnFill btnCommon" onclick="signup()">Sign Up</button>
       <div class="clear"></div>
 
       <div id="wrapping" style="display: none;">
@@ -353,15 +339,15 @@
         <span style="font-size: 12px;">Longitude: </span>
         <span id="lon" style="font-size: 12px;">not located yet</span>
       </div>
+      <div id="status" class="gothamNormal" style="margin-top: 20px;"></div>
       <div id="mapholder"></div>
-      <div id="geo_err"></div>
-      <span id="status"></span>
-      <p>
+      <div id="geo_err" class="gothamNormal"></div>
+      <p class="font14">
         By signing up you agree our <a href="/policies" class="rlink">Privacy and Policy</a>,
-        how we collect and use your data and accept the use of <a href="policies"
+        the way we collect and use your data and accept the use of <a href="policies"
         class="rlink">cookies</a> on the site.
       </p>
-      <p>
+      <p class="font14">
         Already have an account? <a href="/login" class="rlink">Log In</a>
       </p>
     </form>

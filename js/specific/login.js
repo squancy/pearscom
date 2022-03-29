@@ -13,14 +13,7 @@ function login() {
 
   // Check time limit
   if (Math.ceil((e - startTime) / 1e3) > 295) {
-    _("loginbtn").style.display = "none";
-    _("email").style.display = "none";
-    _("password").style.display = "none";
-    _("status").innerHTML = `
-      <strong class='error_red'>
-        You have timed out please refresh your browser!
-      </strong>
-    `;
+    _("status").innerHTML = `You have timed out please refresh your browser!`;
     return false;
   }
 
@@ -39,7 +32,7 @@ function login() {
         if (ajaxReturn(t)) {
           if (t.responseText == "login_failed") {
             _("status").innerHTML = "Login unsuccessful, please try again.";
-            _("loginbtn").style.display = "block";
+            _("loginbtn").style.display = "inline-block";
           } else {
             window.location = "/index";
           }

@@ -261,27 +261,21 @@
     <script src="/js/specific/forgot.js"></script>
   </head>
 
-  <body style="background-color: #fafafa;">
+  <body>
     <?php include_once("template_pageTop.php"); ?>
-    <div id="pageMiddle_2" style="background-color: transparent;">
-      <form id="loginform" onsubmit="return false;">
-        <p style="font-size: 20px; margin-top: 0; color: #999;">
-          Generate a temporary log in password
-        </p>
-        <p>
+    <div id="pageMiddle_2">
+      <p class="font30 gotham align" style="margin-top: 75px;">
+        Password Reset
+      </p>
+      <form id="loginform" onsubmit="return false;" class="formContainer align">
+        <p class="lh">
           Here you can get a temporary log in password  if you forgot your current one.
           Don&#39;t worry, if you wish you can change the temporary password to your custom
           one in the <span style="color: red;">settings</span> menu when you are logged in!
         </p>
-        <div>
-          <span style="color: red;">Step 1:</span>
-          Add your email address so that we can send you a temporary password
-        </div>
-        <br>
         <input id="email" type="text" onfocus="_('status').innerHTML='';"
-          placeholder="Enter email address">
-        <br /><br />
-        <button id="forgotpassbtn" class="main_btn" onclick="forgotpass()">
+          placeholder="Email" class="formField">
+        <button id="forgotpassbtn" class="redBtnFill btnCommon" onclick="forgotpass()">
           Send me a password
         </button> 
         <div id="status"></div>

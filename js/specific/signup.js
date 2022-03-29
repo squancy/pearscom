@@ -73,10 +73,12 @@ function signup() {
             _("signupbtn").style.display = "block";
           } else {
             window.scrollTo(0, 0);
+            _('sutxt').style.display = 'none';
             _("loginform").innerHTML = `
-              <p>
-                <b>Good job, ${decodeURIComponent(e)}!</b>
-                <br><br>
+              <p class="font24 gothamNormal" style="margin-top: 75px;">
+                Good job, ${decodeURIComponent(e)}!
+              </p>
+              <p class="lh">
                 You have done the signing up part, however you have to activate your
                 account in order to be able to log in. We have sent an account activation
                 email to <span style='color: red;'>${n}</span>

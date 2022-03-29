@@ -51,30 +51,30 @@
     const TOKEN = '<?php echo $_SESSION['login']['tk']; ?>';
   </script>
 </head>
-<body style="background-color: #fafafa;">
+<body>
   <?php require_once 'template_pageTop.php'; ?>
-  <div id="pageMiddle_2" style="background: transparent;">
-    <form id="loginform" onsubmit="return false;">
-      <p style="font-size: 28px;">Log In</p>
+  <div id="pageMiddle_2">
+    <p class="align gotham font30" style="margin-top: 75px;">Login</p>
+    <form id="loginform" class="formContainer align" onsubmit="return false;">
       <input type="text" id="email" onfocus="emptyElement('status')" maxlength="88"
-        placeholder="Email">
+        placeholder="Email" class="formField">
       <input type="password" id="password" onfocus="emptyElement('status')" maxlength="150"
-        autocomplete="true" placeholder="Password">
+        autocomplete="true" placeholder="Password" class="formField">
       <br />
-      <div>
-        Remember me:
-        <label class="cntainerr">
+      <div class="align gothamNormal">
+        <label class="chCont">
+          Remember me
           <input type="checkbox" id="rme" name="rme">
-          <span class="checkmark"></span>
+          <span class="cbMark"></span>
         </label>
       </div>
       <br>
       <div class="clear"></div>
-      <button id="loginbtn" class="main_btn" onclick="login()">Log In</button>
-      <p id="status"></p>
+      <button id="loginbtn" class="redBtnFill btnCommon" onclick="login()">Log In</button>
+      <p id="status" class="gothamNormal"></p>
       <span id="error_log"></span>
-      <a href="/signup" class="rlink" id="pushRight">Sign up</a>
-      <a href="/forgot_password" class="rlink">Forgotten your password?</a>
+      <a href="/signup" class="rlink redLink" id="pushRight">Sign up</a>
+      <a href="/forgot_password" class="rlink redLink">Forgotten your password?</a>
       <p style="font-size: 14px;">
         If you have any question or problem feel free to visit our
         <a href="/help" class="rlink">help</a> page.

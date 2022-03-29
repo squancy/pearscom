@@ -27,29 +27,11 @@
   <script src="/js/main.js"></script>
   <script src="/js/ajax.js"></script>
   <script src="/js/specific/dd.js"></script>
-  <style type="text/css">
-    #pageMiddle_2{
-      width: 65%; padding: 30px; font-size: 14px; margin-bottom: 10px;
-    }
-
-    @media only screen and (max-width: 768px){
-      #pageMiddle_2{
-        width: 80%;
-        padding: 20px;
-      }
-    }
-
-    @media only screen and (max-width: 500px){
-      #pageMiddle_2{
-        width: calc(100% - 20px);
-      }
-    }
-  </style>
 </head>
-<body style="background-color: #fafafa;">
+<body>
   <?php require_once 'template_pageTop.php'; ?>
-  <div id="pageMiddle_2" style="font-size: 14px;">
-    <p style="font-size: 22px; color: #999; margin-top: 0;">Privacy and Policy on Pearscom</p>
+  <div id="pageMiddle_2" style="width: 90%;" class="lh">
+    <p class="gotham font30 align" style="margin-top: 75px;">Privacy and Policy</p>
     <div class="collection" id="ccCo">
       <p style="font-size: 18px;">How we collect and use information?</p>
       <img src="/images/alldd.png">

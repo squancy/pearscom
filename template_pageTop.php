@@ -71,7 +71,8 @@
         $pmcount = "99+";
       }
       $pm_n = '
-        <a href="/private_messages/'.$log_username.'" title="You have new messages">
+        <a href="/private_messages/'.$log_username.'" title="You have new messages"
+          class="navBtn">
           <img src="/images/msg_white.png" width="20" height="20" alt="Private Messages"
             id="dpm2">
           <sup class="supStyle">'.$pmcount.'</sup>
@@ -79,7 +80,8 @@
       ';
     }else{
       $pm_n = '
-        <a href="/private_messages/'.$log_username.'" title="You do not have new messages">
+        <a href="/private_messages/'.$log_username.'" title="You do not have new messages"
+          class="navBtn">
           <img src="/images/msg_white.png" width="20" height="20" alt="Private Messages"
           id="dpm3">
         </a>
@@ -88,7 +90,7 @@
   }
 
   // Display notifications; add the num of friend requests + num of notifs
-  $envelope = '&nbsp;&nbsp;<img src="/images/nnot.png" class="nineteen">';
+  $envelope = '&nbsp;&nbsp;<img src="/images/nnot.png" class="notSize">';
   $requests_count = reqCount($conn, $log_username);
   if($user_ok == true) {
     $notescheck = getNotescheck($conn, $log_username);
@@ -107,15 +109,15 @@
       }
 
       $envelope = '
-        <a href="/notifications">
-          <img src="/images/nnot.png" class="nineteen">
+        <a href="/notifications" class="navBtn">
+          <img src="/images/nnot.png" class="notSize">
           <sup class="supStyle">'.$totalNotifs.'</sup>
         </a>
       '; 
     } else {
       $envelope = '
-        <a href="/notifications" title="Your notifications and friend requests">
-          <img src="/images/nnot.png" class="nineteen">
+        <a href="/notifications" title="Your notifications and friend requests" class="navBtn">
+          <img src="/images/nnot.png" class="notSize">
         </a>
       ';      
     }
@@ -302,7 +304,7 @@
     <div id="navbar">
       <div id="innerNav">
         <a href="/index">
-          <img src="/images/newfav.png" alt="Pearscom" width="47" height="47" id="newfav">
+          <img src="/images/newfav.png" alt="Pearscom" width="45" height="45" id="newfav">
         </a>
         <div id="icons_align"
           <?php if(!$log_username){ ?>
@@ -314,7 +316,7 @@
             <a id="sico"><img src="/images/sico.png" width="20" height="20"></a>
             <div class="tdd" style="margin-top: 5px;">
             <?php if($log_username != "" && $user_ok == true){ ?>
-              <a id="menu1btn" onclick="toggleDD()">
+              <a id="menu1btn" class="navBtn" onclick="toggleDD()">
                 <img src="/images/ddi.png" height="24" width="24" style="margin-top: -3px;">
               </a>
             <?php } ?>
@@ -349,7 +351,7 @@
         <div class="clear"></div>
       </div>
       <div onclick="getLSearchArt('searchUsername', 'memSearchResults',
-        '/search_members/' + (encodeURI(_('searchUsername').value)))" id="s_dont">
+        '/search_members/' + (encodeURI(_('searchUsername').value)))" id="s_dont" class="trans">
         <img src="/images/searchnav.png" width="18" height="18" alt="Search icon">
       </div>
     </div>

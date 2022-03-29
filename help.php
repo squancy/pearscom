@@ -80,33 +80,15 @@
   <script src="/js/specific/help.js" defer></script>
   <script src="/js/specific/status_max.js" defer></script>
   <style type="text/css">
-    #pageMiddle_2{
-      padding: 30px; font-size: 14px; margin-bottom: 10px !important;
-    }
-
     select, textarea {
       background-color: white;
     }
-
-    @media only screen and (max-width: 768px){
-      #pageMiddle_2{
-        width: 80%;
-        padding: 20px;
-      }
-    }
-
-    @media only screen and (max-width: 500px){
-      #pageMiddle_2{
-        width: calc(100% - 20px);
-      }
-    }
   </style>
 </head>
-<body style="background-color: #fafafa; height: auto;">
+<body>
   <?php require_once 'template_pageTop.php'; ?>
-  <div id="pageMiddle_2">
-    <p style="font-size: 22px; color: #999; margin-top: 0;">Help &amp; Support Centre</p>
-    <br>
+  <div id="pageMiddle_2" style="width: 90%;" class="lh">
+    <p class="font30 gotham align" style="margin-top: 75px;">Help and Support</p>
     <div class="collection" id="ccSu">
       <p style="font-size: 18px;" id="signup">How can I sign up?</p>
       <img src="/images/alldd.png">
@@ -160,7 +142,10 @@
       <img src="/images/alldd.png">
     </div>
     <div class="slideInfo" id="loDD">
-      <p>After you signed up you have to log in to access your account. This article will help you about it.</p>
+      <p>
+        After you signed up you have to log in to access your account.
+        This article will help you about it.
+      </p>
       <p>The &#34;<i>Login unsuccessful, please try again</i>&#34; error</p>
       <p style="text-align: justify; margin-left: 20px;">
         &bull; This message is for when your username or password is not vaild. Please double
@@ -228,10 +213,6 @@
         &bull; Once you signed up your location will be saved. You have the chance to change
         your location (as many times as you want) when you travel, move or live somewhere else.
         This can be done in your main profile page at the <i>update geolocation</i> section.
-      </p>
-      <p style="font-size: 14px; color: red;">
-        Keep in mind that we will NOT abuse with your personal geolocation information! Report
-        any kind of data stealing and abusing!
       </p>
     </div>
 
@@ -319,10 +300,7 @@
         email address - which must be valid otherwise we will not be able to send it - and
         below it you can write a short message or letter why you want to see him/her on
         Pearscom or anything you want. If everything is right your friend will get an
-        invitation email from you. Then he/she can decide that he/she joins or not.<br
-        /><b>Important: </b>do NOT give not valid, unauthorized or someone else&#39;s email
-        address. Continuous spam sending will may occur a ban! Please keep in mind and do not
-        abuse with this section.
+        invitation email from you. Then he/she can decide that he/she joins or not.
       </p>
     </div>
     <div class="collection" id="ccPh">
@@ -553,25 +531,6 @@
         &bull; Allowed formats: mp3, mp4, mp4 h.264 (aac or mp3) wave, flac, ogg, webm. The
         video size limit is 10MB.
       </p>
-    </div>
-
-    <div class="collection" id="ccBe">
-      <p style="font-size: 18px;" id="goodb">What are the moral roles on Pearscom?</p>
-      <img src="/images/alldd.png">
-    </div>
-    <div class="slideInfo" id="beDD">
-      <p>
-        It is very important to have a good behavior and to be intelligent on Pearscom. We try
-        to create a quite good and fun community so you have to follow all of these rules and
-        statements down below.
-      </p>
-      <p style="margin-left: 20px;">&bull; Do not send <i>harmful</i> messages, posts,
-      comments.</p>
-      <p style="margin-left: 20px;">&bull; Do not <i>spam</i> anything.</p>
-      <p style="margin-left: 20px;">&bull; Do not <i>ask</i> for anyone&#39;s password or email
-      address.</p>
-      <p style="margin-left: 20px;">&bull; Be <i>friendly and help</i> to other people.</p>
-      <p style="margin-left: 20px;">&bull; Do not try to <i>steal</i> any accounts.</p>
     </div>
 
     <div class="collection" id="ccCu">

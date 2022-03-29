@@ -34,20 +34,13 @@ project and only evolved to a somewhat larger one later so I didn't use any fram
   - Do the tasks marked with `TODO...` in the source code
   - Anything else you think would be great
  
-## Play with the code
+## Setting up on your machine
 `git clone https://github.com/squancy/pearscom`<br>
 In order to test Pearscom on your machine you will need a local server like XAMPP or LAMPP. The database scheme is located in `make_sql` as `schema.sql` which is a description of the database structure. It will create the necessary database and tables for Pearscom.<br>
 In `php_includes` edit `conn.php` to be appropriate for your own local server. This file is used for connecting to the database.<br>
 Use PHP version 7.1 for the best experience.<br>
 You may also need to edit `.htaccess` and `php.ini` to configure some settings to your own local server. SEO friendly URLs, https, custom caching etc. are used on the live product so make sure that these are set on your machine as well.<br>
 See the live product at <a href="https://www.pearscom.com/">pearscom.com</a>.<br>
-
-## About the live product
-You can check <a href="https://www.pearscom.com/">Pearscom</a>, play with its features and try out the site.<br>
-  - It is on a shared-host web server (I will consider moving it to a VPS because that would be fun)
-  - The server is running Linux x84_64
-  - Uses Let's Encrypt for https
-  - The server is located in Hungary
 
 ## Contribute
 If you have any questions or suggestions drop me with an email at <a href="mailto:mark@pearscom.com">mark@pearscom.com</a>.

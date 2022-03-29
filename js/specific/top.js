@@ -142,9 +142,9 @@ _("sico").addEventListener("click", function showSearch(e){
   _("dpm3").style.display = "none";
   _("user_template_img").style.display = "none";
   _("search_align").style.display = "block";
-  if(window.innerWidth >= 328){
+  if (window.innerWidth >= 328){
     _("search_align").style.width = "60%";
-  }else{
+  } else {
     _("search_align").style.width = "50%";
   }
   _("s_dont").style.display = "block";

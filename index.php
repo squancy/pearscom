@@ -666,7 +666,7 @@
   }
 ?>
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
 <head>
   <title>Pearscom - <?php echo $htmlTitle; ?></title>
   <meta charset="utf-8">
@@ -740,9 +740,9 @@
 </head>
 <body 
   <?php if ($isfeed) { ?>
-    style="background-color: #fafafa;"
+    style="height: 100%;"
   <?php } else { ?>
-    style="background-color: black;"
+    style="background-color: black; height: 100%;"
   <?php } ?>
   >
   <?php
@@ -757,13 +757,16 @@
         <source src="images/background.mp4" type="video/mp4">
       </video>
       <div class="content">
-        <p class="indTitle" style="margin-top: 0;">Pearscom</p>
-        <button class="indexBtns" onclick="location.href='/login'">Log In</button>
-        <button class="indexBtns" style="background-color: red; color: white;"
+        <p class="indTitle gotham" style="margin-top: 0;">Pearscom</p>
+        <button class="indexBtns btnCommon" id="whiteIndexBtn"
+          onclick="location.href='/login'">Log In</button>
+        <button class="indexBtns btnCommon" id="redIndexBtn"
           onclick="location.href='/signup'">
           Sign Up
         </button>
-        <p>An innovative and open source social-media site</p>
+        <p style="padding: 20px;" class="lh">
+          A fully open-source social media site that does not steal your data
+        </p>
       </div>
     </div>
   <?php }else{ ?>

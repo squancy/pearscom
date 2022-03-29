@@ -1,16 +1,42 @@
-<footer id="pageBottom">
-  <a href="/index" class="bottom_links">Home</a>
-  <a href="/login" class="bottom_links">Log In</a>
-  <a href="/signup" class="bottom_links">Sign Up</a>
-  <a href="/help" class="bottom_links">Help &amp; Support</a>
-  <a href="/policies" class="bottom_links">Privacy and Policy</a>
-  <a href="/jedit" class="bottom_links">JEdit</a>
-  <a href="/loquela" class="bottom_links">Loquela</a>
-  <a href="/games/inferno" class="bottom_links">Survive Inferno</a>
-  <a href="/forgot_password" class="bottom_links">Forgotten Password</a>
-  <a href="/stockai" class="bottom_links">Stock AI</a>
-  <a href="https://www.github.com/squancy/pearscom" class="bottom_links">Source code</a>
-  <hr class="dimw">
-  <br />
-  &copy; <?php echo date("Y"); ?> Pearscom<br><br>
+<footer>
+  <div>
+    <div>
+      <b class="gothamMedium">Useful pages</b>
+      <div><a href="/index" class="trans">Home</a></div>
+      <div><a href="/login" class="trans">Log In</a></div>
+      <div><a href="/signup" class="trans">Sign Up</a></div>
+    </div>
+    <div>
+      <b class="gothamMedium">Support</b>
+      <div><a href="/help" class="trans">Help &amp; Support</a></div>
+      <div><a href="/policies" class="trans">Policies</a></div>
+      <div><a href="/forgot_password" class="trans">Reset Password</a></div>
+    </div>
+    <div>
+      <b class="gothamMedium">Other</b>
+      <div><a href="/loquela" class="trans">Loquela</a></div>
+      <div><a href="/stockai" class="trans">Stock AI</a></div>
+      <div>
+        <a href="https://www.github.com/squancy/pearscom" class="trans">Source code</a>
+      </div>
+    </div>
+
+    <div class="footerSocialMedia">
+      <a href="https://github.com/squancy/pearscom" target="_blank">
+        <div class="bgCommon socialMediaIcon trans"
+          style="background-image: url('/images/github.png')"></div>
+      </a>
+
+      <a href="https://www.pearscom.com/loquela" target="_blank">
+        <div class="bgCommon socialMediaIcon trans"
+          style="background-image: url('/images/loquela.png')"></div>
+      </a>
+
+      <a href="https://www.pearscom.com/stockai" target="_blank">
+        <div class="bgCommon socialMediaIcon trans"
+          style="background-image: url('/images/stockai.png')"></div>
+      </a>
+    </div>
+    <p class="gotham copyright font14 align">&copy; <?php echo date("Y"); ?> Pearscom</p>
+  </div>
 </footer>
